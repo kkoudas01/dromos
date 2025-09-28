@@ -1,0 +1,363 @@
+<!-- 
+(1)
+totalSlides = 48;: Εδώ ορίζετε απλώς τον συνολικό αριθμό των διαφανειών. Αν έχετε 100 διαφάνειες, απλά αλλάζετε τον αριθμό σε 100.
+(2) 
+slideComments = { ... };: Αυτό το τμήμα είναι προαιρετικό. 
+Σας επιτρέπει να ορίσετε σχόλια για συγκεκριμένες διαφάνειες. Για παράδειγμα, το 1: '...' ορίζει ένα σχόλιο για την πρώτη διαφάνεια. 
+Αν για κάποια διαφάνεια δεν ορίσετε σχόλιο, ο κώδικας θα εμφανίσει αυτόματα το όνομά της (π.χ., "Διαφάνεια 2"). 
+-->
+
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Παρουσίαση Υλικού</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- EB Garamond: αισθητική χειρογράφων -->
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- Βυζαντινό Dark Theme --- */
+        :root {
+            --primary-color: #c19a6b; /* χρυσοκαφέ */
+            --background-color: #121212; /* πολύ σκούρο */
+            --surface-color: #1f1a17; /* παλαιωμένο σκούρο καφέ */
+            --text-color: #e8d8c3; /* υπόλευκο parchment */
+            --header-color: #f1e4c9;
+            --shadow-color: rgba(193, 154, 107, 0.4);
+        }
+
+        body {
+            font-family: 'EB Garamond', serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.8;
+            font-size: 1.1em;
+            background-image: radial-gradient(circle at top left, #1f1a17 0%, #121212 100%);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* --- Κουμπί Επιστροφής --- */
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, var(--primary-color), #9e765f);
+            color: var(--background-color);
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px var(--shadow-color);
+        }
+
+        /* --- Εισαγωγικό Κείμενο --- */
+        .intro-paragraph {
+            background-color: var(--surface-color);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid var(--primary-color);
+            margin-bottom: 40px;
+            font-size: 1.15em;
+        }
+
+        /* --- Γκαλερί Εικόνων --- */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 25px var(--shadow-color);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: sepia(0.1) brightness(0.95);
+        }
+
+        /* --- Lightbox Modal --- */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(10, 10, 10, 0.9);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .lightbox.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 85vw;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeInZoom 0.5s ease-in-out;
+        }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 75vh;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            object-fit: contain;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes fadeInZoom {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* --- Κουμπιά Lightbox --- */
+        .lightbox-close, .lightbox-prev, .lightbox-next {
+            position: absolute;
+            color: var(--primary-color);
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+            z-index: 1001;
+        }
+
+        .lightbox-close {
+            top: 15px;
+            right: 30px;
+            font-size: 45px;
+        }
+
+        .lightbox-prev, .lightbox-next {
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 5px 12px;
+            background-color: rgba(50, 40, 30, 0.4);
+            border-radius: 6px;
+        }
+
+        .lightbox-prev:hover, .lightbox-next:hover, .lightbox-close:hover {
+            background-color: rgba(50, 40, 30, 0.7);
+            color: #f1e4c9;
+        }
+
+        .lightbox-prev {
+            left: 20px;
+        }
+
+        .lightbox-next {
+            right: 20px;
+        }
+
+        .lightbox-caption {
+            color: var(--text-color);
+            background: rgba(32, 26, 22, 0.6);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* --- Υπογραφή --- */
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: rgba(255, 235, 205, 0.4);
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <a href="index.html" class="back-button">← Επιστροφή</a>
+
+        <p class="intro-paragraph">
+            Καλώς ήρθατε στην παρουσίαση του υλικού μας! Εδώ θα βρείτε τις βασικές διαφάνειες του μαθήματος. Κάντε κλικ σε κάθε εικόνα για να τη δείτε σε πλήρες μέγεθος και να πλοηγηθείτε στο υλικό.
+        </p>
+        
+        <!-- Η γκαλερί θα δημιουργηθεί αυτόματα εδώ από την JavaScript -->
+        <div class="gallery-grid"></div>
+
+    </div>
+
+    <footer>
+        Δημιουργήθηκε από τον/την [Το Όνομά σας]
+    </footer>
+
+    <div id="lightbox" class="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <a class="lightbox-prev">&#10094;</a>
+        <a class="lightbox-next">&#10095;</a>
+        <div class="lightbox-content">
+            <img id="lightbox-img">
+            <div id="lightbox-caption" class="lightbox-caption"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- ΡΥΘΜΙΣΕΙΣ ΠΑΡΟΥΣΙΑΣΗΣ ---
+        const presentationFolder = 'MyPresentation';
+        
+        // 1. Ορίστε τον ΣΥΝΟΛΙΚΟ ΑΡΙΘΜΟ των διαφανειών σας εδώ.
+        const totalSlides = 3; 
+
+        // 2. (Προαιρετικά) Προσθέστε σχόλια για ΣΥΓΚΕΚΡΙΜΕΝΕΣ διαφάνειες.
+        // Αν μια διαφάνεια δεν έχει σχόλιο εδώ, θα εμφανιστεί το όνομα του αρχείου.
+        const slideComments = {
+            1: 'Αυτή είναι η εισαγωγική διαφάνεια του μαθήματος.',
+            3: 'Εδώ αναλύουμε τη δεύτερη βασική ενότητα.',
+            5: 'Παραδείγματα και ασκήσεις για εξάσκηση.',
+            // Προσθέστε κι άλλα σχόλια εδώ, π.χ.:
+            // 48: 'Αυτή είναι η τελευταία διαφάνεια. Ευχαριστούμε!'
+        };
+
+        // --- ΑΥΤΟΜΑΤΗ ΔΗΜΙΟΥΡΓΙΑ ΛΙΣΤΑΣ ΔΙΑΦΑΝΕΙΩΝ ---
+        // Ο παρακάτω κώδικας δημιουργεί τη λίστα 'slides' αυτόματα,
+        // βασιζόμενος στον αριθμό 'totalSlides'.
+        const slides = [];
+        for (let i = 1; i <= totalSlides; i++) {
+            slides.push({
+                file: `Διαφάνεια${i}.PNG`,
+                comment: slideComments[i] || '' // Παίρνει το προσαρμοσμένο σχόλιο ή το αφήνει κενό.
+            });
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const galleryGrid = document.querySelector('.gallery-grid');
+
+            // --- ΑΥΤΟΜΑΤΗ ΔΗΜΙΟΥΡΓΙΑ ΓΚΑΛΕΡΙ ---
+            // Αυτό το τμήμα κώδικα διαβάζει την *αυτόματα* δημιουργημένη λίστα 'slides' 
+            // και φτιάχνει τη γκαλερί.
+            slides.forEach((slide, index) => {
+                const slideNumber = index + 1;
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+
+                const img = document.createElement('img');
+                img.src = `${presentationFolder}/${slide.file}`;
+                
+                // Ορίζουμε το σχόλιο. Αν δεν υπάρχει προσαρμοσμένο, βάζει "Διαφάνεια Χ".
+                img.dataset.comment = slide.comment || `Διαφάνεια ${slideNumber}`;
+
+                // Χειρισμός σφάλματος αν η εικόνα δεν βρεθεί
+                img.onerror = function() {
+                    this.onerror = null;
+                    this.src = `https://placehold.co/400x300/1f1a17/e8d8c3?text=Διαφάνεια+${slideNumber}`;
+                };
+                
+                galleryItem.appendChild(img);
+                galleryGrid.appendChild(galleryItem);
+            });
+
+
+            // --- ΛΟΓΙΚΗ LIGHTBOX ( παραμένει ως έχει )---
+            const galleryImages = document.querySelectorAll('.gallery-item img');
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxCaption = document.getElementById('lightbox-caption');
+            const closeBtn = document.querySelector('.lightbox-close');
+            const prevBtn = document.querySelector('.lightbox-prev');
+            const nextBtn = document.querySelector('.lightbox-next');
+
+            let currentImageIndex = 0;
+
+            function showLightbox() {
+                lightbox.classList.add('show');
+                document.addEventListener('keydown', handleKeyPress);
+            }
+
+            function hideLightbox() {
+                lightbox.classList.remove('show');
+                document.removeEventListener('keydown', handleKeyPress);
+            }
+
+            function updateImage(index) {
+                if (index < 0 || index >= galleryImages.length) return;
+
+                const imgElement = galleryImages[index];
+                lightboxImg.src = imgElement.src;
+                lightboxCaption.textContent = imgElement.dataset.comment; 
+                currentImageIndex = index;
+
+                prevBtn.style.display = index === 0 ? 'none' : 'block';
+                nextBtn.style.display = index === galleryImages.length - 1 ? 'none' : 'block';
+            }
+
+            galleryImages.forEach((img, index) => {
+                img.addEventListener('click', () => {
+                    updateImage(index);
+                    showLightbox();
+                });
+            });
+
+            closeBtn.addEventListener('click', hideLightbox);
+            prevBtn.addEventListener('click', () => updateImage(currentImageIndex - 1));
+            nextBtn.addEventListener('click', () => updateImage(currentImageIndex + 1));
+            
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) {
+                    hideLightbox();
+                }
+            });
+
+            function handleKeyPress(e) {
+                if (e.key === 'Escape') hideLightbox();
+                if (e.key === 'ArrowLeft') updateImage(currentImageIndex - 1);
+                if (e.key === 'ArrowRight') updateImage(currentImageIndex + 1);
+            }
+        });
+    </script>
+</body>
+</html>
