@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Επανάληψη</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .quiz-container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .question-area {
+      margin-bottom: 20px;
+    }
+    .question-prompt {
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    .sentence-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      margin: 15px 0;
+      min-height: 30px;
+    }
+    .blank-space {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 8px 12px;
+      min-width: 50px;
+      text-align: center;
+      font-weight: bold;
+      background-color: #f9f9f9;
+      display: inline-block;
+    }
+    .blank-space.filled {
+      background-color: #e0ffe0;
+      border-color: #a0c0a0;
+    }
+    #question-image-container img {
+      display: block;
+      margin: 10px auto 15px auto;
+      max-width: 80%;
+      max-height: 300px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .options-container {
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .option-button {
+      background-color: #007bff;
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    .option-button:hover {
+      background-color: #0056b3;
+    }
+    .option-button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    #clear-choices {
+      background-color: #ffc107;
+      color: black;
+    }
+    #clear-choices:hover {
+      background-color: #e0a800;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    #timer, #result {
+      font-size: 1.2em;
+      margin: 10px 0;
+    }
+    .hidden {
+      display: none;
+    }
+    .timeout {
+      color: red;
+    }
+    /* Στυλ για ερωτήσεις πολλαπλής επιλογής */
+    .multiple-choice-question {
+      margin-bottom: 20px;
+    }
+    .multiple-choice-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Adapted for better responsiveness */
+      gap: 10px 40px;
+    }
+    .multiple-choice-options label {
+      cursor: pointer;
+      break-inside: avoid;
+        padding: 5px; /* Add some padding around image options */
+    }
+    .multiple-choice-options img {
+      max-width: 100%; /* Allow images to take available width */
+      height: auto;
+      display: block;
+      margin: 0 auto; /* Center images */
+    }
+
+    /* Styles for the toggle switch */
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+        margin: 10px 0;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    /* Round sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+    .toggle-label {
+        margin-left: 10px;
+        font-weight: bold;
+        vertical-align: middle;
+    }
+
+    @media (max-width: 600px) {
+      .multiple-choice-options {
+        grid-template-columns: 1fr;
+      }
+        .multiple-choice-options img {
+          max-width: 90%; /* Allow images to be slightly larger on small screens */
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div id="intro">
+      <h1>Επανάληψη</h1>
+      <p>Σε κάποιες ερωτήσεις θα συμπληρώσεις κενά και σε άλλες θα επιλέξεις τη σωστή απάντηση.</p>
+      <p id="time-limit-info">Χρονικό όριο ανά γύρο: 15 λεπτά</p>
+
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+            <span class="toggle-label">Επανάληψη Λαθών (Off)</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="quiz-mode-toggle">
+                <span class="slider round"></span>
+            </label>
+            <span class="toggle-label">Πλήρης Επανάληψη (On)</span>
+        </div>
+
+      <button id="start">Ξεκίνα το Κουίζ</button>
+      <button id="otherpage">Πήγαινε πίσω στην τάξη σου</button>
+    </div>
+    <div id="timer" class="hidden">Χρόνος: 15:00</div>
+    <div id="quiz" class="hidden">
+      <div class="question-area">
+        <h3 id="question-number-title"></h3>
+        <div id="question-prompt-text" class="question-prompt"></div>
+        <div id="question-image-container"></div>
+        <div id="question-content"></div>
+      </div>
+      <button id="clear-choices" class="hidden">Καθαρισμός Επιλογών</button>
+    </div>
+    <button id="submit" class="hidden">Υποβολή Απάντησης</button>
+    <div id="result" class="hidden"></div>
+    <button id="download" class="hidden">Λήψη Αποτελεσμάτων (PDF)</button>
+  </div>
+
+  <script>
+    // Δεδομένα για το quiz - συνδυασμός και των δύο τύπων ερωτήσεων
+    const quizData = [
+         // Ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "fillBlank",
+        questionPrompt: "Με βάση την εικόνα των δύο αυτών παράλληλων διανυσμάτων, τι πιστεύεις ότι ισχύει;",
+        imageURL: "parallelVectors.png",
+        sentenceTemplate: [
+          "\\( \\vec{v}= \\)", null, "\\( \\cdot\\vec{u} \\)"
+        ],
+        correctAnswers: ["\\(2\\)"],
+        options: ["\\(1\\)", "\\(-1\\)", "\\(2\\)", "\\(-2\\)", "\\(\\dfrac{1}{2}\\)", "\\(-\\dfrac{1}{2}\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Με βάση την εικόνα των δύο αυτών παράλληλων διανυσμάτων, τι πιστεύεις ότι ισχύει;",
+        imageURL: "parallelVectors2.png",
+        sentenceTemplate: [
+          "\\( \\vec{v}= \\)", null, "\\( \\cdot\\vec{u} \\)"
+        ],
+        correctAnswers: ["\\(-2\\)"],
+        options: ["\\(1\\)", "\\(-1\\)", "\\(2\\)", "\\(-2\\)", "\\(\\dfrac{1}{2}\\)", "\\(-\\dfrac{1}{2}\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Για οποιαδήποτε σημεία \\(Α, Β, Γ\\) ισχύει ότι:",
+        sentenceTemplate: [
+          "\\( \\overrightarrow{ΑΒ}= \\)", null, "\\(-\\)", null
+        ],
+        correctAnswers: ["\\(\\overrightarrow{ΓΒ}\\)",  "\\(\\overrightarrow{ΓΑ}\\)"],
+        options: ["\\(\\overrightarrow{ΑΓ}\\)","\\(\\overrightarrow{ΓΑ}\\)",
+        "\\(\\overrightarrow{ΒΓ}\\)","\\(\\overrightarrow{ΓΒ}\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Για οποιαδήποτε σημεία \\(Α, Β, Γ\\) ισχύει ότι:",
+        sentenceTemplate: [
+          "\\( \\overrightarrow{ΑΒ}= \\)", null, "\\(+\\)", null
+        ],
+        correctAnswers: ["\\(\\overrightarrow{ΑΓ}\\)",  "\\(\\overrightarrow{ΓΒ}\\)"],
+        options: ["\\(\\overrightarrow{ΑΓ}\\)","\\(\\overrightarrow{ΓΑ}\\)",
+        "\\(\\overrightarrow{ΒΓ}\\)","\\(\\overrightarrow{ΓΒ}\\)"]
+      },
+      // Άλλη ερώτηση τύπου συμπλήρωσης κενών
+      {
+        type: "fillBlank",
+        questionPrompt: "Αν τα \\(\\vec{v}\\) και \\(\\vec{u}\\) είναι παράλληλα, τότε να συμπληρώσεις τα κενά:",
+        sentenceTemplate: [
+          "\\( λ_{\\vec{v}}\\)", null, "και \\(\\det(\\vec{v},\\vec{u})\\)", null
+        ],
+        correctAnswers: ["\\(=λ_{\\vec{u}}\\)", "\\(=0\\)"],
+        options: ["\\(\\cdot λ_{\\vec{u}}=-1\\)", "\\(=λ_{\\vec{u}}\\)", "\\(<0\\)", "\\(=0\\)", "\\(>0\\)", "\\(=-1\\)",
+           "\\(=1\\)"]
+      },
+      // Ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Αν ισχύει \\(\\vert\\vec{v}\\cdot\\vec{u}\\vert=\\vert\\vec{v}\\vert\\cdot\\vert\\vec{u}\\vert\\), τότε τι μπορούμε να πούμε για τα διανύσματα \\(\\vec{v}\\) και \\(\\vec{u}\\); ",
+        options: ["Τίποτα. Αυτή η σχέση ισχύει ούτως ή άλλως.", "Ότι είναι παράλληλα.", "Ότι είναι κάθετα."],
+        correctIndex: 1
+      },
+      // Άλλη ερώτηση τύπου συμπλήρωσης κενών
+      {
+        type: "fillBlank",
+        questionPrompt: "Αν τα \\(\\vec{v}\\) και \\(\\vec{u}\\) είναι κάθετα, τότε να συμπληρώσεις τα κενά:",
+        sentenceTemplate: [
+          "\\( λ_{\\vec{v}}\\)", null, "και \\(\\vec{v}\\cdot\\vec{u}\\)", null
+        ],
+        correctAnswers: ["\\(\\cdot λ_{\\vec{u}}=-1\\)", "\\(=0\\)"],
+        options: ["\\(\\cdot λ_{\\vec{u}}=-1\\)","\\(\\cdot λ_{\\vec{u}}=0\\)","\\(\\cdot λ_{\\vec{u}}=1\\)", "\\(=λ_{\\vec{u}}\\)", "\\(<0\\)", "\\(=0\\)", "\\(>0\\)", "\\(=-1\\)", "\\(=1\\)"]
+      },
+      // Άλλη ερώτηση τύπου συμπλήρωσης κενών
+      {
+        type: "fillBlank",
+        questionPrompt: "Αν \\(\\vec{v}=(x_1,y_1)\\) και \\(\\vec{u}=(x_2,y_2)\\), τότε να συμπληρώσεις τα κενά:",
+        sentenceTemplate: [
+          "\\( \\vec{v}\\cdot \\vec{u}=\\)", null
+        ],
+        correctAnswers: ["\\(x_1 x_2+y_1 y_2\\)"],
+        options: ["\\((x_1 x_2,y_1 y_2)\\)","\\((x_1 +x_2,y_1+ y_2)\\)","\\(x_1 x_2+y_1 y_2\\)","\\(x_1 y_1+x_2 y_2\\)"]
+      },
+      // Άλλη ερώτηση τύπου συμπλήρωσης κενών
+      {
+        type: "fillBlank",
+        questionPrompt: "Αν \\((\\vec{v}\\hat{,}\\vec{u})=θ\\), τότε να συμπληρώσεις τα κενά:",
+        sentenceTemplate: [
+          "\\( \\vec{v}\\cdot \\vec{u}=\\)", null
+        ],
+        correctAnswers: ["\\(\\vert\\vec{v}\\vert\\cdot\\vert \\vec{u}\\vert συν(θ)\\)"],
+        options: ["\\(\\vert\\vec{v}\\vert\\cdot\\vert \\vec{u}\\vert ημ(θ)\\)",
+        "\\(\\dfrac{1}{2}\\vert\\vec{v}\\vert\\cdot\\vert \\vec{u}\\vert ημ(θ)\\)",
+        "\\(\\vert\\vec{v}\\vert\\cdot\\vert \\vec{u}\\vert συν(θ)\\)",
+        "\\(\\dfrac{1}{2}\\vert\\vec{v}\\vert\\cdot\\vert \\vec{u}\\vert ημ(θ)\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Με βάση την εικόνα των δύο κόκκινων διανυσμάτων, τι πιστεύεις ότι ισχύει;",
+        imageURL: "vectorComponents.png",
+        sentenceTemplate: [
+          "\\( \\vec{v}= \\)", null, "\\( \\vec{i} \\)", null, "\\( \\vec{j} \\) και \\( \\vec{v}= \\)", null,
+           "\\( \\vec{i} \\)", null, "\\( \\vec{j} \\)"
+        ],
+        correctAnswers: ["\\(3\\)", "\\(-5\\)", "\\(2\\)", "\\(+4\\)"],
+        options: ["\\(2\\)", "\\(-2\\)", "\\(3\\)", "\\(-3\\)", "\\(+4\\)", "\\(5\\)", "\\(-5\\)", "\\(6\\)", "\\(-6\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Έστωσαν τα σημεία \\(A(x_1 , y_1)\\) και \\(B(x_2 , y_2)\\). Τότε το ευθεύγραμμο τμήμα \\(ΑΒ\\) έχει μήκος:",
+        sentenceTemplate: [
+          '\\((ΑΒ)=\\)', null
+        ],
+        correctAnswers: ["\\(\\sqrt{(x_2-x_1)^2+(y_2-y_1)^2}\\)"],
+        options: ["\\(\\sqrt{(x_1+y_1)^2+(x_2+y_2)^2}\\)","\\(\\sqrt{(x_1-y_1)^2+(x_2-y_2)^2}\\)",
+        "\\(\\sqrt{(x_1+y_1)^2-(x_2+y_2)^2}\\)","\\(\\sqrt{(x_1-y_1)^2-(x_2-y_2)^2}\\)","\\(\\sqrt{(x_2+x_1)^2+(y_2+y_1)^2}\\)",
+        "\\(\\sqrt{(x_2-x_1)^2+(y_2-y_1)^2}\\)","\\(\\sqrt{(x_2-x_1)^2-(y_2-y_1)^2}\\)","\\(\\sqrt{(x_2+x_1)^2-(y_2+y_1)^2}\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Το \\(M\\) είναι το μέσο του τμήματος \\(AB\\). Να συμπληρώσεις τα κενά:",
+        imageURL: "midpointVectors.png",
+        sentenceTemplate: [
+          "\\( \\overrightarrow{CM}= \\)", null, ". Επίσης, \\( x_M= \\)", null, " και \\( y_M=\\) ", null
+        ],
+        correctAnswers: ["\\(\\dfrac{\\overrightarrow{CA}+\\overrightarrow{CB}}{2}\\)", 
+        "\\(\\dfrac{x_A+x_B}{2}\\)","\\(\\dfrac{y_A+y_B}{2}\\)"],
+        options: ["\\(\\dfrac{\\overrightarrow{CA}+\\overrightarrow{CB}}{2}\\)",
+        "\\(\\dfrac{\\overrightarrow{CA}-\\overrightarrow{CB}}{2}\\)",
+        "\\(\\dfrac{\\overrightarrow{CB}-\\overrightarrow{CA}}{2}\\)",
+        "\\(\\dfrac{x_A+x_B}{2}\\)","\\(\\dfrac{x_A-x_B}{2}\\)","\\(\\dfrac{x_B-x_A}{2}\\)",
+        "\\(\\dfrac{y_A+y_B}{2}\\)","\\(\\dfrac{y_A-y_B}{2}\\)","\\(\\dfrac{y_B-y_A}{2}\\)"]
+      },
+      // Άλλη ερώτηση τύπου συμπλήρωσης κενών
+      {
+        type: "fillBlank",
+        questionPrompt: "Συμπλήρωσε τα κενά:",
+        sentenceTemplate: [
+          "\\( \\overrightarrow{AB} = (\\)", null, null, null, "\\( ,\\)", null, null, null, "\\() \\)"
+        ],
+        correctAnswers: ["\\(x_B\\)", "\\(-\\)", "\\(x_A\\)","\\(y_B\\)", "\\(-\\)", "\\(y_A\\)"],
+        options: ["\\(x_A\\)", "\\(x_B\\)", "\\(y_A\\)", "\\(y_B\\)", "\\(+\\)", "\\(-\\)", "\\(+\\)", "\\(-\\)"]
+      },
+      // Ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Αν μια ευθεία διέρχεται από ένα σημείο \\(Α(x_1,y_1)\\) και έχει συντελεστή διεύθυνσης \\(λ\\), τότε έχει εξίσωση:",
+        options: ["\\(y-y_1=λ(x-x_1)\\)", "\\(y+y_1=λ(x+x_1)\\)", 
+        "\\(yy_1=λ(x+x_1)\\)","\\(x-x_1=λ(y-y_1)\\)", "\\(x+x_1=λ(y+y_1)\\)", "\\(xx_1=λ(y+y_1)\\)"],
+        correctIndex: 0
+      },
+      // Άλλη ερώτηση τύπου συμπλήρωσης κενών
+      {
+        type: "fillBlank",
+        questionPrompt: "Αν οι ευθείες \\(ε\\) και \\(ζ\\) είναι κάθετες, τότε να συμπληρώσεις τα κενά:",
+        sentenceTemplate: [
+          "\\( λ_{ε}\\)", null
+        ],
+        correctAnswers: ["\\(\\cdot λ_{ζ}=-1\\)"],
+        options: ["\\(\\cdot λ_{ζ}=-1\\)","\\(\\cdot λ_{ζ}=0\\)","\\(\\cdot λ_{ζ}=1\\)","\\(\\cdot λ_{ζ}=1\\)", "\\(=λ_{ζ}\\)", "\\(=-λ_{ζ}\\)"]
+      },
+      // Άλλη ερώτηση τύπου συμπλήρωσης κενών
+      {
+        type: "fillBlank",
+        questionPrompt: "Αν οι ευθείες \\(ε\\) και \\(ζ\\) είναι παράλληλες, τότε να συμπληρώσεις τα κενά:",
+        sentenceTemplate: [
+          "\\( λ_{ε}\\)", null
+        ],
+        correctAnswers: ["\\(=λ_{ζ}\\)"],
+        options: ["\\(\\cdot λ_{ζ}=-1\\)","\\(\\cdot λ_{ζ}=0\\)","\\(\\cdot λ_{ζ}=1\\)","\\(\\cdot λ_{ζ}=1\\)", "\\(=λ_{ζ}\\)", "\\(=-λ_{ζ}\\)"]
+      },
+      // Άλλη ερώτηση τύπου συμπλήρωσης κενών
+      {
+        type: "fillBlank",
+        questionPrompt: "Έστωσαν τα σημεία \\(A(x_1, y_1)\\) και \\(Β(x_2, y_2)\\). Αν ορίζεται ο συντελεστή διεύθυνσης της ευθείας \\(AB\\), τότε:",
+        sentenceTemplate: [
+          "\\( λ_{AB}=\\)", null
+        ],
+        correctAnswers: ["\\(\\dfrac{y_2-y_1}{x_2-x_1}\\)"],
+        options: ["\\(\\dfrac{x_2-x_1}{y_2-y_1}\\)","\\(\\dfrac{x_2+x_1}{y_2+y_1}\\)", "\\(\\dfrac{y_2-y_1}{x_2-x_1}\\)","\\(\\dfrac{y_2+y_1}{x_2+x_1}\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Να βρεις τις εξισώσεις των ευθειών",
+        imageURL: "basicLines.png",
+        sentenceTemplate: [
+          'Η <span style="color: purple;font-weight: bold;">μοβ</span> έχει εξίσωση ', null, ', η <span style="color: green;font-weight: bold;">πράσινη</span> έχει εξίσωση ', null, ', η <span style="color: blue;font-weight: bold;">μπλε</span> έχει εξίσωση ', null,
+          ' και η <span style="color: red;font-weight: bold;">κόκκινη</span> έχει εξίσωση', null, '.'
+        ],
+        correctAnswers: ["\\(y=x\\)", "\\(y=-x\\)", "\\(x=3\\)", "\\(y=3\\)"],
+        options: ["\\(y=x\\)", "\\(y=x+3\\)", "\\(y=-x\\)", "\\(y=-x+3\\)", "\\(x=3\\)", "\\(x=-3\\)", "\\(y=3\\)", "\\(y=-3\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Να συμπληρώσεις τα κενά",
+        sentenceTemplate: [
+          "Η ευθεία με εξίσωση \\(y=x\\sqrt{3}-2\\) σχηματίζει με τον άξονα \\(x'x\\) γωνία " , null,
+           " και τέμνει τον άξονα \\(y'y\\) στο ", null, '.'
+        ],
+        correctAnswers: ["\\(60^o\\)", "\\(-2\\)"],
+        options: ["\\(30^o\\)","\\(45^o\\)","\\(60^o\\)","\\(120^o\\)","\\(135^o\\)","\\(150^o\\)",
+        "\\(2\\)","\\(-2\\)","\\(\\sqrt{3}\\)","\\(\\sqrt{3}\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Να συμπληρώσεις τα κενά",
+        sentenceTemplate: [
+          "Η ευθεία με εξίσωση \\(y=4-x\\) σχηματίζει με τον άξονα \\(x'x\\) γωνία " , null,
+           " και τέμνει τον άξονα \\(y'y\\) στο ", null, '.'
+        ],
+        correctAnswers: ["\\(135^o\\)", "\\(4\\)"],
+        options: ["\\(30^o\\)","\\(45^o\\)","\\(60^o\\)","\\(120^o\\)","\\(135^o\\)","\\(150^o\\)",
+        "\\(1\\)","\\(-1\\)","\\(4\\)","\\(-4\\)"]
+      },
+      // Ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Αν για μια ευθεία \\(ε\\) δεν ορίζεται ο συντελεστής διεύθυνσης, τότε η γωνία που σχηματίζει αυτή με τον άξονα \\(x'x\\) είναι:",
+        options: ["Πάντα ορίζεται ο συντελεστής διεύθυνσης", "\\(0^ο\\)","\\(45^ο\\)","\\(90^ο\\)"],
+        correctIndex: 3
+      },
+      // Ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Αν για μια ευθεία \\(ε\\)  ο συντελεστής διεύθυνσης είναι \\(0\\), τότε η γωνία που σχηματίζει αυτή με τον άξονα \\(x'x\\) είναι:",
+        options: ["Δεν μπορεί να μηδενιστεί ο συντελεστής διεύθυνσης", "\\(0^ο\\)","\\(45^ο\\)","\\(90^ο\\)"],
+        correctIndex: 1
+      },
+      // Άλλη ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Ποια από τις παρακάτω γραφικές παραστάσεις είναι η γραφική παράσταση της \\( y=x \\);",
+        image: null,
+        options: [
+          `<img src="yEQ2.png">`,
+          `<img src="yEQminx.png">`,
+          `<img src="xEQ1.png">`,
+          `<img src="yEqx.png">`
+        ],
+        correctIndex: 3
+      },
+      // Άλλη ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Ποια από τις παρακάτω γραφικές παραστάσεις είναι η γραφική παράσταση της \\( y=-x \\);",
+        image: null,
+        options: [
+          `<img src="yEQ2.png">`,
+          `<img src="yEQminx.png">`,
+          `<img src="xEQ1.png">`,
+          `<img src="yEqx.png">`
+        ],
+        correctIndex: 1
+      },
+      // Άλλη ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Ποια από τις παρακάτω γραφικές παραστάσεις είναι η γραφική παράσταση της \\( y=2 \\);",
+        image: null,
+        options: [
+          `<img src="yEQ2.png">`,
+          `<img src="yEQminx.png">`,
+          `<img src="xEQ1.png">`,
+          `<img src="yEqx.png">`
+        ],
+        correctIndex: 0
+      },
+      // Άλλη ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Ποια από τις παρακάτω γραφικές παραστάσεις είναι η γραφική παράσταση της \\( x=2 \\);",
+        image: null,
+        options: [
+          `<img src="yEQ2.png">`,
+          `<img src="yEQminx.png">`,
+          `<img src="xEQ1.png">`,
+          `<img src="yEqx.png">`
+        ],
+        correctIndex: 2
+      },
+      // Ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Δίνεται η εξίσωση \\((t^2-3t+2)x+(t^2-4t+3)y+t^2-1=0\\). Για ποιες τιμές του \\(t\\in\\mathbb{R}\\) η εν λόγω εξίσωση παριστάνει ευθεία;",
+        options: ["Για κάθε \\(t\\in\\mathbb{R}\\)", "Για \\(t\\neq 1\\)","Για \\(t\\neq 2\\)","Για \\(t\\neq 3\\)",
+        "Για \\(t\\neq 1\\) και \\(t\\neq 2\\)","Για \\(t\\neq 1\\) και \\(t\\neq 3\\)", "Για \\(t\\neq 2\\) και \\(t\\neq 2\\)",
+        "Για \\(t\\neq 1\\) και \\(t\\neq 2\\) και \\(t\\neq 3\\)"],
+        correctIndex: 1
+      },
+      // Ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Δίνεται η ευθεία \\(Αx+Βy+Γ=0\\). Για ποιες τιμές των \\(Α, Β, Γ\\) η εν λόγω ευθεία διέρχεται από την αρχή των αξόνων.",
+        options: ["Για \\(Α=0\\)", "Για \\(Β=0\\)", "Για \\(Γ=0\\)"],
+        correctIndex: 2
+      },
+      // Ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Δίνεται η ευθεία \\(Αx+Βy+Γ=0\\). Για ποιες τιμές των \\(Α, Β, Γ\\) η εν λόγω ευθεία είναι κάθετη στον άξονα \\(x'x\\).",
+        options: ["Για \\(Α=0\\)", "Για \\(Β=0\\)", "Για \\(Γ=0\\)"],
+        correctIndex: 1
+      },
+      // Ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Δίνεται η ευθεία \\(Αx+Βy+Γ=0\\). Για ποιες τιμές των \\(Α, Β, Γ\\) η εν λόγω ευθεία είναι παράλληλη με τον άξονα \\(x'x\\).",
+        options: ["Για \\(Α=0\\)", "Για \\(Β=0\\)", "Για \\(Γ=0\\)"],
+        correctIndex: 0
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Έστω ευθεία \\(ε: Αx+Βy+Γ=0\\) και σημείο \\(M(x_0 , y_0)\\). Τότε, η απόσταση του σημείου από την ευθεία είναι:",
+        sentenceTemplate: [
+          '\\(\\operatorname{d}(M,ε)=\\)', null
+        ],
+        correctAnswers: ["\\(\\dfrac{\\vert A x_0+Bx_0+Γ\\vert}{\\sqrt{A^2+B^2}}\\)"],
+        options: ["\\(\\dfrac{\\vert A x_0+Bx_0+Γ\\vert}{\\sqrt{A^2-B^2}}\\)",
+        "\\(\\dfrac{ A x_0+Bx_0+Γ}{\\sqrt{A^2+B^2}}\\)",
+        "\\(\\dfrac{\\vert A x_0+Bx_0+Γ\\vert}{\\sqrt{A^2+B^2}}\\)",
+        "\\(\\dfrac{\\vert A x_0+Bx_0+Γ\\vert}{\\sqrt{x_0^2+x_0^2}}\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Έστωσαν τα σημεία \\(Α, Β, Γ\\). Το εμβαδόν του τριγώνου \\(ΑΒΓ\\) δίνεται από τον τύπο:",
+        sentenceTemplate: [
+          '\\((ΑΒΓ)=\\)', null
+        ],
+        correctAnswers: ["\\(\\dfrac{1}{2}\\vert\\det\\left(\\overrightarrow{AB},\\overrightarrow{AΓ}\\right)\\vert\\)"],
+        options: ["\\(\\vert\\det\\left(\\overrightarrow{AB},\\overrightarrow{AΓ}\\right)\\vert\\)",
+        "\\(\\dfrac{1}{2}\\det\\left(\\overrightarrow{AB},\\overrightarrow{AΓ}\\right)\\)",
+        "\\(\\dfrac{1}{2}\\vert\\det\\left(\\overrightarrow{AB},\\overrightarrow{AΓ}\\right)\\vert\\)"]
+      },
+      // Ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Ο κύκλος με κέντρο \\(K(x_0, y_0)\\) και ακτίνα \\(r\\) έχει εξίσωση:",
+        options: ["\\((x+x_0)^2+(y+y_0)^2=r^2\\)", "\\((x+x_0)^2-(y+y_0)^2=r^2\\)", "\\((x+x_0)^2+(y+y_0)^2=r\\)",
+        "\\((x-x_0)^2+(y-y_0)^2=r^2\\)","\\((x-x_0)^2-(y-y_0)^2=r^2\\)","\\((x-x_0)^2+(y-y_0)^2=r\\)"],
+        correctIndex: 3
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Ο κύκλος με εξίσωση \\(x^2+y^2=9\\) έχει:",
+        sentenceTemplate: [
+          'κέντρο το ', null, " και ακτίνα ", null
+        ],
+        correctAnswers: ["\\(Α(0,0)\\)", "\\(3\\)"],
+        options: ["\\(Α(0,0)\\)", "\\(Α(3,3)\\)", "\\(Α(-3,-3)\\)", "\\(Α(9,9)\\)", "\\(Α(-9,-9)\\)",
+         "\\(r=0\\)", "\\(r=3\\)", "\\(r=\\pm 3\\)", "\\(r=9\\)", "\\(r=\\pm 9\\)"]
+      },
+      {
+        type: "multipleChoice",
+        question: "Ποια είναι η εξίσωση του παρακάτω σχήματος;",
+        image: "circleM22rs10.png",
+        // circleM22rs10
+        options: [
+          "\\(x^2+y^2=10\\)", //0
+          "\\((x+2)^2+(y+2)^2=10\\)",//1
+          "\\((x+2)^2+(y-2)^2=10\\)",//2
+          "\\((x-2)^2+(y+2)^2=10\\)",//3
+          "\\((x-2)^2+(y-2)^2=10\\)"
+        ],
+        correctIndex: 2
+      },
+      {
+        type: "multipleChoice",
+        question: "Ποια είναι η εξίσωση του παρακάτω σχήματος;",
+        image: "circle10.png",
+        // circleM22rs10
+        options: [
+          "\\(x^2+y^2=10\\)", //0
+          "\\((x+2)^2+(y+2)^2=10\\)",//1
+          "\\((x+2)^2+(y-2)^2=10\\)",//2
+          "\\((x-2)^2+(y+2)^2=10\\)",//3
+          "\\((x-2)^2+(y-2)^2=10\\)"
+        ],
+        correctIndex: 0
+      },
+      {
+        type: "multipleChoice",
+        question: "Ποια είναι η εξίσωση του παρακάτω σχήματος;",
+        image: "circle22r10.png",
+        // circleM22rs10
+        options: [
+          "\\(x^2+y^2=10\\)", //0
+          "\\((x+2)^2+(y+2)^2=10\\)",//1
+          "\\((x+2)^2+(y-2)^2=10\\)",//2
+          "\\((x-2)^2+(y+2)^2=10\\)",//3
+          "\\((x-2)^2+(y-2)^2=10\\)"
+        ],
+        correctIndex: 4
+      },
+      // Άλλη ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Ποιο σχήμα αναπαριστά παραβολή;",
+        image: null,
+        options: [
+          `<img src="ySQ6x.png">`,
+          `<img src="ySQminusxSQ.png">`,
+          `<img src="xSQ4ySQ9.png">`
+        ],
+        correctIndex: 0
+      },
+      // Άλλη ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Ποιο σχήμα αναπαριστά έλλειψη;",
+        image: null,
+        options: [
+          `<img src="ySQ6x.png">`,
+          `<img src="ySQminusxSQ.png">`,
+          `<img src="xSQ4ySQ9.png">`
+        ],
+        correctIndex: 2
+      },
+      // Άλλη ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Ποιο σχήμα αναπαριστά υπερβολή;",
+        image: null,
+        options: [
+          `<img src="ySQ6x.png">`,
+          `<img src="ySQminusxSQ.png">`,
+          `<img src="xSQ4ySQ9.png">`
+        ],
+        correctIndex: 1
+      },
+      // Άλλη ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Ποιο σχήμα έχει εξίσωση \\(y^2=2px\\);",
+        image: null,
+        options: [
+          `<img src="ySQ6x.png">`,
+          `<img src="xSQ6y.png">`,
+          `<img src="ySQminusxSQ.png">`,
+          `<img src="xSQminusySQ.png">`,
+          `<img src="xSQ4ySQ9.png">`,
+          `<img src="ySQ4xSQ9.png">`
+        ],
+        correctIndex: 0
+      },
+      // Άλλη ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Ποιο σχήμα έχει εξίσωση \\(\\dfrac{x^2}{α^2}+\\dfrac{y^2}{β^2}=1\\);",
+        image: null,
+        options: [
+          `<img src="ySQ6x.png">`,//0
+          `<img src="xSQ6y.png">`,//1
+          `<img src="ySQminusxSQ.png">`,//2
+          `<img src="xSQminusySQ.png">`,//3
+          `<img src="xSQ4ySQ9.png">`,//4
+          `<img src="ySQ4xSQ9.png">`//5
+        ],
+        correctIndex: 5
+      },
+      // Άλλη ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Ποιο σχήμα έχει εξίσωση \\(\\dfrac{x^2}{α^2}-\\dfrac{y^2}{β^2}=1\\);",
+        image: null,
+        options: [
+          `<img src="ySQ6x.png">`,//0
+          `<img src="xSQ6y.png">`,//1
+          `<img src="ySQminusxSQ.png">`,//2
+          `<img src="xSQminusySQ.png">`,//3
+          `<img src="xSQ4ySQ9.png">`,//4
+          `<img src="ySQ4xSQ9.png">`//5
+        ],
+        correctIndex: 3
+      },
+      // Άλλη ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Ποιο σχήμα έχει εξίσωση \\(x^2=2py\\);",
+        image: null,
+        options: [
+          `<img src="ySQ6x.png">`,
+          `<img src="xSQ6y.png">`,
+          `<img src="ySQminusxSQ.png">`,
+          `<img src="xSQminusySQ.png">`,
+          `<img src="xSQ4ySQ9.png">`,
+          `<img src="ySQ4xSQ9.png">`
+        ],
+        correctIndex: 1
+      },
+      // Άλλη ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Ποιο σχήμα έχει εξίσωση \\(\\dfrac{x^2}{β^2}+\\dfrac{y^2}{α^2}=1\\);",
+        image: null,
+        options: [
+          `<img src="ySQ6x.png">`,//0
+          `<img src="xSQ6y.png">`,//1
+          `<img src="ySQminusxSQ.png">`,//2
+          `<img src="xSQminusySQ.png">`,//3
+          `<img src="xSQ4ySQ9.png">`,//4
+          `<img src="ySQ4xSQ9.png">`//5
+        ],
+        correctIndex: 4
+      },
+      // Άλλη ερώτηση τύπου πολλαπλής επιλογής
+      {
+        type: "multipleChoice",
+        question: "Ποιο σχήμα έχει εξίσωση \\(\\dfrac{y^2}{α^2}-\\dfrac{x^2}{β^2}=1\\);",
+        image: null,
+        options: [
+          `<img src="ySQ6x.png">`,//0
+          `<img src="xSQ6y.png">`,//1
+          `<img src="ySQminusxSQ.png">`,//2
+          `<img src="xSQminusySQ.png">`,//3
+          `<img src="xSQ4ySQ9.png">`,//4
+          `<img src="ySQ4xSQ9.png">`//5
+        ],
+        correctIndex: 2
+      },
+      {
+        type: "multipleChoice",
+        question: "Ποια είναι η εξίσωση του παρακάτω σχήματος;",
+        image: "ySQ4xSQ9.png",
+        //"ySQ6x.png", "xSQ4ySQ9.png", "xSQ6y.png", "ySQminusxSQ.png", 
+        //"xSQminus6y.png", "xSQminusySQ.png", "ySQminus6x.png", "xSQ4ySQ9.png", "ySQ4xSQ9.png"
+        options: [
+          "\\(y^2=6x\\)", //0
+          "\\(y^2=-6x\\)",//1
+          "\\(x^2=6y\\)",//2
+          "\\(x^2=-6y\\)",//3
+          "\\(\\dfrac{x^2}{9}+\\dfrac{y^2}{4}=1\\)",//4
+          "\\(\\dfrac{x^2}{4}+\\dfrac{y^2}{9}=1\\)",//5
+          "\\(\\dfrac{x^2}{9}-\\dfrac{y^2}{4}=1\\)",//6
+          "\\(\\dfrac{y^2}{4}-\\dfrac{x^2}{9}=1\\)"
+        ],
+        correctIndex: 4
+      },
+      {
+        type: "multipleChoice",
+        question: "Ποια είναι η εξίσωση του παρακάτω σχήματος;",
+        image: "ySQ6x.png",
+        options: [
+          "\\(y^2=6x\\)", //0
+          "\\(y^2=-6x\\)",//1
+          "\\(x^2=6y\\)",//2
+          "\\(x^2=-6y\\)",//3
+          "\\(\\dfrac{x^2}{9}+\\dfrac{y^2}{4}=1\\)",//4
+          "\\(\\dfrac{x^2}{4}+\\dfrac{y^2}{9}=1\\)",//5
+          "\\(\\dfrac{x^2}{9}-\\dfrac{y^2}{4}=1\\)",//6
+          "\\(\\dfrac{y^2}{4}-\\dfrac{x^2}{9}=1\\)"//7
+        ],
+        correctIndex: 0
+      },
+      {
+        type: "multipleChoice",
+        question: "Ποια είναι η εξίσωση του παρακάτω σχήματος;",
+        image: "xSQ4ySQ9.png",
+        //"ySQ6x.png", "xSQ4ySQ9.png", "xSQ6y.png", "ySQminusxSQ.png", 
+        //"xSQminus6y.png", "xSQminusySQ.png", "ySQminus6x.png", "xSQ4ySQ9.png", "ySQ4xSQ9.png"
+        options: [
+          "\\(y^2=6x\\)", //0
+          "\\(y^2=-6x\\)",//1
+          "\\(x^2=6y\\)",//2
+          "\\(x^2=-6y\\)",//3
+          "\\(\\dfrac{x^2}{9}+\\dfrac{y^2}{4}=1\\)",//4
+          "\\(\\dfrac{x^2}{4}+\\dfrac{y^2}{9}=1\\)",//5
+          "\\(\\dfrac{x^2}{9}-\\dfrac{y^2}{4}=1\\)",//6
+          "\\(\\dfrac{y^2}{4}-\\dfrac{x^2}{9}=1\\)"//7
+        ],
+        correctIndex: 5
+      },
+      {
+        type: "multipleChoice",
+        question: "Ποια είναι η εξίσωση του παρακάτω σχήματος;",
+        image: "xSQ6y.png",
+        //"ySQ6x.png", "xSQ4ySQ9.png", "xSQ6y.png", "ySQminusxSQ.png", 
+        //"xSQminus6y.png", "xSQminusySQ.png", "ySQminus6x.png", "xSQ4ySQ9.png", "ySQ4xSQ9.png"
+        options: [
+          "\\(y^2=6x\\)", //0
+          "\\(y^2=-6x\\)",//1
+          "\\(x^2=6y\\)",//2
+          "\\(x^2=-6y\\)",//3
+          "\\(\\dfrac{x^2}{9}+\\dfrac{y^2}{4}=1\\)",//4
+          "\\(\\dfrac{x^2}{4}+\\dfrac{y^2}{9}=1\\)",//5
+          "\\(\\dfrac{x^2}{9}-\\dfrac{y^2}{4}=1\\)",//6
+          "\\(\\dfrac{y^2}{4}-\\dfrac{x^2}{9}=1\\)"//7
+        ],
+        correctIndex: 2
+      },
+      {
+        type: "multipleChoice",
+        question: "Ποια είναι η εξίσωση του παρακάτω σχήματος;",
+        image: "ySQminusxSQ.png",
+        //"ySQ6x.png", "xSQ4ySQ9.png", "xSQ6y.png", "ySQminusxSQ.png", 
+        //"xSQminus6y.png", "xSQminusySQ.png", "ySQminus6x.png", "xSQ4ySQ9.png", "ySQ4xSQ9.png"
+        options: [
+          "\\(y^2=6x\\)", //0
+          "\\(y^2=-6x\\)",//1
+          "\\(x^2=6y\\)",//2
+          "\\(x^2=-6y\\)",//3
+          "\\(\\dfrac{x^2}{9}+\\dfrac{y^2}{4}=1\\)",//4
+          "\\(\\dfrac{x^2}{4}+\\dfrac{y^2}{9}=1\\)",//5
+          "\\(\\dfrac{x^2}{9}-\\dfrac{y^2}{4}=1\\)",//6
+          "\\(\\dfrac{y^2}{4}-\\dfrac{x^2}{9}=1\\)"//7
+        ],
+        correctIndex: 7
+      },
+      {
+        type: "multipleChoice",
+        question: "Ποια είναι η εξίσωση του παρακάτω σχήματος;",
+        image: "xSQminus6y.png",
+        //"ySQ6x.png", "xSQ4ySQ9.png", "xSQ6y.png", "ySQminusxSQ.png", 
+        //"xSQminus6y.png", "xSQminusySQ.png", "ySQminus6x.png", "xSQ4ySQ9.png", "ySQ4xSQ9.png"
+        options: [
+          "\\(y^2=6x\\)", //0
+          "\\(y^2=-6x\\)",//1
+          "\\(x^2=6y\\)",//2
+          "\\(x^2=-6y\\)",//3
+          "\\(\\dfrac{x^2}{9}+\\dfrac{y^2}{4}=1\\)",//4
+          "\\(\\dfrac{x^2}{4}+\\dfrac{y^2}{9}=1\\)",//5
+          "\\(\\dfrac{x^2}{9}-\\dfrac{y^2}{4}=1\\)",//6
+          "\\(\\dfrac{y^2}{4}-\\dfrac{x^2}{9}=1\\)"//7
+        ],
+        correctIndex: 3
+      },
+      {
+        type: "multipleChoice",
+        question: "Ποια είναι η εξίσωση του παρακάτω σχήματος;",
+        image: "xSQminusySQ.png",
+        //"ySQ6x.png", "xSQ4ySQ9.png", "xSQ6y.png", "ySQminusxSQ.png", 
+        //"xSQminus6y.png", "xSQminusySQ.png", "ySQminus6x.png", "xSQ4ySQ9.png", "ySQ4xSQ9.png"
+        options: [
+          "\\(y^2=6x\\)", //0
+          "\\(y^2=-6x\\)",//1
+          "\\(x^2=6y\\)",//2
+          "\\(x^2=-6y\\)",//3
+          "\\(\\dfrac{x^2}{9}+\\dfrac{y^2}{4}=1\\)",//4
+          "\\(\\dfrac{x^2}{4}+\\dfrac{y^2}{9}=1\\)",//5
+          "\\(\\dfrac{x^2}{9}-\\dfrac{y^2}{4}=1\\)",//6
+          "\\(\\dfrac{y^2}{4}-\\dfrac{x^2}{9}=1\\)"//7
+        ],
+        correctIndex: 6
+      },
+      {
+        type: "multipleChoice",
+        question: "Ποια είναι η εξίσωση του παρακάτω σχήματος;",
+        image: "ySQminus6x.png",
+        //"ySQ6x.png", "xSQ4ySQ9.png", "xSQ6y.png", "ySQminusxSQ.png", 
+        //"xSQminus6y.png", "xSQminusySQ.png", "ySQminus6x.png", "xSQ4ySQ9.png", "ySQ4xSQ9.png"
+        options: [
+          "\\(y^2=6x\\)", //0
+          "\\(y^2=-6x\\)",//1
+          "\\(x^2=6y\\)",//2
+          "\\(x^2=-6y\\)",//3
+          "\\(\\dfrac{x^2}{9}+\\dfrac{y^2}{4}=1\\)",//4
+          "\\(\\dfrac{x^2}{4}+\\dfrac{y^2}{9}=1\\)",//5
+          "\\(\\dfrac{x^2}{9}-\\dfrac{y^2}{4}=1\\)",//6
+          "\\(\\dfrac{y^2}{4}-\\dfrac{x^2}{9}=1\\)"//7
+        ],
+        correctIndex: 1
+      },
+      {
+        type: "multipleChoice",
+        question: "Δίνεται σημείο \\(A(x_0, y_0)\\) του παρακάτω σχήματος. Ποια είναι η εξίσωση της εφαπτομένης του στο σημείο \\(A\\);",
+        image: "ySQ6x.png",
+        //"ySQ6x.png", "xSQ4ySQ9.png", "ySQminusxSQ.png", "circle10.png",
+        //"ySQ4xSQ9.png", "xSQ6y.png", "xSQminusySQ.png"
+        options: [
+          "\\(x_0 x+y_0 y=r^2\\)", //0
+          "\\(y_0 y=p(x+x_0)\\)",//1
+          "\\(x_0 x=p(y+y_0)\\)",//2
+          "\\(\\dfrac{x_0 x}{α^2}+\\dfrac{y_0 y}{β^2}=1\\)",//3
+          "\\(\\dfrac{x_0 x}{β^2}+\\dfrac{y_0 y}{α^2}=1\\)",//4
+          "\\(\\dfrac{x_0 x}{α^2}-\\dfrac{y_0 y}{β^2}=1\\)",//5
+          "\\(\\dfrac{y_0 y}{α^2}-\\dfrac{x_0 x}{β^2}=1\\)"//6
+        ],
+        correctIndex: 1
+      },
+      {
+        type: "multipleChoice",
+        question: "Δίνεται σημείο \\(A(x_0, y_0)\\) του παρακάτω σχήματος. Ποια είναι η εξίσωση της εφαπτομένης του στο σημείο \\(A\\);",
+        image: "xSQ4ySQ9.png",
+        //"ySQ6x.png", "xSQ4ySQ9.png", "ySQminusxSQ.png", "circle10.png",
+        //"ySQ4xSQ9.png", "xSQ6y.png", "xSQminusySQ.png"
+        options: [
+          "\\(x_0 x+y_0 y=r^2\\)", //0
+          "\\(y_0 y=p(x+x_0)\\)",//1
+          "\\(x_0 x=p(y+y_0)\\)",//2
+          "\\(\\dfrac{x_0 x}{α^2}+\\dfrac{y_0 y}{β^2}=1\\)",//3
+          "\\(\\dfrac{x_0 x}{β^2}+\\dfrac{y_0 y}{α^2}=1\\)",//4
+          "\\(\\dfrac{x_0 x}{α^2}-\\dfrac{y_0 y}{β^2}=1\\)",//5
+          "\\(\\dfrac{y_0 y}{α^2}-\\dfrac{x_0 x}{β^2}=1\\)"//6
+        ],
+        correctIndex: 4
+      },
+      {
+        type: "multipleChoice",
+        question: "Δίνεται σημείο \\(A(x_0, y_0)\\) του παρακάτω σχήματος. Ποια είναι η εξίσωση της εφαπτομένης του στο σημείο \\(A\\);",
+        image: "ySQminusxSQ.png",
+        //"ySQ6x.png", "xSQ4ySQ9.png", "ySQminusxSQ.png", "circle10.png",
+        //"ySQ4xSQ9.png", "xSQ6y.png", "xSQminusySQ.png"
+        options: [
+          "\\(x_0 x+y_0 y=r^2\\)", //0
+          "\\(y_0 y=p(x+x_0)\\)",//1
+          "\\(x_0 x=p(y+y_0)\\)",//2
+          "\\(\\dfrac{x_0 x}{α^2}+\\dfrac{y_0 y}{β^2}=1\\)",//3
+          "\\(\\dfrac{x_0 x}{β^2}+\\dfrac{y_0 y}{α^2}=1\\)",//4
+          "\\(\\dfrac{x_0 x}{α^2}-\\dfrac{y_0 y}{β^2}=1\\)",//5
+          "\\(\\dfrac{y_0 y}{α^2}-\\dfrac{x_0 x}{β^2}=1\\)"//6
+        ],
+        correctIndex: 6
+      },
+      {
+        type: "multipleChoice",
+        question: "Δίνεται σημείο \\(A(x_0, y_0)\\) του παρακάτω σχήματος. Ποια είναι η εξίσωση της εφαπτομένης του στο σημείο \\(A\\);",
+        image: "circle10.png",
+        //"ySQ6x.png", "xSQ4ySQ9.png", "ySQminusxSQ.png", "circle10.png",
+        //"ySQ4xSQ9.png", "xSQ6y.png", "xSQminusySQ.png"
+        options: [
+          "\\(x_0 x+y_0 y=r^2\\)", //0
+          "\\(y_0 y=p(x+x_0)\\)",//1
+          "\\(x_0 x=p(y+y_0)\\)",//2
+          "\\(\\dfrac{x_0 x}{α^2}+\\dfrac{y_0 y}{β^2}=1\\)",//3
+          "\\(\\dfrac{x_0 x}{β^2}+\\dfrac{y_0 y}{α^2}=1\\)",//4
+          "\\(\\dfrac{x_0 x}{α^2}-\\dfrac{y_0 y}{β^2}=1\\)",//5
+          "\\(\\dfrac{y_0 y}{α^2}-\\dfrac{x_0 x}{β^2}=1\\)"//6
+        ],
+        correctIndex: 0
+      },
+      {
+        type: "multipleChoice",
+        question: "Δίνεται σημείο \\(A(x_0, y_0)\\) του παρακάτω σχήματος. Ποια είναι η εξίσωση της εφαπτομένης του στο σημείο \\(A\\);",
+        image: "ySQ4xSQ9.png",
+        //"ySQ6x.png", "xSQ4ySQ9.png", "ySQminusxSQ.png", "circle10.png",
+        //"ySQ4xSQ9.png", "xSQ6y.png", "xSQminusySQ.png"
+        options: [
+          "\\(x_0 x+y_0 y=r^2\\)", //0
+          "\\(y_0 y=p(x+x_0)\\)",//1
+          "\\(x_0 x=p(y+y_0)\\)",//2
+          "\\(\\dfrac{x_0 x}{α^2}+\\dfrac{y_0 y}{β^2}=1\\)",//3
+          "\\(\\dfrac{x_0 x}{β^2}+\\dfrac{y_0 y}{α^2}=1\\)",//4
+          "\\(\\dfrac{x_0 x}{α^2}-\\dfrac{y_0 y}{β^2}=1\\)",//5
+          "\\(\\dfrac{y_0 y}{α^2}-\\dfrac{x_0 x}{β^2}=1\\)"//6
+        ],
+        correctIndex: 3
+      },
+      {
+        type: "multipleChoice",
+        question: "Δίνεται σημείο \\(A(x_0, y_0)\\) του παρακάτω σχήματος. Ποια είναι η εξίσωση της εφαπτομένης του στο σημείο \\(A\\);",
+        image: "xSQ6y.png",
+        //"ySQ6x.png", "xSQ4ySQ9.png", "ySQminusxSQ.png", "circle10.png",
+        //"ySQ4xSQ9.png", "xSQ6y.png", "xSQminusySQ.png"
+        options: [
+          "\\(x_0 x+y_0 y=r^2\\)", //0
+          "\\(y_0 y=p(x+x_0)\\)",//1
+          "\\(x_0 x=p(y+y_0)\\)",//2
+          "\\(\\dfrac{x_0 x}{α^2}+\\dfrac{y_0 y}{β^2}=1\\)",//3
+          "\\(\\dfrac{x_0 x}{β^2}+\\dfrac{y_0 y}{α^2}=1\\)",//4
+          "\\(\\dfrac{x_0 x}{α^2}-\\dfrac{y_0 y}{β^2}=1\\)",//5
+          "\\(\\dfrac{y_0 y}{α^2}-\\dfrac{x_0 x}{β^2}=1\\)"//6
+        ],
+        correctIndex: 2
+      },
+      {
+        type: "multipleChoice",
+        question: "Δίνεται σημείο \\(A(x_0, y_0)\\) του παρακάτω σχήματος. Ποια είναι η εξίσωση της εφαπτομένης του στο σημείο \\(A\\);",
+        image: "xSQminusySQ.png",
+        //"ySQ6x.png", "xSQ4ySQ9.png", "ySQminusxSQ.png", "circle10.png",
+        //"ySQ4xSQ9.png", "xSQ6y.png", "xSQminusySQ.png"
+        options: [
+          "\\(x_0 x+y_0 y=r^2\\)", //0
+          "\\(y_0 y=p(x+x_0)\\)",//1
+          "\\(x_0 x=p(y+y_0)\\)",//2
+          "\\(\\dfrac{x_0 x}{α^2}+\\dfrac{y_0 y}{β^2}=1\\)",//3
+          "\\(\\dfrac{x_0 x}{β^2}+\\dfrac{y_0 y}{α^2}=1\\)",//4
+          "\\(\\dfrac{x_0 x}{α^2}-\\dfrac{y_0 y}{β^2}=1\\)",//5
+          "\\(\\dfrac{y_0 y}{α^2}-\\dfrac{x_0 x}{β^2}=1\\)"//6
+        ],
+        correctIndex: 5
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Να συμπληρώσεις τα κενά.",
+        sentenceTemplate: [
+          'Η καμπύλη με εξίσωση \\(y^2=2px\\) είναι ', null, ', έχει εστία το σημείο ', null, ' και διευθετούσα την ευθεία ', null, '.'
+        ],
+        correctAnswers: ["παραβολή", "\\(Ε\\left(\\dfrac{p}{2},0\\right)\\)", "\\(δ:x=-\\dfrac{p}{2}\\)"],
+        options: ["παραβολή", "έλλειψη", "υπερβολή", 
+        "\\(Ε\\left(\\dfrac{p}{2},0\\right)\\)","\\(Ε\\left( 0,\\dfrac{p}{2}\\right)\\)",
+        "\\(Ε\\left(-\\dfrac{p}{2},0\\right)\\)","\\(Ε\\left( 0,-\\dfrac{p}{2}\\right)\\)",
+         "\\(δ:x=-\\dfrac{p}{2}\\)", "\\(δ:y=-\\dfrac{p}{2}\\)",
+         "\\(δ:x=\\dfrac{p}{2}\\)", "\\(δ:y=\\dfrac{p}{2}\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Να συμπληρώσεις τα κενά.",
+        sentenceTemplate: [
+          'Η καμπύλη με εξίσωση \\(\\dfrac{x^2}{α^2}+\\dfrac{y^2}{β^2}=1\\) είναι ', null, ', έχει εστίες τα σημεία ', null, ' και  ', null, ' και εκκεντρότητα \\(ε=\\)', null,
+ ' με \\(ε\\)', null, '.'
+        ],
+        correctAnswers: ["έλλειψη", "\\(Ε\\left( γ,0\\right)\\)", "\\(Ε'\\left( -γ,0\\right)\\)", "\\(\\dfrac{γ}{α}\\)", "\\(<1\\)"],
+        options: ["παραβολή", "έλλειψη", "υπερβολή", 
+        "\\(Ε\\left( γ,0\\right)\\)", "\\(Ε'\\left( -γ,0\\right)\\)",
+        "\\(Ε\\left( 0,γ\\right)\\)", "\\(Ε'\\left( 0,-γ\\right)\\)",
+         "\\(\\dfrac{γ}{α}\\)", "\\(\\dfrac{α}{γ}\\)","\\(\\dfrac{β}{α}\\)",
+         "\\(<1\\)", "\\(>1\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Να συμπληρώσεις τα κενά.",
+        sentenceTemplate: [
+          'Η καμπύλη με εξίσωση \\(\\dfrac{x^2}{α^2}-\\dfrac{y^2}{β^2}=1\\) είναι ', null, ', έχει εστίες τα σημεία ', null, ' και  ', null, ', εκκεντρότητα \\(ε=\\)', null, 
+' με \\(ε\\)', null, ' και ασύμπτωτες ', null, ', ', null, '.'
+        ],
+        correctAnswers: ["υπερβολή", "\\(Ε\\left( γ,0\\right)\\)", "\\(Ε'\\left( -γ,0\\right)\\)", "\\(\\dfrac{γ}{α}\\)", "\\(>1\\)",
+"\\(\\dfrac{x}{α}-\\dfrac{y}{β}=0\\)","\\(\\dfrac{x}{α}+\\dfrac{y}{β}=0\\)"],
+        options: ["παραβολή", "έλλειψη", "υπερβολή", 
+        "\\(Ε\\left( γ,0\\right)\\)", "\\(Ε'\\left( -γ,0\\right)\\)",
+        "\\(Ε\\left( 0,γ\\right)\\)", "\\(Ε'\\left( 0,-γ\\right)\\)",
+         "\\(\\dfrac{γ}{α}\\)", "\\(\\dfrac{α}{γ}\\)","\\(\\dfrac{β}{α}\\)",
+         "\\(<1\\)", "\\(>1\\)",
+	"\\(\\dfrac{x}{α}-\\dfrac{y}{β}=1\\)","\\(\\dfrac{x}{α}+\\dfrac{y}{β}=1\\)",
+"\\(\\dfrac{x}{α}-\\dfrac{y}{β}=0\\)","\\(\\dfrac{x}{α}+\\dfrac{y}{β}=0\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Να συμπληρώσεις τα κενά.",
+        sentenceTemplate: [
+          'Η καμπύλη με εξίσωση \\(x^2=2py\\) είναι ', null, ', έχει εστία το σημείο ', null, ' και διευθετούσα την ευθεία ', null, '.'
+        ],
+        correctAnswers: ["παραβολή", "\\(Ε\\left( 0,\\dfrac{p}{2}\\right)\\)", "\\(δ:y=-\\dfrac{p}{2}\\)"],
+        options: ["παραβολή", "έλλειψη", "υπερβολή", 
+        "\\(Ε\\left(\\dfrac{p}{2},0\\right)\\)","\\(Ε\\left( 0,\\dfrac{p}{2}\\right)\\)",
+        "\\(Ε\\left(-\\dfrac{p}{2},0\\right)\\)","\\(Ε\\left( 0,-\\dfrac{p}{2}\\right)\\)",
+         "\\(δ:x=-\\dfrac{p}{2}\\)", "\\(δ:y=-\\dfrac{p}{2}\\)",
+         "\\(δ:x=\\dfrac{p}{2}\\)", "\\(δ:y=\\dfrac{p}{2}\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Να συμπληρώσεις τα κενά.",
+        sentenceTemplate: [
+          'Η καμπύλη με εξίσωση \\(\\dfrac{x^2}{β^2}+\\dfrac{y^2}{α^2}=1\\) είναι ', null, ', έχει εστίες τα σημεία ', null, ' και  ', null, ' και εκκεντρότητα \\(ε=\\)', null,
+ ' με \\(ε\\)', null , '.'
+        ],
+        correctAnswers: ["έλλειψη", "\\(Ε\\left( 0,γ\\right)\\)", "\\(Ε'\\left( 0,-γ\\right)\\)", "\\(\\dfrac{γ}{α}\\)", "\\(<1\\)"],
+        options: ["παραβολή", "έλλειψη", "υπερβολή", 
+        "\\(Ε\\left( γ,0\\right)\\)", "\\(Ε'\\left( -γ,0\\right)\\)",
+        "\\(Ε\\left( 0,γ\\right)\\)", "\\(Ε'\\left( 0,-γ\\right)\\)",
+         "\\(\\dfrac{γ}{α}\\)", "\\(\\dfrac{α}{γ}\\)","\\(\\dfrac{β}{α}\\)",
+         "\\(<1\\)", "\\(>1\\)"]
+      },
+      {
+        type: "fillBlank",
+        questionPrompt: "Να συμπληρώσεις τα κενά.",
+        sentenceTemplate: [
+          'Η καμπύλη με εξίσωση \\(\\dfrac{y^2}{α^2}-\\dfrac{x^2}{β^2}=1\\) είναι ', null, ', έχει εστίες τα σημεία ', null, ' και  ', null, ', εκκεντρότητα \\(ε=\\)', null, 
+' με \\(ε\\)', null, ' και ασύμπτωτες ', null, ', ', null, '.'
+        ],
+        correctAnswers: ["υπερβολή", "\\(Ε\\left( 0,γ\\right)\\)", "\\(Ε'\\left( 0,-γ\\right)\\)", "\\(\\dfrac{γ}{α}\\)", "\\(>1\\)",
+"\\(\\dfrac{y}{α}-\\dfrac{x}{β}=0\\)","\\(\\dfrac{y}{α}+\\dfrac{x}{β}=0\\)"],
+        options: ["παραβολή", "έλλειψη", "υπερβολή", 
+        "\\(Ε\\left( γ,0\\right)\\)", "\\(Ε'\\left( -γ,0\\right)\\)",
+        "\\(Ε\\left( 0,γ\\right)\\)", "\\(Ε'\\left( 0,-γ\\right)\\)",
+         "\\(\\dfrac{γ}{α}\\)", "\\(\\dfrac{α}{γ}\\)","\\(\\dfrac{β}{α}\\)",
+         "\\(<1\\)", "\\(>1\\)",
+	"\\(\\dfrac{y}{α}-\\dfrac{x}{β}=1\\)","\\(\\dfrac{y}{α}+\\dfrac{x}{β}=1\\)",
+"\\(\\dfrac{y}{α}-\\dfrac{x}{β}=0\\)","\\(\\dfrac{y}{α}+\\dfrac{x}{β}=0\\)"]
+      }
+    ];
+
+    const TIME_LIMIT = 900; // 15 λεπτά σε δευτερόλεπτα
+
+    let isMode2 = false; // Default mode is Mode 1 (off)
+
+    let currentQuizQuestions = []; // Questions for the current round/attempt
+    let currentQuestionIndex = 0; // Index within currentQuizQuestions
+
+    // --- Variables used by both modes, managed differently ---
+    let currentAttemptScore = 0; // Correct answers in the current round/attempt
+    let currentAttemptErrors = 0; // Errors in the current round (Mode 1 specific)
+    let timeLimitExceeded = false; // Status for the current round/attempt
+
+    let startTime; // Start time for the current round/attempt
+    let timerInterval;
+    let attempt = 1; // Attempt number (increments differently per mode)
+    const attemptsData = []; // Stores data for all completed attempts
+
+    // --- Mode 1 specific variables ---
+    let incorrectQuestionsThisRound = []; // Questions objects answered incorrectly in the current round
+    let currentRoundIncorrectQuestionNumbersDisplay = []; // Store display numbers of incorrect questions for Mode 1 PDF
+
+    // --- Variables for current question state (shared) ---
+    let userAnswersForCurrentQuestion = []; // For fill-in-the-blank
+    let nextBlankToFillIndex = 0; // For fill-in-the-blank
+    let optionButtons = []; // For fill-in-the-blank options
+    let selectedOption = null; // For multiple choice
+
+    const quizModeToggle = document.getElementById("quiz-mode-toggle");
+    const timeLimitInfo = document.getElementById("time-limit-info");
+
+
+    function startQuiz() {
+      document.getElementById("intro").classList.add("hidden");
+      document.getElementById("timer").classList.remove("hidden");
+      document.getElementById("quiz").classList.remove("hidden");
+      document.getElementById("submit").classList.remove("hidden");
+      document.getElementById("result").classList.add("hidden");
+      document.getElementById("download").classList.add("hidden");
+      document.getElementById("timer").classList.remove("timeout");
+
+        isMode2 = quizModeToggle.checked; // Get the selected mode
+
+        // Reset state for a new attempt/round
+        currentAttemptScore = 0;
+        currentAttemptErrors = 0; // Only relevant for Mode 1
+        timeLimitExceeded = false;
+        currentRoundIncorrectQuestionNumbersDisplay = []; // Only relevant for Mode 1
+
+        startTime = new Date();
+        if (timerInterval) {
+          clearInterval(timerInterval);
+        }
+        timerInterval = setInterval(updateTimer, 1000);
+
+        if (isMode2) { // Mode 2 Logic (Repeat entire quiz on error/timeout)
+            currentQuizQuestions = [...quizData]; // Always start with all questions
+             // shuffleArray(currentQuizQuestions); // Optional: shuffle for Mode 2 too
+            currentQuestionIndex = 0;
+            loadQuestion();
+        } else { // Mode 1 Logic (Repeat only incorrect questions)
+            if (attempt === 1 || incorrectQuestionsThisRound.length === 0) { // First attempt or finished previous round successfully
+                currentQuizQuestions = [...quizData]; // Start with all questions
+                // shuffleArray(currentQuizQuestions); // Shuffle only on the very first attempt
+            } else { // Repeating incorrect questions from the previous round
+                currentQuizQuestions = [...incorrectQuestionsThisRound]; // Use only incorrect questions
+                // Optionally shuffle incorrect questions for variety
+                // shuffleArray(currentQuizQuestions);
+            }
+            incorrectQuestionsThisRound = []; // Clear for the new round's tracking
+            currentQuestionIndex = 0;
+            loadQuestion();
+        }
+    }
+
+    // Fisher-Yates Shuffle Algorithm
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+        }
+    }
+
+
+    function updateTimer() {
+      const now = new Date();
+      const elapsed = Math.floor((now - startTime) / 1000);
+      const remaining = TIME_LIMIT - elapsed;
+
+      const minutes = Math.floor(remaining / 60).toString().padStart(2, "0");
+      const seconds = (remaining % 60).toString().padStart(2, "0");
+
+      const timerElement = document.getElementById("timer");
+        // Timer text differs slightly based on mode
+        if (isMode2 && remaining <= 0) {
+             timerElement.textContent = `Χρόνος (${attempt}η Προσπάθεια): 00:00 (Έχει παρέλθει ο χρόνος, αλλά συνεχίζεις)`;
+        } else {
+             timerElement.textContent = `Χρόνος (${isMode2 ? attempt + 'η Προσπάθεια' : attempt + 'ος Γύρος'}): ${minutes}:${seconds}`;
+        }
+
+      if (remaining <= 0 && !timeLimitExceeded) {
+        timeLimitExceeded = true;
+        timerElement.classList.add("timeout");
+      }
+    }
+
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
+      const secs = (seconds % 60).toString().padStart(2, "0");
+      return `${minutes}:${secs}`;
+    }
+
+    function loadQuestion() {
+      if (currentQuestionIndex >= currentQuizQuestions.length) {
+          // Should not happen if checkAnswer logic is correct, but as a safeguard
+          console.error("Attempted to load question beyond quiz length.");
+          clearInterval(timerInterval);
+          showResults();
+          return;
+      }
+
+      const q = currentQuizQuestions[currentQuestionIndex];
+      const questionNumberTitle = document.getElementById("question-number-title");
+      const questionPromptText = document.getElementById("question-prompt-text");
+      const questionImageContainer = document.getElementById("question-image-container");
+      const questionContent = document.getElementById("question-content");
+
+      // Display question number relative to the current round/attempt and total for it
+      questionNumberTitle.textContent = `Ερώτηση ${currentQuestionIndex + 1} / ${currentQuizQuestions.length} (${isMode2 ? attempt + 'η Προσπάθεια' : attempt + 'ος Γύρος'})`;
+
+      // Καθαρίζουμε τα περιεχόμενα
+      questionImageContainer.innerHTML = '';
+      questionContent.innerHTML = '';
+
+      // Φόρτωση εικόνας (αν υπάρχει)
+      if (q.imageURL || q.image) {
+        const imgElement = document.createElement("img");
+        imgElement.src = q.imageURL || q.image;
+        imgElement.alt = q.questionPrompt || q.question || "Εικόνα Ερώτησης";
+        questionImageContainer.appendChild(imgElement);
+      }
+
+      // Φόρτωση περιεχομένου ερώτησης ανάλογα με τον τύπο
+      if (q.type === "fillBlank") {
+        loadFillBlankQuestion(q, questionPromptText, questionContent);
+      } else if (q.type === "multipleChoice") {
+        loadMultipleChoiceQuestion(q, questionPromptText, questionContent);
+      }
+
+      // Ανανέωση MathJax
+      MathJax.typesetPromise([questionContent, questionPromptText]).catch(err => console.error("MathJax typeset error:", err));
+    }
+
+    function loadFillBlankQuestion(q, questionPromptText, questionContent) {
+      questionPromptText.textContent = q.questionPrompt;
+
+      // Δημιουργία προτύπου πρότασης με κενά
+      const sentenceContainer = document.createElement("div");
+      sentenceContainer.classList.add("sentence-container");
+
+      const optionsContainer = document.createElement("div");
+      optionsContainer.classList.add("options-container");
+
+      userAnswersForCurrentQuestion = new Array(q.correctAnswers.length).fill(null);
+      nextBlankToFillIndex = 0;
+      optionButtons = []; // Reset option buttons array
+
+      let blankIndex = 0;
+      if (q.sentenceTemplate && Array.isArray(q.sentenceTemplate)) {
+        q.sentenceTemplate.forEach(part => {
+          if (part === null) {
+            const blankSpan = document.createElement("span");
+            blankSpan.classList.add("blank-space");
+            blankSpan.dataset.blankIndex = blankIndex;
+            blankSpan.innerHTML = "___";
+            sentenceContainer.appendChild(blankSpan);
+            blankIndex++;
+          } else {
+            const partSpan = document.createElement("span");
+            partSpan.innerHTML = part;
+            sentenceContainer.appendChild(partSpan);
+          }
+        });
+      }
+
+      if (q.options && Array.isArray(q.options)) {
+        q.options.forEach(optionText => {
+          const button = document.createElement("button");
+          button.classList.add("option-button");
+          button.innerHTML = optionText;
+          button.dataset.value = optionText;
+          button.addEventListener("click", handleOptionClick);
+          optionsContainer.appendChild(button);
+          optionButtons.push(button);
+        });
+      }
+
+      questionContent.appendChild(sentenceContainer);
+      questionContent.appendChild(optionsContainer);
+
+      document.getElementById("clear-choices").classList.remove("hidden");
+    }
+
+    function loadMultipleChoiceQuestion(q, questionPromptText, questionContent) {
+      questionPromptText.textContent = q.question;
+
+      const questionDiv = document.createElement("div");
+      questionDiv.classList.add("multiple-choice-question");
+
+      const optionsDiv = document.createElement("div");
+      optionsDiv.classList.add("multiple-choice-options");
+
+      selectedOption = null; // Reset selected option for this question
+
+      q.options.forEach((option, index) => {
+        const label = document.createElement("label");
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "option"; // Use the same name for all radios in a question
+        radio.value = index;
+        radio.addEventListener("change", function() {
+          selectedOption = parseInt(this.value, 10); // Parse value as integer
+        });
+
+        label.appendChild(radio);
+        label.appendChild(document.createTextNode(" ")); // Κενό μεταξύ radio και περιεχομένου
+        label.insertAdjacentHTML('beforeend', option);
+
+        optionsDiv.appendChild(label);
+      });
+
+      questionDiv.appendChild(optionsDiv);
+      questionContent.appendChild(questionDiv);
+
+      document.getElementById("clear-choices").classList.add("hidden");
+    }
+
+    function handleOptionClick(event) {
+      const selectedButton = event.currentTarget;
+      const valueToFill = selectedButton.dataset.value;
+
+      const q = currentQuizQuestions[currentQuestionIndex];
+
+      if (q.type === "fillBlank" && nextBlankToFillIndex < q.correctAnswers.length) {
+        const blankToFill = document.querySelector(`.blank-space[data-blank-index="${nextBlankToFillIndex}"]`);
+        if (blankToFill) {
+          blankToFill.innerHTML = valueToFill;
+          blankToFill.classList.add("filled");
+          userAnswersForCurrentQuestion[nextBlankToFillIndex] = valueToFill;
+          nextBlankToFillIndex++;
+          selectedButton.disabled = true; // Disable used option button
+          MathJax.typesetPromise([blankToFill]).catch(err => console.error("MathJax error on fill:", err));
+        }
+      }
+      // Multiple choice doesn't use handleOptionClick for selecting, only fillBlank options
+    }
+
+    function clearCurrentQuestionChoices() {
+      const q = currentQuizQuestions[currentQuestionIndex];
+
+      if (q.type === "fillBlank") {
+        userAnswersForCurrentQuestion = new Array(q.correctAnswers.length).fill(null);
+        nextBlankToFillIndex = 0;
+
+        const blankSpaces = document.querySelectorAll(".blank-space");
+        blankSpaces.forEach(blank => {
+          blank.innerHTML = "___";
+          blank.classList.remove("filled");
+        });
+
+        optionButtons.forEach(button => {
+          button.disabled = false;
+        });
+        // Re-render MathJax for cleared blanks if needed
+        MathJax.typesetPromise([document.querySelector(".sentence-container")]).catch(err => console.error("MathJax error on clear:", err));
+      } else if (q.type === "multipleChoice") {
+        const radios = document.querySelectorAll('input[name="option"]');
+        radios.forEach(radio => {
+          radio.checked = false;
+        });
+        selectedOption = null;
+      }
+    }
+
+    function checkAnswer() {
+      const q = currentQuizQuestions[currentQuestionIndex];
+      let isCorrect = false;
+
+      if (q.type === "fillBlank") {
+        // Έλεγχος για ερώτηση συμπλήρωσης κενών
+        const allBlanksFilled = userAnswersForCurrentQuestion.every(answer => answer !== null);
+
+        if (allBlanksFilled && userAnswersForCurrentQuestion.length === q.correctAnswers.length) {
+          isCorrect = true;
+          for (let i = 0; i < q.correctAnswers.length; i++) {
+            // Trim whitespace and compare HTML content (which includes MathJax spans)
+                // Using innerHTML comparison might be brittle if MathJax output differs slightly.
+                // A safer comparison might involve parsing MathJax output or comparing original text/values if possible.
+                // For this example, comparing innerHTML including MathJax generated spans.
+                const userAnswerHtml = userAnswersForCurrentQuestion[i].trim();
+                const correctAnswerHtml = q.correctAnswers[i].trim();
+
+                // Compare rendered MathJax HTML if both are MathJax
+                if (userAnswerHtml.startsWith('\\(') && userAnswerHtml.endsWith('\\)') &&
+                    correctAnswerHtml.startsWith('\\(') && correctAnswerHtml.endsWith('\\)')) {
+                    // This is a simplified comparison. A robust solution might involve
+                    // comparing the original LaTeX string or using MathJax APIs to compare expressions.
+                    // For now, let's compare the HTML content that MathJax produced.
+                    const userSpan = document.createElement('span'); userSpan.innerHTML = userAnswerHtml; MathJax.typesetPromise([userSpan]);
+                    const correctSpan = document.createElement('span'); correctSpan.innerHTML = correctAnswerHtml; MathJax.typesetPromise([correctSpan]);
+
+                    // Wait for MathJax to render before comparing
+                    MathJax.startup.promise.then(() => {
+                         if (userSpan.innerHTML.trim() !== correctSpan.innerHTML.trim()) {
+                            isCorrect = false;
+                         }
+                    });
+
+                } else {
+                    // Compare plain text answers
+                    if (userAnswerHtml !== correctAnswerHtml) {
+                        isCorrect = false;
+                    }
+                }
+                // If at any point isCorrect becomes false, we can break early
+                if (!isCorrect) break;
+          }
+             // Need to wait for the MathJax promise from the comparison logic above if used
+             if (isCorrect && userAnswersForCurrentQuestion.length > 0 && userAnswersForCurrentQuestion[0].startsWith('\\(')) {
+                  // If we are comparing MathJax, need to ensure the promise completes before setting isCorrect final state
+                  // This simplified approach might need adjustment for production-level robustness
+                  // For now, assuming synchronous check is sufficient for the provided data structure
+             }
+
+        }
+      } else if (q.type === "multipleChoice") {
+        // Έλεγχος για ερώτηση πολλαπλής επιλογής
+        if (selectedOption !== null && selectedOption === q.correctIndex) {
+          isCorrect = true;
+        }
+      }
+
+      if (isCorrect) {
+        currentAttemptScore++;
+      } else {
+        currentAttemptErrors++; // Track errors in the current round/attempt
+        if (!isMode2) { // For Mode 1, track which questions were incorrect
+            incorrectQuestionsThisRound.push(q); // Add the question object to the incorrect list
+            currentRoundIncorrectQuestionNumbersDisplay.push(currentQuestionIndex + 1); // Add display number
+        }
+      }
+
+      currentQuestionIndex++;
+      if (currentQuestionIndex < currentQuizQuestions.length) {
+        loadQuestion();
+      } else {
+        // End of the current round/attempt
+        clearInterval(timerInterval);
+        showResults();
+      }
+    }
+
+    function showResults() {
+      const now = new Date();
+      const elapsed = Math.floor((now - startTime) / 1000);
+      const totalQuestionsInRound = currentQuizQuestions.length;
+      const percentage = (totalQuestionsInRound > 0) ? ((currentAttemptScore / totalQuestionsInRound) * 100).toFixed(2) : 0;
+
+      // Record stats for the just completed round/attempt
+      attemptsData.push({
+        attempt: attempt,
+        score: currentAttemptScore, // Correct in this round/attempt
+        errors: isMode2 ? totalQuestionsInRound - currentAttemptScore : currentAttemptErrors, // Errors calculated based on mode
+        totalQuestions: totalQuestionsInRound, // Total in this round/attempt
+        percentage: percentage,
+        timeTaken: elapsed, // Time for this round/attempt
+        timeLimitExceeded: timeLimitExceeded, // Status for this round/attempt
+        incorrectQuestionNumbers: isMode2 ? null : [...currentRoundIncorrectQuestionNumbersDisplay] // Only store for Mode 1
+      });
+
+      const resultDiv = document.getElementById("result");
+      resultDiv.classList.remove("hidden");
+      document.getElementById("quiz").classList.add("hidden");
+      document.getElementById("submit").classList.add("hidden");
+      document.getElementById("clear-choices").classList.add("hidden");
+      document.getElementById("timer").classList.remove("timeout"); // Remove red color
+
+      let message = "";
+      let startNext = false; // Flag to determine if another round/attempt is needed
+
+      if (isMode2) { // Mode 2 Result Logic
+          const totalQuizQuestions = quizData.length;
+          if (currentAttemptScore === totalQuizQuestions && !timeLimitExceeded) {
+              message = `Συγχαρητήρια! Ολοκλήρωσες την ${attempt}η Προσπάθεια με επιτυχία!`;
+              message += `<br>Τελικό σκορ: ${currentAttemptScore}/${totalQuestionsInRound} (${percentage}%)<br>Χρόνος: ${formatTime(elapsed)}`;
+          } else {
+              message = `Στην ${attempt}η Προσπάθεια:`;
+              if (currentAttemptScore < totalQuestionsInRound) {
+                  message += `<br>Είχες λάθη (${totalQuestionsInRound - currentAttemptScore} λανθασμένες απαντήσεις).`;
+              }
+              if (timeLimitExceeded) {
+                  message += `<br>Υπέρβηκες το χρονικό όριο (${formatTime(elapsed)} > ${formatTime(TIME_LIMIT)}).`;
+              }
+              message += `<br>Σκορ: ${currentAttemptScore}/${totalQuestionsInRound} (${percentage}%)<br>Χρόνος: ${formatTime(elapsed)}`;
+              message += `<br>Θα επαναλάβεις όλο το quiz.`;
+              startNext = true; // Need to restart the whole quiz
+          }
+      } else { // Mode 1 Result Logic
+          // Determine outcome based on errors in *this* round (which might only be a subset of questions)
+          if (currentAttemptErrors === 0) {
+              message = `Συγχαρητήρια! Ολοκλήρωσες τον ${attempt}ο Γύρο με επιτυχία (0 λάθη)!`;
+              if (currentQuizQuestions.length === quizData.length) { // If this round had all questions
+                  message += `<br>Τελείωσες όλο το quiz!`;
+              } else { // If this round was a repeat of incorrect questions
+                  message += `<br>Απάντησες σωστά σε όλες τις ερωτήσεις αυτής της επανάληψης.`;
+              }
+          } else { // currentAttemptErrors > 0
+              message = `Στον ${attempt}ο Γύρο, είχες ${currentAttemptErrors} λάθη από τις ${totalQuestionsInRound} ερωτήσεις.`;
+              if (currentRoundIncorrectQuestionNumbersDisplay.length > 0) {
+                  message += ` (Ερωτήσεις: ${currentRoundIncorrectQuestionNumbersDisplay.join(', ')})`;
+              }
+              message += `<br>Θα επαναλάβεις ${incorrectQuestionsThisRound.length} ερώτηση(εις) που απάντησες λανθασμένα.`;
+              startNext = true; // Need to start the next round with incorrect questions
+          }
+          message += `<br>Σκορ γύρου: ${currentAttemptScore}/${totalQuestionsInRound} (${percentage}%)<br>Χρόνος γύρου: ${formatTime(elapsed)}`;
+      }
+
+        // Add time limit exceeded note if applicable in both modes
+        if (timeLimitExceeded && !(isMode2 && currentAttemptScore === quizData.length)) {
+             message += `<br>${isMode2 ? 'Σημείωση:' : 'Προσοχή και στον χρόνο στον επόμενο γύρο.'} (Υπέρβαση χρονικού ορίου)`;
+        }
+
+
+      resultDiv.innerHTML = `<p>${message}</p>`;
+
+      // Display timer status for the finished round/attempt
+      const timerElement = document.getElementById("timer");
+      timerElement.textContent = `Τελικός Χρόνος ${isMode2 ? 'Προσπάθειας' : 'Γύρου'} ${attempt}: ${formatTime(elapsed)}${timeLimitExceeded ? " (Υπέρβαση χρονικού ορίου)" : ""}`;
+
+
+      if (startNext) { // Start the next round/attempt based on mode logic
+        attempt++;
+        setTimeout(() => {
+          resultDiv.classList.add("hidden");
+          startQuiz(); // Recursive call to start the next round/attempt
+        }, 5000); // Wait 5 seconds before starting next round
+      } else {
+          // Quiz finished successfully overall (either Mode 1 with 0 errors or Mode 2 with full score & no timeout)
+          document.getElementById("download").classList.remove("hidden");
+      }
+    }
+
+    function generatePDF() {
+      try {
+        if (typeof window.jspdf !== 'undefined') {
+          const { jsPDF } = window.jspdf;
+          // Use 'pt' units for better control, convert from mm (default) if needed later
+            const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+         
+            // Add Greek font support - requires font files and registering them with jsPDF
+            // This is a placeholder comment. Proper Greek font embedding is complex with jsPDF.
+            // For simplicity, sticking to basic fonts which might not render all Greek characters correctly.
+            // A more robust solution would involve server-side PDF generation or a different library.
+
+          doc.setFont("helvetica", "bold"); // Use a common font, may not support all Greek chars
+          doc.setFontSize(18);
+          doc.setTextColor(0, 0, 0);
+          doc.text("Αποτελέσματα Κουίζ Μαθηματικών", 105, 15, { align: 'center' });
+
+          doc.setFontSize(12);
+          doc.setFont("helvetica", "normal");
+          const now = new Date();
+            // Use Greek locale for date formatting
+          doc.text(`Ημερομηνία: ${now.toLocaleString('el-GR')}`, 105, 25, { align: 'center' });
+
+          let yPos = 40;
+
+          attemptsData.forEach((attemptData, index) => {
+                // Check if we need a new page
+                if (yPos > 250) { // Adjust threshold as needed
+                     doc.addPage();
+                     yPos = 20; // Start lower on new pages
+                }
+
+            doc.setFillColor(0, 0, 0);
+            doc.rect(15, yPos - 5, 180, 8, 'F'); // Adjusted height/position
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12); // Smaller font for attempt title
+            doc.setFont("helvetica", "bold");
+            doc.text(`${attemptData.attempt}${isMode2 ? 'η Προσπάθεια' : 'ος Γύρος'}`, 20, yPos);
+
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(10); // Smaller font for details
+            doc.setFont("helvetica", "normal");
+            yPos += 8; // Adjusted spacing
+
+            doc.text(`Ερωτήσεις: ${attemptData.totalQuestions}`, 20, yPos);
+            doc.text(`Σωστές: ${attemptData.score}`, 20, yPos + 6); // Adjusted spacing
+
+                // Display errors based on mode
+                if (isMode2) {
+                     doc.text(`Λάθος: ${attemptData.totalQuestions - attemptData.score}`, 20, yPos + 12);
+                } else { // Mode 1
+                     doc.text(`Λάθη: ${attemptData.errors}`, 20, yPos + 12);
+                }
+
+
+            doc.text(`Χρόνος: ${formatTime(attemptData.timeTaken)}`, 100, yPos);
+
+                let statusText = "Ολοκληρώθηκε";
+                if (isMode2) {
+                     if (attemptData.score < attemptData.totalQuestions || attemptData.timeLimitExceeded) {
+                          statusText = "Επανάληψη Απαιτείται";
+                     }
+                } else { // Mode 1
+                    if (attemptData.errors > 0) {
+                        statusText = "Επανάληψη Λαθών";
+                    }
+                }
+                if (attemptData.timeLimitExceeded && !(isMode2 && attemptData.score === attemptData.totalQuestions)) { // Add time exceeded note unless it's a perfect run in Mode 2
+                     statusText += " (Υπέρβαση Χρόνου)";
+                }
+
+            doc.text(`Κατάσταση: ${statusText}`, 100, yPos + 6); // Adjusted spacing
+            doc.text(`Ποσοστό: ${attemptData.percentage}%`, 100, yPos + 12); // Adjusted spacing
+
+            // List incorrect question numbers for Mode 1 if available
+            if (!isMode2 && attemptData.incorrectQuestionNumbers && attemptData.incorrectQuestionNumbers.length > 0) {
+                let numbersText = attemptData.incorrectQuestionNumbers.join(', ');
+                // Wrap text if too long
+                const splitText = doc.splitTextToSize(`Ερωτήσεις Λαθών (με σειρά γύρου): ${numbersText}`, 170); // Adjust width as needed
+                doc.text(splitText, 20, yPos + 18); // Position below error/total lines
+                yPos += (splitText.length * 5); // Adjust yPos for text height
+            }
+
+            yPos += 20; // Standard spacing after details
+          });
+
+          // Final Congratulations page (if the last attempt was successful based on the active mode's rules)
+            const lastAttempt = attemptsData[attemptsData.length - 1];
+            let quizCompletedSuccessfully = false;
+
+            if (isMode2) {
+                 // Mode 2 success: Full score and no time limit exceeded in the last attempt
+                 if (lastAttempt.score === lastAttempt.totalQuestions && !lastAttempt.timeLimitExceeded) {
+                      quizCompletedSuccessfully = true;
+                 }
+            } else {
+                 // Mode 1 success: 0 errors in the last round, AND that round contained all quiz questions (meaning all previous errors were corrected)
+                 // We can check if the last round had errors, if not, it was successful.
+                 // A simpler check might be: Did the last round contain all questions AND have 0 errors?
+                 // Or, did *any* round achieve 0 errors? The prompt implies success is when
+                 // they pass the *final* round of incorrect questions. Let's assume the last
+                 // round recorded with 0 errors means overall success for Mode 1.
+                 if (lastAttempt.errors === 0) {
+                     // In Mode 1, if the last recorded round had 0 errors, it means
+                     // either they passed the full quiz on the first try, or they
+                     // successfully passed the repeat round of incorrect questions.
+                     quizCompletedSuccessfully = true;
+                 }
+            }
+
+
+          if (quizCompletedSuccessfully) {
+            doc.addPage();
+            doc.setFontSize(22);
+            doc.setTextColor(0, 128, 0);
+            doc.setFont("helvetica", "bold");
+            doc.text("ΣΥΓΧΑΡΗΤΗΡΙΑ!", 105, 50, { align: 'center' });
+            doc.setFontSize(16);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Ολοκλήρωσες το quiz με επιτυχία`, 105, 70, { align: 'center' });
+            doc.text(`σε ${attemptsData.length} ${isMode2 ? 'προσπάθεια(ες)' : 'γύρο(ους)'}!`, 105, 90, { align: 'center' });
+          }
+
+          doc.save('math_quiz_results.pdf');
+        } else {
+          throw new Error("jsPDF not loaded");
+        }
+      } catch (error) {
+        console.error("PDF generation error:", error);
+        alert("Παρουσιάστηκε σφάλμα κατά τη δημιουργία του PDF. Παρακαλώ δοκιμάστε ξανά ή ανανεώστε τη σελίδα.");
+      }
+    }
+
+    // Event listener for the toggle switch to update the text
+    quizModeToggle.addEventListener('change', function() {
+        if (this.checked) {
+            timeLimitInfo.textContent = "Χρονικό όριο ανά προσπάθεια: 15 λεπτά";
+        } else {
+            timeLimitInfo.textContent = "Χρονικό όριο ανά γύρο: 15 λεπτά";
+        }
+    });
+
+    // Ensure initial time limit text is correct
+    timeLimitInfo.textContent = `Χρονικό όριο ανά ${quizModeToggle.checked ? 'προσπάθεια' : 'γύρο'}: 15 λεπτά`;
+
+
+    document.getElementById("start").addEventListener("click", startQuiz);
+    document.getElementById("submit").addEventListener("click", checkAnswer);
+    document.getElementById("clear-choices").addEventListener("click", clearCurrentQuestionChoices);
+    document.getElementById("otherpage").addEventListener("click", function() {
+      window.location.href = 'index.html';
+    });
+    document.getElementById("download").addEventListener("click", generatePDF);
+
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && !document.getElementById("quiz").classList.contains("hidden") && !document.getElementById("submit").classList.contains("hidden")) {
+        e.preventDefault();
+        document.getElementById("submit").click();
+      }
+    });
+
+    // Initial state setup if needed (e.g., hide quiz elements on load)
+    document.getElementById("quiz").classList.add("hidden");
+    document.getElementById("timer").classList.add("hidden");
+    document.getElementById("submit").classList.add("hidden");
+    document.getElementById("result").classList.add("hidden");
+    document.getElementById("download").classList.add("hidden");
+
+  </script>
+</body>
+</html>

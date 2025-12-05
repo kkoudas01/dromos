@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ολοκληρωμένο Μαθηματικό Quiz</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .quiz-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-height: 80vh; /* Ύψος του quiz container */
+            overflow-y: auto; /* Ενεργοποίηση κάθετης κύλισης αν χρειάζεται */
+        }
+        .question-area {
+            margin-bottom: 30px; /* Αυξημένο κενό μεταξύ ερωτήσεων */
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .question-prompt {
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        /* Styles for fillBlank (button based) */
+        .sentence-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 5px; /* Μικρό κενό μεταξύ των τμημάτων της πρότασης */
+            margin: 15px 0; /* Κενό πάνω και κάτω από την πρόταση */
+            min-height: 30px; /* Ελάχιστο ύψος για να μην "πηδάει" η διάταξη */
+        }
+        .blank-space {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px 12px;
+            min-width: 50px; /* Ελάχιστο πλάτος για το κενό */
+            text-align: center;
+            font-weight: bold;
+            background-color: #f9f9f9;
+            display: inline-block; /* Για να σέβεται το padding και το margin */
+        }
+        .blank-space.filled {
+            background-color: #e0ffe0; /* Πράσινο φόντο όταν συμπληρωθεί */
+            border-color: #a0c0a0;
+        }
+        .options-container {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px; /* Κενό μεταξύ των κουμπιών επιλογής */
+        }
+        .option-button {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .option-button:hover {
+            background-color: #0056b3;
+        }
+        .option-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Styles for fillBlankKeyboard */
+        .keyboard-answer-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 15px 0;
+            flex-wrap: wrap; /* Επιτρέπει αναδίπλωση σε μικρές οθόνες */
+        }
+        .answer-input {
+            width: auto; /* Αυτόματο πλάτος βάσει περιεχομένου */
+            min-width: 60px; /* Ελάχιστο πλάτος */
+            max-width: 150px; /* Μέγιστο πλάτος */
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        /* Στυλ για το container της εικόνας της ερώτησης */
+        .question-image-container img { /* Διορθωμένος CSS selector */
+            display: block;
+            margin: 10px auto 15px auto; /* Κεντράρισμα και περιθώρια */
+            max-width: 80%; /* Μέγιστο πλάτος εικόνας */
+            max-height: 300px; /* Μέγιστο ύψος εικόνας */
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .clear-choices {
+            background-color: #ffc107; /* Κίτρινο χρώμα */
+            color: black;
+            padding: 8px 15px;
+            margin: 10px 0; /* Κενό πάνω/κάτω από το κουμπί */
+        }
+        .clear-choices:hover {
+            background-color: #e0a800;
+        }
+        
+        #submit-all {
+            background-color: #28a745; /* Πράσινο χρώμα */
+            color: white;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            margin: 20px auto; /* Κεντράρισμα */
+            display: block;
+        }
+        #submit-all:hover {
+            background-color: #218838;
+        }
+        
+        #timer {
+            font-size: 1.2em;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        .timeout {
+            color: red;
+        }
+        
+        /* Multiple choice styles */
+        .multiple-choice-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid */
+            gap: 10px 20px; /* row-gap column-gap */
+        }
+        .multiple-choice-options label {
+            cursor: pointer;
+            padding: 8px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            display: flex; /* Για καλύτερη στοίχιση του radio/checkbox με το κείμενο */
+            align-items: center;
+        }
+        .multiple-choice-options label:hover {
+            background-color: #f0f0f0;
+        }
+        .multiple-choice-options input[type="radio"],
+        .multiple-choice-options input[type="checkbox"] {
+            margin-right: 8px; /* Κενό μεταξύ radio/checkbox και κειμένου */
+        }
+
+        /* Intro screen styles */
+        #intro {
+            text-align: center;
+        }
+        #intro h1 {
+            color: #2c3e50; /* Σκούρο μπλε-γκρι */
+        }
+        #intro button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+        
+        /* Results screen */
+        #result {
+            padding: 20px;
+            background-color: #f8f9fa; /* Απαλό γκρι */
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        #download {
+            background-color: #17a2b8; /* Γαλάζιο */
+            color: white;
+            margin: 10px auto;
+            display: block;
+        }
+        #download:hover {
+            background-color: #138496;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .multiple-choice-options {
+                grid-template-columns: 1fr; /* Μία στήλη σε μικρές οθόνες */
+            }
+            .keyboard-answer-container {
+                flex-direction: column; /* Στοιχεία σε στήλη */
+                align-items: flex-start; /* Στοίχιση στην αρχή */
+            }
+            .answer-input {
+                width: 100%; /* Πλήρες πλάτος */
+                max-width: none; /* Κατάργηση μέγιστου πλάτους */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="intro">
+        <h1>Ολοκληρωμένο Μαθηματικό Quiz</h1>
+        <p>Απαντήστε σε όλες τις ερωτήσεις που εμφανίζονται σε μία σελίδα. Μπορείτε να μετακινηθείτε ανάμεσα στις ερωτήσεις με κύλιση.</p>
+        <p id="time-limit-info">Χρονικό όριο: 15 λεπτά</p>
+        <button id="start">Έναρξη Quiz</button>
+    </div>
+
+    <div id="quiz" class="hidden">
+        <div id="timer">Χρόνος: 15:00</div>
+        
+        <div id="all-questions-container" class="quiz-container">
+            </div>
+        
+        <button id="submit-all">Υποβολή Απαντήσεων</button>
+    </div>
+
+    <div id="result" class="hidden"></div>
+    <button id="download" class="hidden">Λήψη Αποτελεσμάτων (PDF)</button>
+
+    <script>
+        // Quiz data
+        const quizData = [
+           {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( ημ(-38^\\circ) \\approx\\) ",
+        suffix: "0,61566",
+        answer: "-"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε τη σχέση με την μικρότερη δυνατή γωνία θετικού μέτρου (σε μοίρες): ",
+        prefix: "\\( εφ( \\)",
+        suffix: "): δεν ορίζεται",
+        answer: "90"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( σφ(18^\\circ) \\approx\\)",
+        suffix: "3,07768",
+        answer: "+"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( ημ(157^\\circ) \\approx\\)",
+        suffix: "0,3907",
+        answer: "+"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( σφ(-70^\\circ) \\approx\\)",
+        suffix: "0.36397",
+        answer: "-"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( συν(220^\\circ) \\approx\\)",
+        suffix: "0.766",
+        answer: "-"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε την ισότητα: ",
+        prefix: "\\( εφ(180^\\circ) =\\)",
+        suffix: "",
+        answer: "0"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( σφ(193^\\circ) \\approx\\)",
+        suffix: "4,33148",
+        answer: "+"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε την ισότητα: ",
+        prefix: "\\( ημ(90^\\circ) =\\)",
+        suffix: "",
+        answer: "1"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( εφ(-25^\\circ) \\approx\\)",
+        suffix: "0,133526 ",
+        answer: "-"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε την ισότητα: ",
+        prefix: "\\( συν(0^\\circ) =\\)",
+        suffix: "",
+        answer: "1"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε την ισότητα: ",
+        prefix: "\\( ημ(270^\\circ) =\\)",
+        suffix: "",
+        answer: "-1"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε την ισότητα: ",
+        prefix: "\\( σφ(90^\\circ) =\\)",
+        suffix: "",
+        answer: "0"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( συν(32^\\circ) \\approx\\)",
+        suffix: "0,848048",
+        answer: "+"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( εφ(103^\\circ) \\approx\\)",
+        suffix: "4,33148 ",
+        answer: "-"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε την ισότητα: ",
+        prefix: "\\( ημ(0^\\circ) =\\)",
+        suffix: "",
+        answer: "0"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( εφ(19^\\circ) \\approx\\)",
+        suffix: "0,344328",
+        answer: "+"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε την ισότητα: ",
+        prefix: "\\( συν(270^\\circ) =\\)",
+        suffix: "",
+        answer: "0"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( σφ(300^\\circ) \\approx\\)",
+        suffix: "0,57735",
+        answer: "-"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε την ισότητα: ",
+        prefix: "\\( ημ(180^\\circ) =\\)",
+        suffix: "",
+        answer: "0"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( συν(125^\\circ) \\approx\\)",
+        suffix: "0,573576",
+        answer: "-"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε την ισότητα: ",
+        prefix: "\\( εφ(0^\\circ) =\\)",
+        suffix: "",
+        answer: "0"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( σφ(170^\\circ) \\approx\\)",
+        suffix: "5,67128",
+        answer: "-"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε την ισότητα: ",
+        prefix: "\\( συν(90^\\circ) =\\)",
+        suffix: "",
+        answer: "0"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε τη σχέση με μια γωνία μεταξύ των \\( 91^\\circ \\) και των των \\( 361^\\circ \\): ",
+        prefix: "\\( εφ( \\)",
+        suffix: "): δεν ορίζεται",
+        answer: "270"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( ημ(200^\\circ) \\approx\\)",
+        suffix: "0,34202",
+        answer: "-"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( συν(-50^\\circ) \\approx\\)",
+        suffix: "0,642788",
+        answer: "+"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( εφ(325^\\circ) \\approx\\)",
+        suffix: "0,700208",
+        answer: "-"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε τη σχέση με την μικρότερη δυνατή μη αρνητική γωνία (σε μοίρες): ",
+        prefix: "\\( σφ( \\)",
+        suffix: "): δεν ορίζεται",
+        answer: "0"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( ημ(19^\\circ) \\approx\\)",
+        suffix: "0,325568",
+        answer: "+"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε την ισότητα: ",
+        prefix: "\\( συν(180^\\circ) =\\)",
+        suffix: "",
+        answer: "-1"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( εφ(42^\\circ) \\approx\\)",
+        suffix: "0,900404",
+        answer: "+"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε την ισότητα: ",
+        prefix: "\\( σφ(270^\\circ) =\\)",
+        suffix: "",
+        answer: "0"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( ημ(310^\\circ) \\approx\\)",
+        suffix: "0,766044",
+        answer: "-"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( εφ(203^\\circ) \\approx\\)",
+        suffix: "0,424475",
+        answer: "+"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε τη σχέση με μια γωνία μεταξύ της \\( 1^\\circ \\) και των των \\( 359^\\circ \\): ",
+        prefix: "\\( σφ( \\)",
+        suffix: "): δεν ορίζεται",
+        answer: "180"
+      },
+      {
+        type: "fillBlankKeyboard",
+        question: "Συμπλήρωσε «+» ή «-»: ",
+        prefix: "\\( συν(319^\\circ) \\approx\\)",
+        suffix: "0,75471",
+        answer: "+"
+      }
+        ];
+
+        const TIME_LIMIT = 900; // 15 λεπτά σε δευτερόλεπτα
+        let startTime;
+        let timerInterval;
+        let timeLimitExceeded = false;
+
+        // User answers storage
+        const userAnswers = {
+            multipleChoice: [],
+            fillBlank: [],
+            fillBlankKeyboard: [],
+            multipleChoiceMultSelect: []
+        };
+
+        document.getElementById("start").addEventListener("click", startQuiz);
+        document.getElementById("submit-all").addEventListener("click", checkAllAnswers);
+
+        function startQuiz() {
+            document.getElementById("intro").classList.add("hidden");
+            document.getElementById("quiz").classList.remove("hidden");
+            document.getElementById("result").classList.add("hidden");
+            document.getElementById("download").classList.add("hidden");
+
+            // Initialize timer
+            startTime = new Date();
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+
+            // Load all questions
+            loadAllQuestions();
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const elapsed = Math.floor((now - startTime) / 1000);
+            const remaining = TIME_LIMIT - elapsed;
+
+            const minutes = Math.floor(remaining / 60).toString().padStart(2, "0");
+            const seconds = (remaining % 60).toString().padStart(2, "0");
+
+            const timerElement = document.getElementById("timer");
+            timerElement.textContent = `Χρόνος: ${minutes}:${seconds}`;
+
+            if (remaining <= 0 && !timeLimitExceeded) {
+                timeLimitExceeded = true;
+                timerElement.classList.add("timeout");
+                checkAllAnswers(); // Auto-submit when time runs out
+            }
+        }
+
+        function loadAllQuestions() {
+            const container = document.getElementById("all-questions-container");
+            container.innerHTML = ""; // Καθαρισμός προηγούμενων ερωτήσεων
+
+            quizData.forEach((question, index) => {
+                const questionDiv = document.createElement("div");
+                questionDiv.className = "question-area";
+                questionDiv.id = `question-${index}`;
+                
+                const promptDiv = document.createElement("div");
+                promptDiv.className = "question-prompt";
+                promptDiv.innerHTML = `<strong>Ερώτηση ${index + 1}:</strong> ${question.question || question.questionPrompt}`;
+                questionDiv.appendChild(promptDiv);
+
+                // Add image if imageURL exists for the question
+                if (question.imageURL) {
+                    const imgContainer = document.createElement("div");
+                    imgContainer.className = "question-image-container";
+                    
+                    const imgElement = document.createElement("img");
+                    imgElement.src = question.imageURL;
+                    imgElement.alt = `Εικόνα για την ερώτηση ${index + 1}`;
+                    // Fallback image in case of error
+                    imgElement.onerror = function() {
+                        this.onerror=null; // Prevent infinite loop if placeholder also fails
+                        this.src='https://placehold.co/200x100/f87171/ffffff?text=Error+Loading+Image';
+                        this.alt = 'Σφάλμα φόρτωσης εικόνας';
+                    };
+                    
+                    imgContainer.appendChild(imgElement);
+                    questionDiv.appendChild(imgContainer);
+                } else if (question.image) { 
+                    // Existing logic for question.image (if it's a full HTML string)
+                    // This might be relevant if other question types use 'image' property differently
+                    const imgContainer = document.createElement("div");
+                    imgContainer.className = "question-image-container";
+                    imgContainer.innerHTML = question.image; 
+                    questionDiv.appendChild(imgContainer);
+                }
+
+
+                const contentDiv = document.createElement("div");
+                contentDiv.className = "question-content";
+                
+                // Load question based on type
+                switch(question.type) {
+                    case "multipleChoice":
+                        loadMultipleChoiceQuestion(contentDiv, question, index);
+                        break;
+                    case "fillBlank":
+                        loadFillBlankQuestion(contentDiv, question, index);
+                        break;
+                    case "fillBlankKeyboard":
+                        loadFillBlankKeyboardQuestion(contentDiv, question, index);
+                        break;
+                    case "multipleChoiceMultSelect":
+                        loadMultipleChoiceMultSelectQuestion(contentDiv, question, index);
+                        break;
+                }
+
+                questionDiv.appendChild(contentDiv);
+                
+                // Add clear button for relevant question types
+                if (question.type === "fillBlank" || question.type === "multipleChoiceMultSelect" || question.type === "fillBlankKeyboard") {
+                    const clearBtn = document.createElement("button");
+                    clearBtn.className = "clear-choices option-button"; // Added option-button for consistent styling
+                    clearBtn.textContent = "Εκκαθάριση Επιλογών";
+                    clearBtn.onclick = () => clearQuestionChoices(index, question.type);
+                    // Add some margin to the clear button
+                    clearBtn.style.marginTop = "10px"; 
+                    clearBtn.style.backgroundColor = "#ffc107"; // Yellow color for clear
+                    clearBtn.style.color = "black";
+                    questionDiv.appendChild(clearBtn);
+                }
+
+                container.appendChild(questionDiv);
+            });
+
+            // Render math expressions
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function loadMultipleChoiceQuestion(container, question, index) {
+            const optionsDiv = document.createElement("div");
+            optionsDiv.className = "multiple-choice-options";
+
+            question.options.forEach((option, optIndex) => {
+                const label = document.createElement("label");
+                const radio = document.createElement("input");
+                radio.type = "radio";
+                radio.name = `question-${index}`;
+                radio.value = optIndex;
+                radio.onchange = () => {
+                    userAnswers.multipleChoice[index] = optIndex;
+                };
+
+                label.appendChild(radio);
+                // Check if option contains an image tag
+                if (option.includes("<img")) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = option;
+                    const img = tempDiv.querySelector('img');
+                    if (img) {
+                        img.onerror = function() {
+                            this.onerror=null;
+                            this.src='https://placehold.co/100x80/f87171/ffffff?text=Error';
+                            this.alt = 'Σφάλμα εικόνας επιλογής';
+                        };
+                    }
+                    label.insertAdjacentHTML('beforeend', tempDiv.innerHTML);
+                } else {
+                    label.insertAdjacentHTML('beforeend', option);
+                }
+                optionsDiv.appendChild(label);
+            });
+
+            container.appendChild(optionsDiv);
+        }
+
+        function loadFillBlankQuestion(container, question, index) {
+            userAnswers.fillBlank[index] = Array(question.correctAnswers.length).fill(null);
+            
+            const sentenceContainer = document.createElement("div");
+            sentenceContainer.className = "sentence-container";
+
+            let blankIndex = 0;
+            question.sentenceTemplate.forEach(part => {
+                if (part === null) {
+                    const blankSpan = document.createElement("span");
+                    blankSpan.className = "blank-space";
+                    blankSpan.dataset.index = blankIndex;
+                    blankSpan.textContent = "___";
+                    sentenceContainer.appendChild(blankSpan);
+                    blankIndex++;
+                } else {
+                    const partSpan = document.createElement("span");
+                    partSpan.innerHTML = part; // Use innerHTML to render MathJax etc.
+                    sentenceContainer.appendChild(partSpan);
+                }
+            });
+
+            const optionsContainer = document.createElement("div");
+            optionsContainer.className = "options-container";
+
+            question.options.forEach(option => {
+                const button = document.createElement("button");
+                button.className = "option-button";
+                button.innerHTML = option; // Use innerHTML for MathJax
+                button.onclick = () => {
+                    const nextBlank = sentenceContainer.querySelector(`.blank-space:not(.filled)`);
+                    if (nextBlank) {
+                        const blankIdx = parseInt(nextBlank.dataset.index);
+                        nextBlank.innerHTML = option; // Use innerHTML for MathJax
+                        nextBlank.classList.add("filled");
+                        userAnswers.fillBlank[index][blankIdx] = option;
+                        button.disabled = true;
+                    }
+                };
+                optionsContainer.appendChild(button);
+            });
+
+            container.appendChild(sentenceContainer);
+            container.appendChild(optionsContainer);
+        }
+
+        function loadFillBlankKeyboardQuestion(container, question, index) {
+            const answerContainer = document.createElement("div");
+            answerContainer.className = "keyboard-answer-container";
+
+            if (question.prefix) {
+                const prefixSpan = document.createElement("span");
+                prefixSpan.innerHTML = question.prefix; // Use innerHTML for MathJax
+                answerContainer.appendChild(prefixSpan);
+            }
+
+            const input = document.createElement("input");
+            input.type = "text";
+            input.className = "answer-input";
+            input.placeholder = "...";
+            input.oninput = () => {
+                userAnswers.fillBlankKeyboard[index] = input.value.trim();
+            };
+            answerContainer.appendChild(input);
+
+            if (question.suffix) {
+                const suffixSpan = document.createElement("span");
+                suffixSpan.innerHTML = question.suffix; // Use innerHTML for MathJax
+                answerContainer.appendChild(suffixSpan);
+            }
+
+            container.appendChild(answerContainer);
+        }
+
+        function loadMultipleChoiceMultSelectQuestion(container, question, index) {
+            userAnswers.multipleChoiceMultSelect[index] = [];
+            
+            const optionsDiv = document.createElement("div");
+            optionsDiv.className = "multiple-choice-options";
+
+            question.options.forEach((option, optIndex) => {
+                const label = document.createElement("label");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.value = optIndex;
+                checkbox.onchange = () => {
+                    if (checkbox.checked) {
+                        if (!userAnswers.multipleChoiceMultSelect[index].includes(optIndex)) {
+                            userAnswers.multipleChoiceMultSelect[index].push(optIndex);
+                        }
+                    } else {
+                        userAnswers.multipleChoiceMultSelect[index] = 
+                            userAnswers.multipleChoiceMultSelect[index].filter(i => i !== optIndex);
+                    }
+                };
+
+                label.appendChild(checkbox);
+                label.insertAdjacentHTML('beforeend', option); // Use innerHTML for MathJax
+                optionsDiv.appendChild(label);
+            });
+
+            container.appendChild(optionsDiv);
+        }
+
+        function clearQuestionChoices(index, type) {
+            const questionElement = document.getElementById(`question-${index}`);
+            if (!questionElement) return;
+
+            switch(type) {
+                case "fillBlank":
+                    userAnswers.fillBlank[index] = Array(quizData[index].correctAnswers.length).fill(null);
+                    questionElement.querySelectorAll(".blank-space").forEach(blank => {
+                        blank.textContent = "___"; // Reset text content
+                        blank.classList.remove("filled");
+                    });
+                    questionElement.querySelectorAll(".option-button").forEach(btn => {
+                        btn.disabled = false;
+                    });
+                    break;
+                    
+                case "fillBlankKeyboard":
+                    userAnswers.fillBlankKeyboard[index] = "";
+                    const input = questionElement.querySelector(".answer-input");
+                    if (input) input.value = "";
+                    break;
+                    
+                case "multipleChoiceMultSelect":
+                    userAnswers.multipleChoiceMultSelect[index] = [];
+                    questionElement.querySelectorAll("input[type=checkbox]").forEach(cb => {
+                        cb.checked = false;
+                    });
+                    break;
+            }
+             if (window.MathJax) { // Re-render MathJax if necessary, e.g. if blanks contained math
+                MathJax.typesetPromise([questionElement]);
+            }
+        }
+
+        function checkAllAnswers() {
+            clearInterval(timerInterval);
+            
+            // Calculate score
+            let score = 0;
+            const results = quizData.map((question, index) => {
+                let isCorrect = false;
+                
+                switch(question.type) {
+                    case "multipleChoice":
+                        isCorrect = userAnswers.multipleChoice[index] === question.correctIndex;
+                        break;
+                        
+                    case "fillBlank":
+                        const fillBlankAnswers = userAnswers.fillBlank[index] || [];
+                        isCorrect = question.correctAnswers && fillBlankAnswers.length === question.correctAnswers.length && 
+                                    fillBlankAnswers.every((ans, i) => ans === question.correctAnswers[i]);
+                        break;
+                        
+                    case "fillBlankKeyboard":
+                        isCorrect = (userAnswers.fillBlankKeyboard[index] || "").toLowerCase() === (question.answer || "").toLowerCase();
+                        break;
+                        
+                    case "multipleChoiceMultSelect":
+                        const userSelections = userAnswers.multipleChoiceMultSelect[index] || [];
+                        const correctSelections = question.correctIndices || [];
+                        // Sort arrays before comparison to ensure order doesn't matter for correctness
+                        isCorrect = userSelections.length === correctSelections.length && 
+                                    userSelections.sort().every((val, idx) => val === correctSelections.sort()[idx]);
+                        break;
+                }
+                
+                if (isCorrect) score++;
+                return {
+                    question: question.question || question.questionPrompt,
+                    isCorrect,
+                    userAnswer: getUserAnswerDisplay(question, index),
+                    correctAnswer: getCorrectAnswerDisplay(question)
+                };
+            });
+
+            showResults(score, results);
+        }
+
+        function getUserAnswerDisplay(question, index) {
+            const type = question.type;
+            const answer = userAnswers[type] ? userAnswers[type][index] : undefined;
+
+            if (answer === undefined || answer === null || (Array.isArray(answer) && answer.length === 0)) return "Δεν δόθηκε απάντηση";
+            
+            switch(type) {
+                case "multipleChoice":
+                    return question.options[answer] || "Άκυρη επιλογή";
+                case "fillBlank":
+                    return Array.isArray(answer) ? answer.map(a => a || " ").join(", ") : "Κενά απαντήσεων";
+                case "fillBlankKeyboard":
+                    return answer || "Κενό";
+                case "multipleChoiceMultSelect":
+                    return Array.isArray(answer) ? (answer.map(optIdx => question.options[optIdx]).join(", ") || "Καμία επιλογή") : "Καμία επιλογή";
+                default:
+                    return "Άγνωστη μορφή απάντησης";
+            }
+        }
+
+        function getCorrectAnswerDisplay(question) {
+            switch(question.type) {
+                case "multipleChoice":
+                    return question.options[question.correctIndex];
+                case "fillBlank":
+                    return question.correctAnswers.join(", ");
+                case "fillBlankKeyboard":
+                    return question.answer;
+                case "multipleChoiceMultSelect":
+                    return question.correctIndices.map(idx => question.options[idx]).join(", ");
+                default:
+                    return "Άγνωστη σωστή απάντηση";
+            }
+        }
+
+        function showResults(score, results) {
+            const percentage = quizData.length > 0 ? ((score / quizData.length) * 100).toFixed(2) : 0;
+            const now = new Date();
+            const elapsed = startTime ? Math.floor((now - startTime) / 1000) : 0;
+            
+            document.getElementById("quiz").classList.add("hidden");
+            const resultDiv = document.getElementById("result");
+            resultDiv.classList.remove("hidden");
+            document.getElementById("download").classList.remove("hidden");
+            
+            let resultsHTML = `
+                <h2>Αποτελέσματα Quiz</h2>
+                <p><strong>Συνολική βαθμολογία:</strong> ${score} / ${quizData.length} (${percentage}%)</p>
+                <p><strong>Χρόνος:</strong> ${formatTime(elapsed)}${timeLimitExceeded ? " (Έληξε το χρονικό όριο)" : ""}</p>
+                <h3>Αναλυτικά αποτελέσματα:</h3>
+                <ol>
+            `;
+            
+            results.forEach((result, index) => {
+                resultsHTML += `
+                    <li>
+                        <p><strong>Ερώτηση ${index + 1}: ${result.question}</strong></p>
+                        <p>Δική σας απάντηση: ${result.userAnswer}</p>
+                        <p>Σωστή απάντηση: ${result.correctAnswer}</p>
+                        <p>Κατάσταση: ${result.isCorrect ? '<span style="color:green">Σωστό</span>' : '<span style="color:red">Λάθος</span>'}</p>
+                    </li>
+                `;
+            });
+            
+            resultsHTML += `</ol>`;
+            resultDiv.innerHTML = resultsHTML;
+             if (window.MathJax) { // Re-render MathJax for results
+                MathJax.typesetPromise([resultDiv]);
+            }
+            
+            // Save data for PDF
+            window.quizResultsForPDF = {
+                score,
+                total: quizData.length,
+                percentage,
+                time: elapsed,
+                timeLimitExceeded,
+                results
+            };
+        }
+
+        function formatTime(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
+            const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+            return `${minutes}:${seconds}`;
+        }
+
+        // PDF generation
+        document.getElementById("download").addEventListener("click", generatePDF);
+
+        function generatePDF() {
+            try {
+                if (typeof window.jspdf !== 'undefined' && window.quizResultsForPDF) {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    
+                    // Add Greek font (ensure the font file is available or use a standard one)
+                    // For simplicity, we'll rely on jsPDF's default fonts which might have limited Greek support.
+                    // For full Greek support, you'd typically embed a font like 'Noto Sans'
+                    // doc.addFont('NotoSans-Regular.ttf', 'NotoSans', 'normal');
+                    // doc.setFont('NotoSans');
+
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(18);
+                    doc.text("Αποτελέσματα Μαθηματικού Quiz", 105, 15, { align: 'center' });
+                    
+                    doc.setFontSize(12);
+                    doc.setFont("helvetica", "normal");
+                    const now = new Date();
+                    doc.text(`Ημερομηνία: ${now.toLocaleString('el-GR', { dateStyle: 'full', timeStyle: 'medium' })}`, 105, 25, { align: 'center' });
+                    
+                    doc.setFontSize(14);
+                    doc.text(`Συνολική βαθμολογία: ${window.quizResultsForPDF.score} / ${window.quizResultsForPDF.total} (${window.quizResultsForPDF.percentage}%)`, 14, 40);
+                    doc.text(`Χρόνος: ${formatTime(window.quizResultsForPDF.time)}${window.quizResultsForPDF.timeLimitExceeded ? " (Έληξε το χρονικό όριο)" : ""}`, 14, 50);
+                    
+                    let yPos = 65;
+                    const lineHeight = 7;
+                    const pageHeight = doc.internal.pageSize.height;
+                    const margin = 14;
+
+                    window.quizResultsForPDF.results.forEach((result, index) => {
+                        if (yPos + 4 * lineHeight > pageHeight - margin) { // Check if space for next entry
+                            doc.addPage();
+                            yPos = margin;
+                        }
+                        
+                        doc.setFontSize(12);
+                        doc.setFont("helvetica", "bold");
+                        // Split long question text
+                        const questionText = `Ερώτηση ${index + 1}: ${result.question}`;
+                        const questionLines = doc.splitTextToSize(questionText, doc.internal.pageSize.width - 2 * margin);
+                        doc.text(questionLines, margin, yPos);
+                        yPos += questionLines.length * lineHeight;
+                        
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(10);
+
+                        const userAnswerText = `Δική σας απάντηση: ${result.userAnswer}`;
+                        const userAnswerLines = doc.splitTextToSize(userAnswerText, doc.internal.pageSize.width - 2 * margin - 5);
+                        doc.text(userAnswerLines, margin + 5, yPos);
+                        yPos += userAnswerLines.length * lineHeight;
+
+                        const correctAnswerText = `Σωστή απάντηση: ${result.correctAnswer}`;
+                        const correctAnswerLines = doc.splitTextToSize(correctAnswerText, doc.internal.pageSize.width - 2 * margin - 5);
+                        doc.text(correctAnswerLines, margin + 5, yPos);
+                        yPos += correctAnswerLines.length * lineHeight;
+                        
+                        doc.text(`Κατάσταση: ${result.isCorrect ? 'Σωστό' : 'Λάθος'}`, margin + 5, yPos);
+                        yPos += lineHeight + 5; // Extra space between questions
+                    });
+                    
+                    doc.save('math_quiz_results.pdf');
+                } else {
+                    let errorMsg = "jsPDF not loaded or no results to download.";
+                    if (!window.jspdf) errorMsg = "Η βιβλιοθήκη jsPDF δεν έχει φορτωθεί.";
+                    else if (!window.quizResultsForPDF) errorMsg = "Δεν υπάρχουν αποτελέσματα για λήψη.";
+                    console.error("PDF generation error:", errorMsg);
+                    // Replace alert with a custom message box if you have one
+                    // For now, using alert as a fallback
+                    if (typeof showCustomAlert === 'function') { // Assuming you might have a custom alert
+                        showCustomAlert(errorMsg);
+                    } else {
+                        alert(errorMsg);
+                    }
+                }
+            } catch (error) {
+                console.error("PDF generation error:", error);
+                 if (typeof showCustomAlert === 'function') {
+                    showCustomAlert("Προέκυψε σφάλμα κατά τη δημιουργία του PDF. Παρακαλώ δοκιμάστε ξανά.");
+                } else {
+                    alert("Προέκυψε σφάλμα κατά τη δημιουργία του PDF. Παρακαλώ δοκιμάστε ξανά.");
+                }
+            }
+        }
+    </script>
+</body>
+</html>

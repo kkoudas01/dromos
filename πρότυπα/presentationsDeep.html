@@ -1,0 +1,462 @@
+<!-- 
+(1)
+totalSlides = 48;: Εδώ ορίζετε απλώς τον συνολικό αριθμό των διαφανειών. Αν έχετε 100 διαφάνειες, απλά αλλάζετε τον αριθμό σε 100.
+(2) 
+slideComments = { ... };: Αυτό το τμήμα είναι προαιρετικό. 
+Σας επιτρέπει να ορίσετε σχόλια για συγκεκριμένες διαφάνειες. Για παράδειγμα, το 1: '...' ορίζει ένα σχόλιο για την πρώτη διαφάνεια. 
+Αν για κάποια διαφάνεια δεν ορίσετε σχόλιο, ο κώδικας θα εμφανίσει αυτόματα το όνομά της (π.χ., "Διαφάνεια 2"). 
+(3) 
+const presentationFolder = 'MyPresentation'; Φάκελος με διαφάνειες
+-->
+
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Εκπαιδευτική Παρουσίαση</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Roboto + Open Sans: πιο μοντέρνα και ευανάγνωστα -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- Modern Dark Theme for Teens --- */
+        :root {
+            --primary-color: #6a8fd8; /* φιλικό μπλε */
+            --secondary-color: #a37cf0; /* ζωντανό ιώδες */
+            --background-color: #0f0f13; /* βαθύ σκούρο */
+            --surface-color: #1e1e2a; /* μοντέρνο σκούρο */
+            --text-color: #e0e0e8; /* απαλό λευκό */
+            --header-color: #ffffff;
+            --highlight-color: #6a8fd8;
+            --shadow-color: rgba(106, 143, 216, 0.3);
+            --card-bg: #252536;
+            --card-hover: #2e2e45;
+        }
+
+        body {
+            font-family: 'Roboto', 'Open Sans', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            font-size: 1.05em;
+            background-image: 
+                radial-gradient(circle at 10% 20%, #1e1e2a 0%, #0f0f13 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 25px;
+        }
+
+        /* --- Κουμπί Επιστροφής --- */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            border: none;
+            font-size: 1em;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px var(--shadow-color);
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        }
+
+        .back-button::before {
+            content: "←";
+            margin-right: 8px;
+            font-size: 1.1em;
+        }
+
+        /* --- Εισαγωγικό Κείμενο --- */
+        .intro-paragraph {
+            background-color: var(--surface-color);
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 6px solid var(--primary-color);
+            margin-bottom: 40px;
+            font-size: 1.1em;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            line-height: 1.7;
+        }
+
+        .intro-paragraph strong {
+            color: var(--highlight-color);
+            font-weight: 600;
+        }
+
+        /* --- Γκαλερί Εικόνων --- */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 25px;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px var(--shadow-color);
+            background-color: var(--card-hover);
+            border-color: rgba(106, 143, 216, 0.3);
+        }
+
+        .gallery-item::after {
+            content: attr(data-title);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            color: white;
+            padding: 15px 10px 10px;
+            font-size: 0.95em;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover::after {
+            opacity: 1;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        /* --- Lightbox Modal --- */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 15, 20, 0.95);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .lightbox.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeInZoom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none; /* Απενεργοποίηση κλικ στο περιεχόμενο */
+        }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            object-fit: contain;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: auto; /* Ενεργοποίηση κλικ στην εικόνα */
+        }
+
+        @keyframes fadeInZoom {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* --- Κουμπιά Lightbox --- */
+        .lightbox-close, .lightbox-prev, .lightbox-next {
+            position: absolute;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            z-index: 1001;
+            background-color: rgba(30, 30, 42, 0.7);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            pointer-events: auto; /* Ενεργοποίηση κλικ στα κουμπιά */
+        }
+
+        .lightbox-close {
+            top: 25px;
+            right: 25px;
+            font-size: 35px;
+        }
+
+        .lightbox-prev, .lightbox-next {
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 5px;
+        }
+
+        .lightbox-prev:hover, .lightbox-next:hover, .lightbox-close:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .lightbox-close:hover {
+            transform: scale(1.1);
+        }
+
+        .lightbox-prev {
+            left: 25px;
+        }
+
+        .lightbox-next {
+            right: 25px;
+        }
+
+        .lightbox-caption {
+            color: white;
+            background: rgba(40, 40, 55, 0.8);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            text-align: center;
+            margin-top: 15px;
+            max-width: 80%;
+            line-height: 1.5;
+            pointer-events: auto; /* Ενεργοποίηση κλικ στο caption */
+        }
+
+        /* --- Υπογραφή --- */
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 25px;
+            color: rgba(200, 200, 220, 0.6);
+            font-size: 0.95em;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 15px;
+            }
+            
+            .intro-paragraph {
+                padding: 20px;
+                font-size: 1em;
+            }
+            
+            .lightbox-close, .lightbox-prev, .lightbox-next {
+                width: 40px;
+                height: 40px;
+                font-size: 30px;
+            }
+            
+            .lightbox-close {
+                top: 15px;
+                right: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <a href="index.html" class="back-button">Επιστροφή</a>
+
+        <p class="intro-paragraph">
+            <strong>Καλώς ήρθατε!</strong> Εδώ θα βρείτε όλο το εκπαιδευτικό υλικό του μαθήματος. Κάντε κλικ σε οποιαδήποτε εικόνα για να την δείτε σε πλήρη ανάλυση και να εξερευνήσετε το περιεχόμενό της. Χρησιμοποιήστε τα βέλη για να περιηγηθείτε μεταξύ των διαφανειών.
+        </p>
+        
+        <!-- Η γκαλερί θα δημιουργηθεί αυτόματα εδώ από την JavaScript -->
+        <div class="gallery-grid"></div>
+
+    </div>
+
+    <footer>
+        Δημιουργήθηκε για την εκπαιδευτική σας εμπειρία &copy; 2023
+    </footer>
+
+    <div id="lightbox" class="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <a class="lightbox-prev">&#10094;</a>
+        <a class="lightbox-next">&#10095;</a>
+        <div class="lightbox-content">
+            <img id="lightbox-img">
+            <div id="lightbox-caption" class="lightbox-caption"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- ΡΥΘΜΙΣΕΙΣ ΠΑΡΟΥΣΙΑΣΗΣ ---
+        const presentationFolder = 'functionsIntro';
+        
+        // 1. Ορίστε τον ΣΥΝΟΛΙΚΟ ΑΡΙΘΜΟ των διαφανειών σας εδώ.
+        const totalSlides = 7; 
+
+        // 2. (Προαιρετικά) Προσθέστε σχόλια για ΣΥΓΚΕΚΡΙΜΕΝΕΣ διαφάνειες.
+        // Αν μια διαφάνεια δεν έχει σχόλιο εδώ, θα εμφανιστεί το όνομα του αρχείου.
+        const slideComments = {
+            1: 'Εισαγωγή - Τι θα μάθουμε σήμερα;',
+            3: 'Βασικές αρχές και θεωρία',
+            5: 'Πρακτικά παραδείγματα και εφαρμογές',
+            // Προσθέστε κι άλλα σχόλια εδώ, π.χ.:
+            // 48: 'Τελική διαφάνεια - Συμπεράσματα'
+        };
+
+        // --- ΑΥΤΟΜΑΤΗ ΔΗΜΙΟΥΡΓΙΑ ΛΙΣΤΑΣ ΔΙΑΦΑΝΕΙΩΝ ---
+        const slides = [];
+        for (let i = 1; i <= totalSlides; i++) {
+            slides.push({
+                file: `Διαφάνεια${i}.PNG`,
+                comment: slideComments[i] || `Διαφάνεια ${i}` // Παίρνει το προσαρμοσμένο σχόλιο ή το αφήνει κενό.
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const galleryGrid = document.querySelector('.gallery-grid');
+
+            // --- ΑΥΤΟΜΑΤΗ ΔΗΜΙΟΥΡΓΙΑ ΓΚΑΛΕΡΙ ---
+            slides.forEach((slide, index) => {
+                const slideNumber = index + 1;
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                galleryItem.dataset.title = `Διαφάνεια ${slideNumber}`;
+
+                const img = document.createElement('img');
+                img.src = `${presentationFolder}/${slide.file}`;
+                img.alt = `Διαφάνεια ${slideNumber}`;
+                
+                // Ορίζουμε το σχόλιο
+                img.dataset.comment = slide.comment;
+
+                // Χειρισμός σφάλματος αν η εικόνα δεν βρεθεί
+                img.onerror = function() {
+                    this.onerror = null;
+                    this.src = `https://placehold.co/400x300/1e1e2a/e0e0e8?text=Διαφάνεια+${slideNumber}`;
+                };
+                
+                galleryItem.appendChild(img);
+                galleryGrid.appendChild(galleryItem);
+            });
+
+            // --- ΛΟΓΙΚΗ LIGHTBOX ---
+            const galleryImages = document.querySelectorAll('.gallery-item img');
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxCaption = document.getElementById('lightbox-caption');
+            const closeBtn = document.querySelector('.lightbox-close');
+            const prevBtn = document.querySelector('.lightbox-prev');
+            const nextBtn = document.querySelector('.lightbox-next');
+
+            let currentImageIndex = 0;
+
+            function showLightbox() {
+                lightbox.classList.add('show');
+                document.body.style.overflow = 'hidden'; // Απενεργοποίηση scroll
+                document.addEventListener('keydown', handleKeyPress);
+            }
+
+            function hideLightbox() {
+                lightbox.classList.remove('show');
+                document.body.style.overflow = ''; // Επαναφορά scroll
+                document.removeEventListener('keydown', handleKeyPress);
+            }
+
+            function updateImage(index) {
+                if (index < 0 || index >= galleryImages.length) return;
+
+                const imgElement = galleryImages[index];
+                lightboxImg.src = imgElement.src;
+                lightboxCaption.textContent = imgElement.dataset.comment; 
+                currentImageIndex = index;
+
+                // Εμφάνιση/απόκρυψη βελών ανάλογα με τη θέση
+                prevBtn.style.display = index === 0 ? 'none' : 'flex';
+                nextBtn.style.display = index === galleryImages.length - 1 ? 'none' : 'flex';
+            }
+
+            galleryImages.forEach((img, index) => {
+                img.addEventListener('click', () => {
+                    updateImage(index);
+                    showLightbox();
+                });
+            });
+
+            // Μόνο το κουμπί X κλείνει το lightbox
+            closeBtn.addEventListener('click', hideLightbox);
+            
+            // Χειρισμός βελών πλοήγησης
+            prevBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                updateImage(currentImageIndex - 1);
+            });
+            
+            nextBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                updateImage(currentImageIndex + 1);
+            });
+
+            function handleKeyPress(e) {
+                if (e.key === 'Escape') hideLightbox();
+                if (e.key === 'ArrowLeft' && currentImageIndex > 0) {
+                    updateImage(currentImageIndex - 1);
+                }
+                if (e.key === 'ArrowRight' && currentImageIndex < galleryImages.length - 1) {
+                    updateImage(currentImageIndex + 1);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

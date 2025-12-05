@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Τριγωνομετρικοί αριθμοί κυρτών γωνιών</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .quiz-container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .question {
+      margin-bottom: 20px;
+    }
+    .options label {
+      display: block;
+      margin: 10px 0;
+      cursor: pointer;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    #timer, #result {
+      font-size: 1.2em;
+      margin: 10px 0;
+    }
+    .hidden {
+      display: none;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div id="intro">
+      <h1>Τριγωνομετρικοί αριθμοί κυρτών γωνιών</h1>
+      <p>Το quiz αυτό αφορά τους τριγωνομετρικούς αριθμούς των κυρτών γωνιών \( 0^o \) έως \(180^ο\). 
+        Κάθε λάθος που κάνεις, σε καταδικάζει να κάνεις το quiz από την αρχή, οπότε να είσαι προσεκτικός.</p>
+      <button id="start">Ξεκίνα το Κουίζ</button>
+      <button id="otherpage">Πήγαινε πίσω στην τάξη σου</button>
+    </div>
+    <div id="timer" class="hidden">Time: 00:00</div>
+    <div id="quiz" class="hidden"></div>
+    <button id="submit" class="hidden">Submit</button>
+    <div id="result" class="hidden"></div>
+    <button id="download" class="hidden">Download Results</button>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        question: "Με τι σούται το \\( συν(30^o) \\);",
+        options: ["\\(\\frac{1}{2}\\)", "\\(\\frac{\\sqrt{2}}{2}\\)", "\\(\\frac{\\sqrt{3}}{2}\\)",
+        "\\(\\frac{\\sqrt{3}}{3}\\)", "\\(\\frac{3}{2}\\)"],
+        correct: "\\(\\frac{\\sqrt{3}}{2}\\)"
+      },
+      {
+        question: "Με τι σούται το \\( ημ(45^o) \\);",
+        options: ["\\(\\frac{1}{2}\\)", "\\(\\frac{\\sqrt{2}}{2}\\)", "\\(\\frac{\\sqrt{3}}{2}\\)",
+        "\\(\\frac{\\sqrt{3}}{3}\\)", "\\(\\frac{3}{2}\\)"],
+        correct: "\\(\\frac{\\sqrt{2}}{2}\\)"
+      },
+      {
+        question: "Με τι σούται η \\( εφ(60^o) \\);",
+        options: ["\\(\\sqrt{3}\\)", "\\(\\frac{\\sqrt{2}}{2}\\)", "\\(\\frac{\\sqrt{3}}{2}\\)",
+        "\\(\\frac{\\sqrt{3}}{3}\\)", "\\(\\frac{3}{2}\\)"],
+        correct: "\\(\\sqrt{3}\\)"
+      },
+      {
+        question: "Με τι σούται το \\( συν(90^o) \\);",
+        options: ["\\(\\frac{1}{2}\\)", "\\(1\\)", "\\(-1\\)",
+        "\\(0\\)", "Δεν ορίζεται"],
+        correct: "\\(0\\)"
+      },
+      {
+        question: "Με τι σούται το \\( ημ(180^o) \\);",
+        options: ["\\(-1\\)", "\\(1\\)", "\\(\\frac{\\sqrt{3}}{2}\\)",
+        "\\(0\\)", "Δεν ορίζεται"],
+        correct: "\\(0\\)"
+      },
+      {
+        question: "Με τι σούται η \\( εφ(0^o) \\);",
+        options: ["\\(\\sqrt{3}\\)", "\\(1\\)", "\\(-1\\)",
+        "\\(0\\)", "Δεν ορίζεται"],
+        correct: "\\(0\\)"
+      },
+      {
+        question: "Με τι σούται το \\( συν(45^o) \\);",
+        options: ["\\(\\frac{1}{2}\\)", "\\(\\frac{\\sqrt{2}}{2}\\)", "\\(\\frac{\\sqrt{3}}{2}\\)",
+        "\\(\\frac{\\sqrt{3}}{3}\\)", "\\(\\frac{3}{2}\\)"],
+        correct: "\\(\\frac{\\sqrt{2}}{2}\\)"
+      },
+      {
+        question: "Με τι σούται το \\( ημ(60^o) \\);",
+        options: ["\\(\\frac{1}{2}\\)", "\\(\\frac{\\sqrt{2}}{2}\\)", "\\(\\frac{\\sqrt{3}}{2}\\)",
+        "\\(\\frac{\\sqrt{3}}{3}\\)", "\\(\\frac{3}{2}\\)"],
+        correct: "\\(\\frac{\\sqrt{3}}{2}\\)"
+      },
+      {
+        question: "Με τι σούται η \\( εφ(90^o) \\);",
+        options: ["\\(\\sqrt{3}\\)", "\\(1\\)", "\\(-1\\)",
+        "\\(\\frac{\\sqrt{3}}{3}\\)", "Δεν ορίζεται"],
+        correct: "Δεν ορίζεται"
+      },
+      {
+        question: "Με τι σούται το \\( συν(180^o) \\);",
+        options: ["\\(-1\\)", "\\(\\frac{\\sqrt{2}}{2}\\)", "\\(\\frac{\\sqrt{3}}{2}\\)",
+        "\\(1\\)", "\\(0\\)"],
+        correct: "\\(-1\\)"
+      },
+      {
+        question: "Με τι σούται το \\( ημ(0^o) \\);",
+        options: ["\\(-1\\)", "\\(\\frac{\\sqrt{2}}{2}\\)", "\\(\\frac{\\sqrt{3}}{2}\\)",
+        "\\(1\\)", "\\(0\\)"],
+        correct: "\\(0\\)"
+      },
+      {
+        question: "Με τι σούται η \\( εφ(30^o) \\);",
+        options: ["\\(\\sqrt{3}\\)", "\\(1\\)", "\\(-1\\)",
+        "\\(\\frac{\\sqrt{3}}{3}\\)", "Δεν ορίζεται"],
+        correct: "\\(\\frac{\\sqrt{3}}{3}\\)"
+      },
+      {
+        question: "Με τι σούται το \\( συν(60^o) \\);",
+        options: ["\\(\\frac{1}{2}\\)", "\\(\\frac{\\sqrt{2}}{2}\\)", "\\(\\frac{\\sqrt{3}}{2}\\)",
+        "\\(\\frac{\\sqrt{3}}{3}\\)", "\\(\\frac{3}{2}\\)"],
+        correct: "\\(\\frac{1}{2}\\)"
+      },
+      {
+        question: "Με τι σούται το \\( ημ(90^o) \\);",
+        options: ["\\(-1\\)", "\\(\\frac{\\sqrt{2}}{2}\\)", "\\(\\frac{\\sqrt{3}}{2}\\)",
+        "\\(1\\)", "\\(0\\)"],
+        correct: "\\(1\\)"
+      },
+      {
+        question: "Με τι σούται η \\( εφ(180^o) \\);",
+        options: ["\\(0\\)", "\\(1\\)", "\\(-1\\)",
+        "\\(\\frac{\\sqrt{3}}{3}\\)", "Δεν ορίζεται"],
+        correct: "\\(0\\)"
+      },
+      {
+        question: "Με τι σούται το \\( συν(0^o) \\);",
+        options: ["\\(-1\\)", "\\(\\frac{\\sqrt{2}}{2}\\)", "\\(\\frac{\\sqrt{3}}{2}\\)",
+        "\\(1\\)", "\\(0\\)"],
+        correct: "\\(1\\)"
+      },
+      {
+        question: "Με τι σούται το \\( ημ(30^o) \\);",
+        options: ["\\(\\frac{1}{2}\\)", "\\(\\frac{\\sqrt{2}}{2}\\)", "\\(\\frac{\\sqrt{3}}{2}\\)",
+        "\\(\\frac{\\sqrt{3}}{3}\\)", "\\(\\frac{3}{2}\\)"],
+        correct: "\\(\\frac{1}{2}\\)"
+      },
+      {
+        question: "Με τι σούται η \\( εφ(45^o) \\);",
+        options: ["\\(\\sqrt{3}\\)", "Δεν ορίζεται", "\\(\\frac{\\sqrt{2}}{2}\\)",
+        "\\(\\frac{\\sqrt{3}}{3}\\)", "\\(1\\)"],
+        correct: "\\(1\\)"
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let startTime;
+    let timerInterval;
+    let attempt = 1;
+    const attemptsData = [];
+
+    function startQuiz() {
+      document.getElementById("intro").classList.add("hidden");
+      document.getElementById("timer").classList.remove("hidden");
+      document.getElementById("quiz").classList.remove("hidden");
+      document.getElementById("submit").classList.remove("hidden");
+      startTime = new Date();
+      timerInterval = setInterval(updateTimer, 1000);
+      currentQuestion = 0;
+      score = 0;
+      loadQuestion();
+    }
+
+    function updateTimer() {
+      const now = new Date();
+      const elapsed = Math.floor((now - startTime) / 1000);
+      const minutes = Math.floor(elapsed / 60).toString().padStart(2, "0");
+      const seconds = (elapsed % 60).toString().padStart(2, "0");
+      document.getElementById("timer").textContent = `Time: ${minutes}:${seconds}`;
+    }
+
+    function loadQuestion() {
+      const quiz = document.getElementById("quiz");
+      const q = quizData[currentQuestion];
+      quiz.innerHTML = `
+        <div class="question">
+          <h3>Question ${currentQuestion + 1}: ${q.question}</h3>
+          ${q.image ? `<img src="${q.image}" alt="Question Image">` : ""}
+          <div class="options">
+            ${q.options.map((option, index) => `
+              <label>
+                <input type="radio" name="option" value="${index}">
+                ${option}
+              </label>
+            `).join("")}
+          </div>
+        </div>
+      `;
+      MathJax.typeset();
+    }
+
+    function checkAnswer() {
+      const selected = document.querySelector('input[name="option"]:checked');
+      if (!selected) {
+        alert("Please select an answer!");
+        return;
+      }
+      const userAnswer = quizData[currentQuestion].options[parseInt(selected.value)];
+      if (userAnswer === quizData[currentQuestion].correct) {
+        score++;
+      }
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        loadQuestion();
+      } else {
+        clearInterval(timerInterval);
+        handleQuizEnd();
+      }
+    }
+
+    function handleQuizEnd() {
+      const now = new Date();
+      const elapsed = Math.floor((now - startTime) / 1000);
+      const percentage = ((score / quizData.length) * 100).toFixed(2);
+
+      attemptsData.push({
+        attemptNumber: attempt,
+        score: score,
+        total: quizData.length,
+        percentage: percentage,
+        elapsed: elapsed,
+        timestamp: now.toISOString()
+      });
+
+      if (score < quizData.length) {
+        document.getElementById("result").classList.remove("hidden");
+        document.getElementById("result").innerHTML = `
+          <p>Είχες λάθη. Ας ξανακάνουμε το quiz!</p>
+        `;
+        setTimeout(() => {
+          document.getElementById("result").classList.add("hidden");
+          startQuiz();
+          attempt++;
+        }, 3000);
+      } else {
+        document.getElementById("quiz").classList.add("hidden");
+        document.getElementById("submit").classList.add("hidden");
+        document.getElementById("result").classList.remove("hidden");
+        document.getElementById("download").classList.remove("hidden");
+        document.getElementById("result").innerHTML = `
+          <p>Συγχαρητήρια! Τελείωσες το quiz με επιτυχία!</p>
+        `;
+      }
+    }
+
+    function downloadResults() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFont("Helvetica", "normal");
+
+      let y = 10;
+      attemptsData.forEach((data) => {
+        doc.setFillColor(0, 0, 0);
+        doc.rect(10, y, 190, 50, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(12);
+        doc.text(`Attempt: ${data.attemptNumber}`, 15, y + 10);
+        doc.text(`Score: ${data.score}`, 15, y + 20);
+        doc.text(`Total: ${data.total}`, 15, y + 30);
+        doc.text(`Percentage: ${data.percentage}%`, 15, y + 40);
+        doc.text(`Time: ${data.elapsed} seconds`, 100, y + 20);
+        doc.text(`Timestamp: ${data.timestamp}`, 100, y + 30);
+        y += 60;
+      });
+
+      doc.save("quiz_results.pdf");
+    }
+
+    document.getElementById("start").addEventListener("click", startQuiz);
+    document.getElementById("submit").addEventListener("click", checkAnswer);
+    document.getElementById("download").addEventListener("click", downloadResults);
+    document.getElementById("otherpage").addEventListener("click", () => {
+      window.location.href = "index.html"; // άλλαξε το URL όπως θες
+    });
+  </script>
+</body>
+</html>

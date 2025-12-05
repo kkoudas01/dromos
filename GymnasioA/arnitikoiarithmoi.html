@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Αρνητικοί αριθμοί</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .quiz-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .question-area {
+            margin-bottom: 20px;
+        }
+        .question-prompt {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        /* Styles for fillBlank (button based) */
+        .sentence-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 5px;
+            margin: 15px 0;
+            min-height: 30px;
+        }
+        .blank-space {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px 12px;
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+            background-color: #f9f9f9;
+            display: inline-block;
+        }
+        .blank-space.filled {
+            background-color: #e0ffe0;
+            border-color: #a0c0a0;
+        }
+        .options-container {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .option-button {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .option-button:hover {
+            background-color: #0056b3;
+        }
+        .option-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Styles for fillBlankKeyboard */
+        .keyboard-answer-container {
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Adjusted gap */
+            margin: 15px 0;
+            flex-wrap: wrap; /* Allow wrapping */
+        }
+        .keyboard-answer-container span, .keyboard-answer-container div { /* Style for prefix/suffix/text parts */
+            font-size: 1em; /* Ensure consistent font size */
+            line-height: 1.5; /* For better vertical alignment with inputs */
+        }
+        .answer-input { /* Style for the text input field */
+            width: auto; /* Allow natural width based on content */
+            min-width: 60px; /* Minimum width */
+            max-width: 150px; /* Maximum width to prevent overly long inputs */
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em; /* Consistent font size */
+            text-align: center;
+            margin: 0 2px; /* Small margin around inputs */
+        }
+
+
+        #question-image-container img {
+            display: block;
+            margin: 10px auto 15px auto;
+            max-width: 80%;
+            max-height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #clear-choices {
+            background-color: #ffc107;
+            color: black;
+        }
+        #clear-choices:hover {
+            background-color: #e0a800;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #exit-quiz-button { /* Style for the new exit button */
+            background-color: #dc3545; /* Bootstrap danger red */
+        }
+        #exit-quiz-button:hover {
+            background-color: #c82333; /* Darker red on hover */
+        }
+        #timer, #result {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        .hidden {
+            display: none;
+        }
+        .timeout {
+            color: red;
+        }
+        /* Styles for multiple choice questions */
+        .multiple-choice-question {
+            margin-bottom: 20px;
+        }
+        .multiple-choice-options { /* Applies to both radio and checkbox options */
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px 40px;
+        }
+        .multiple-choice-options label {
+            cursor: pointer;
+            break-inside: avoid;
+            padding: 5px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            display: flex; /* For better alignment of checkbox/radio and text */
+            align-items: center; /* Vertically align items in label */
+        }
+        .multiple-choice-options label:hover {
+             background-color: #f0f0f0;
+        }
+        .multiple-choice-options input[type="radio"],
+        .multiple-choice-options input[type="checkbox"] {
+            margin-right: 8px;
+            flex-shrink: 0; /* Prevent shrinking if label text is long */
+        }
+        .multiple-choice-options img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Toggle switch styles */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin: 10px 0;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .toggle-label {
+            margin-left: 10px;
+            font-weight: bold;
+            vertical-align: middle;
+        }
+
+        @media (max-width: 600px) {
+            .multiple-choice-options {
+                grid-template-columns: 1fr;
+            }
+            .multiple-choice-options img {
+                max-width: 90%;
+            }
+            .keyboard-answer-container {
+                /* flex-direction: column; /* Consider if vertical stacking is desired for very narrow screens */
+                align-items: flex-start; /* Align items to start if wrapping occurs */
+            }
+            .answer-input {
+                width: 80px; /* Adjust for smaller screens if needed */
+                max-width: 120px;
+                 /* box-sizing: border-box; /* Include padding and border in the element's total width and height */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div id="intro">
+            <h1>Αρνητικοί αριθμοί</h1>
+            <p>Στο παρόν quiz θα χρειαστεί να έχεις διαβάσει τη βασική θεωρία των 4 πράξεων στους αρνητικούς αριθμούς. </p>
+            <p id="time-limit-info">Χρόνος για κάθε γύρο: 15 λεπτά</p>
+
+            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                <span class="toggle-label">Επανάληψη λαθών </span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="quiz-mode-toggle">
+                    <span class="slider round"></span>
+                </label>
+                <span class="toggle-label">Επανάληψη όλου του quiz</span>
+            </div>
+
+            <button id="start">Άρχισε το Quiz</button>
+            <button id="otherpage">Πήγαινε πίσω στην τάξη σου</button>
+        </div>
+        <div id="timer" class="hidden">Time: 15:00</div>
+        <div id="quiz" class="hidden">
+            <div class="question-area">
+                <h3 id="question-number-title"></h3>
+                <div id="question-prompt-text" class="question-prompt"></div>
+                <div id="question-image-container"></div>
+                <div id="question-content"></div>
+            </div>
+            <button id="clear-choices" class="hidden">Καθαρισμός επιλογών</button>
+        </div>
+        <button id="submit" class="hidden">Υποβολή απάντησης</button>
+        <button id="exit-quiz-button" class="hidden">Έξοδος από το quiz</button> <div id="result" class="hidden"></div>
+        <button id="download" class="hidden">Download Results (PDF)</button>
+    </div>
+
+    <script>
+        // Quiz data - combination of question types
+        const quizData = [
+            // Multiple choice question (single select)
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( -(-3)=\\)", null],
+                answers: ["+3"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( +(-19)=\\)", null],
+                answers: ["-19"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( +(+25)=\\)", null],
+                answers: ["+25"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( -(+14)=\\)", null],
+                answers: ["-14"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( -5-3=\\)", null],
+                answers: ["-8"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( -7+10=\\)", null],
+                answers: ["+3"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( +8+20=\\)", null],
+                answers: ["+28"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( -90+50=\\)", null],
+                answers: ["-40"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( +15-20=\\)", null],
+                answers: ["-5"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( +23-23=\\)", null],
+                answers: ["0"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( +80-74=\\)", null],
+                answers: ["+6"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( -70+70=\\)", null],
+                answers: ["0"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( (-8)\\cdot (-9)=\\)", null],
+                answers: ["+72"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( (+7)\\cdot (-6)=\\)", null],
+                answers: ["-42"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( (+5)\\cdot (+3)=\\)", null],
+                answers: ["+15"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( 0\\cdot (+3)=\\)", null],
+                answers: ["0"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( (-4)\\cdot (+10)=\\)", null],
+                answers: ["-40"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( \\dfrac{-1000}{-2}=\\)", null],
+                answers: ["+500"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( \\dfrac{+300}{-3}=\\)", null],
+                answers: ["-100"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( \\dfrac{+70}{+2}=\\)", null],
+                answers: ["+35"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( -(-42)=\\)", null],
+                answers: ["+42"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( +6+24=\\)", null],
+                answers: ["+30"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( (+2)\\cdot (+60)=\\)", null],
+                answers: ["+120"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( \\dfrac{+180}{+2}=\\)", null],
+                answers: ["+90"] 
+            },
+	    { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( +(+24)=\\)", null],
+                answers: ["+24"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( -93-7=\\)", null],
+                answers: ["-100"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( (-7)\\cdot (-9)=\\)", null],
+                answers: ["+63"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( \\dfrac{-500}{-2}=\\)", null],
+                answers: ["+250"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( +(-95)=\\)", null],
+                answers: ["-95"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( +6-26=\\)", null],
+                answers: ["-20"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( +95-6=\\)", null],
+                answers: ["+89"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( (+9)\\cdot (-6)=\\)", null],
+                answers: ["-54"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( \\dfrac{+140}{-2}=\\)", null],
+                answers: ["-70"] 
+            },
+	    { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( -(+39)=\\)", null],
+                answers: ["-39"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( -70+8=\\)", null],
+                answers: ["-62"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( -45+50=\\)", null],
+                answers: ["+5"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( (-7)\\cdot (+10)=\\)", null],
+                answers: ["-70"] 
+            },
+            { // ΑΛΛΑΓΗ: Νέα δομή για fillBlankKeyboard
+                type: "fillBlankKeyboard",
+                question: "Να συμπληρώσεις το αποτέλεσμα. ⚠️ΠΡΟΣΟΧΗ⚠️ Αν σου βγει θετικό αποτέλεσμα, γράψε οπωσδήποτε το «+». Π.χ., αν βγει αποτέλεσμα «+91», μη γράψεις σκέτο «91»:",
+                template: ["\\( \\dfrac{-600}{+2}=\\)", null],
+                answers: ["-300"] 
+            }
+            // END: New question type "multipleChoiceMultSelect"
+        ];
+
+        const TIME_LIMIT = 900; // 15 minutes in seconds
+
+        let isMode2 = false;
+
+        let currentQuizQuestions = [];
+        let currentQuestionIndex = 0;
+        let currentAttemptScore = 0;
+        let currentAttemptErrors = 0;
+        let timeLimitExceeded = false;
+        let startTime;
+        let timerInterval;
+        let attempt = 1;
+        const attemptsData = [];
+
+        let incorrectQuestionsThisRound = [];
+        let currentRoundIncorrectQuestionNumbersDisplay = [];
+
+        // Variables for current question state
+        let userAnswersForCurrentQuestion = []; 
+        let nextBlankToFillIndex = 0;           
+        let optionButtons = [];                 
+        let selectedOption = null;              
+        let selectedOptionsArray = [];          
+        let currentTextAnswerInputs = []; // ΑΛΛΑΓΗ: Για πολλαπλά πεδία εισαγωγής
+
+        const quizModeToggle = document.getElementById("quiz-mode-toggle");
+        const timeLimitInfo = document.getElementById("time-limit-info");
+        const exitQuizButton = document.getElementById("exit-quiz-button"); 
+
+        function startQuiz() {
+            document.getElementById("intro").classList.add("hidden");
+            document.getElementById("timer").classList.remove("hidden");
+            document.getElementById("quiz").classList.remove("hidden");
+            document.getElementById("submit").classList.remove("hidden");
+            exitQuizButton.classList.remove("hidden"); 
+            document.getElementById("result").classList.add("hidden");
+            document.getElementById("download").classList.add("hidden");
+
+            isMode2 = quizModeToggle.checked;
+
+            currentAttemptScore = 0;
+            currentAttemptErrors = 0;
+            timeLimitExceeded = false;
+            currentRoundIncorrectQuestionNumbersDisplay = [];
+
+            startTime = new Date();
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+
+            if (isMode2) {
+                currentQuizQuestions = [...quizData]; 
+                currentQuestionIndex = 0;
+                loadQuestion();
+            } else {
+                if (attempt === 1 || incorrectQuestionsThisRound.length === 0) {
+                    currentQuizQuestions = [...quizData]; 
+                } else {
+                    currentQuizQuestions = [...incorrectQuestionsThisRound]; 
+                }
+                incorrectQuestionsThisRound = []; 
+                currentQuestionIndex = 0;
+                loadQuestion();
+            }
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const elapsed = Math.floor((now - startTime) / 1000);
+            const remaining = TIME_LIMIT - elapsed;
+
+            const minutes = Math.floor(remaining / 60).toString().padStart(2, "0");
+            const seconds = (remaining % 60).toString().padStart(2, "0");
+
+            const timerElement = document.getElementById("timer");
+             if (isMode2 && remaining <= 0 && !timeLimitExceeded) { 
+                 timerElement.textContent = `Χρόνος (${attempt}η προσπάθεια): 00:00 (Ο χρόνος σου τελείωσε, αλλά συνεχίζεις)`;
+            } else if (remaining <=0 && !isMode2 && !timeLimitExceeded) {
+                 timerElement.textContent = `Χρόνος (${attempt}ος γύρος): 00:00 (Ο χρόνος σου τελείωσε!)`;
+            } else if (remaining > 0) {
+                 timerElement.textContent = `Χρόνος (${isMode2 ? attempt + 'η προσπάθεια' : attempt + 'ος γύρος'}): ${minutes}:${seconds}`;
+            }
+
+
+            if (remaining <= 0 && !timeLimitExceeded) {
+                timeLimitExceeded = true;
+                timerElement.classList.add("timeout");
+            }
+        }
+
+        function formatTime(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
+            const secs = (totalSeconds % 60).toString().padStart(2, "0");
+            return `${minutes}:${secs}`;
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= currentQuizQuestions.length) {
+                clearInterval(timerInterval); 
+                showResults();
+                return;
+            }
+
+            const q = currentQuizQuestions[currentQuestionIndex];
+            const questionNumberTitle = document.getElementById("question-number-title");
+            const questionPromptText = document.getElementById("question-prompt-text");
+            const questionImageContainer = document.getElementById("question-image-container");
+            const questionContent = document.getElementById("question-content");
+            const clearChoicesButton = document.getElementById("clear-choices");
+
+             questionNumberTitle.textContent = `Ερώτηση ${currentQuestionIndex + 1} / ${currentQuizQuestions.length} (${isMode2 ? attempt + 'η προσπάθεια' : attempt + 'ος γύρος'})`;
+
+
+            questionImageContainer.innerHTML = '';
+            questionContent.innerHTML = '';
+            selectedOptionsArray = [];
+            currentTextAnswerInputs = []; // ΑΛΛΑΓΗ: Καθαρισμός για τη νέα ερώτηση
+
+            if (q.imageURL || q.image) {
+                const imgElement = document.createElement("img");
+                imgElement.src = q.imageURL || q.image;
+                imgElement.alt = q.questionPrompt || q.question || "Question Image";
+                questionImageContainer.appendChild(imgElement);
+            }
+
+            clearChoicesButton.classList.add("hidden"); 
+
+            if (q.type === "fillBlank") {
+                loadFillBlankQuestion(q, questionPromptText, questionContent);
+                clearChoicesButton.classList.remove("hidden");
+            } else if (q.type === "multipleChoice") {
+                loadMultipleChoiceQuestion(q, questionPromptText, questionContent);
+            } else if (q.type === "multipleChoiceMultSelect") {
+                loadMultipleChoiceMultSelectQuestion(q, questionPromptText, questionContent);
+                clearChoicesButton.classList.remove("hidden");
+            } else if (q.type === "fillBlankKeyboard") { 
+                loadFillBlankKeyboardQuestion(q, questionPromptText, questionContent);
+                clearChoicesButton.classList.remove("hidden");
+            } 
+
+            MathJax.typesetPromise([questionContent, questionPromptText, questionImageContainer]).catch(err => console.error("MathJax typeset error:", err));
+        }
+
+        function loadFillBlankQuestion(q, questionPromptText, questionContent) {
+            questionPromptText.innerHTML = q.questionPrompt || "";
+
+            const sentenceContainer = document.createElement("div");
+            sentenceContainer.classList.add("sentence-container");
+
+            const optionsContainer = document.createElement("div");
+            optionsContainer.classList.add("options-container");
+
+            userAnswersForCurrentQuestion = new Array(q.correctAnswers.length).fill(null);
+            nextBlankToFillIndex = 0;
+            optionButtons = [];
+
+            let blankIndex = 0;
+            if (q.sentenceTemplate && Array.isArray(q.sentenceTemplate)) {
+                q.sentenceTemplate.forEach(part => {
+                    if (part === null) {
+                        const blankSpan = document.createElement("span");
+                        blankSpan.classList.add("blank-space");
+                        blankSpan.dataset.blankIndex = blankIndex;
+                        blankSpan.innerHTML = "___";
+                        sentenceContainer.appendChild(blankSpan);
+                        blankIndex++;
+                    } else {
+                        const partSpan = document.createElement("span");
+                        partSpan.innerHTML = part;
+                        sentenceContainer.appendChild(partSpan);
+                    }
+                });
+            }
+
+            if (q.options && Array.isArray(q.options)) {
+                q.options.forEach(optionText => {
+                    const button = document.createElement("button");
+                    button.classList.add("option-button");
+                    button.innerHTML = optionText;
+                    button.dataset.value = optionText;
+                    button.addEventListener("click", handleFillBlankOptionClick);
+                    optionsContainer.appendChild(button);
+                    optionButtons.push(button);
+                });
+            }
+
+            questionContent.appendChild(sentenceContainer);
+            questionContent.appendChild(optionsContainer);
+        }
+
+        function loadMultipleChoiceQuestion(q, questionPromptText, questionContent) {
+            questionPromptText.innerHTML = q.question;
+
+            const questionDiv = document.createElement("div");
+            questionDiv.classList.add("multiple-choice-question");
+
+            const optionsDiv = document.createElement("div");
+            optionsDiv.classList.add("multiple-choice-options");
+
+            selectedOption = null;
+
+            q.options.forEach((option, index) => {
+                const label = document.createElement("label");
+                const radio = document.createElement("input");
+                radio.type = "radio";
+                radio.name = `question-${currentQuestionIndex}`;
+                radio.id = `question-${currentQuestionIndex}-option-${index}`;
+                radio.value = index;
+                radio.addEventListener("change", function() {
+                    selectedOption = parseInt(this.value, 10);
+                });
+
+                label.appendChild(radio);
+                label.insertAdjacentHTML('beforeend', option);
+                optionsDiv.appendChild(label);
+            });
+
+            questionDiv.appendChild(optionsDiv);
+            questionContent.appendChild(questionDiv);
+        }
+
+        function loadMultipleChoiceMultSelectQuestion(q, questionPromptText, questionContent) {
+            questionPromptText.innerHTML = q.question;
+
+            const questionDiv = document.createElement("div");
+            questionDiv.classList.add("multiple-choice-question");
+
+            const optionsDiv = document.createElement("div");
+            optionsDiv.classList.add("multiple-choice-options");
+
+            selectedOptionsArray = [];
+
+            q.options.forEach((option, index) => {
+                const label = document.createElement("label");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.name = `question-${currentQuestionIndex}-option`;
+                checkbox.id = `question-${currentQuestionIndex}-option-${index}`;
+                checkbox.value = index;
+
+                checkbox.addEventListener("change", function() {
+                    const valInt = parseInt(this.value, 10);
+                    if (this.checked) {
+                        if (!selectedOptionsArray.includes(valInt)) {
+                            selectedOptionsArray.push(valInt);
+                        }
+                    } else {
+                        selectedOptionsArray = selectedOptionsArray.filter(item => item !== valInt);
+                    }
+                });
+
+                label.appendChild(checkbox);
+                label.insertAdjacentHTML('beforeend', option);
+                optionsDiv.appendChild(label);
+            });
+
+            questionDiv.appendChild(optionsDiv);
+            questionContent.appendChild(questionDiv);
+        }
+
+        // ΑΛΛΑΓΗ: Ενημέρωση της συνάρτησης για υποστήριξη πολλαπλών κενών
+        function loadFillBlankKeyboardQuestion(q, questionPromptText, questionContent) {
+            questionPromptText.innerHTML = q.question || ""; 
+            currentTextAnswerInputs = []; // Καθαρισμός του πίνακα για τη νέα ερώτηση
+
+            const answerContainer = document.createElement("div");
+            answerContainer.classList.add("keyboard-answer-container");
+
+            if (q.template && Array.isArray(q.template)) {
+                q.template.forEach((part, index) => {
+                    if (part === null) { // Αν είναι null, πρόσθεσε ένα input field
+                        const inputElement = document.createElement("input");
+                        inputElement.type = "text";
+                        inputElement.classList.add("answer-input");
+                        inputElement.id = `text-answer-${currentQuestionIndex}-${currentTextAnswerInputs.length}`; 
+                        inputElement.placeholder = "...";
+                        answerContainer.appendChild(inputElement);
+                        currentTextAnswerInputs.push(inputElement); // Πρόσθεσε το input στον πίνακα
+                    } else { // Αλλιώς, πρόσθεσε το κείμενο
+                        const textPartSpan = document.createElement("div"); // Χρησιμοποιούμε div για να μην σπάει η γραμμή άσκοπα αν το κείμενο είναι σκέτος αριθμός.
+                        textPartSpan.innerHTML = part; 
+                        answerContainer.appendChild(textPartSpan);
+                    }
+                });
+            }
+
+            questionContent.appendChild(answerContainer);
+
+            // Focus στο πρώτο input field, αν υπάρχει
+            if (currentTextAnswerInputs.length > 0) {
+                currentTextAnswerInputs[0].focus(); 
+            }
+        }
+
+        function handleFillBlankOptionClick(event) {
+            const selectedButton = event.currentTarget;
+            const valueToFill = selectedButton.dataset.value;
+            const q = currentQuizQuestions[currentQuestionIndex];
+
+            if (q.type === "fillBlank" && nextBlankToFillIndex < q.correctAnswers.length) {
+                const blankToFill = document.querySelector(`.blank-space[data-blank-index="${nextBlankToFillIndex}"]`);
+                if (blankToFill) {
+                    blankToFill.innerHTML = valueToFill;
+                    blankToFill.classList.add("filled");
+                    userAnswersForCurrentQuestion[nextBlankToFillIndex] = valueToFill;
+                    nextBlankToFillIndex++;
+                    selectedButton.disabled = true;
+                    MathJax.typesetPromise([blankToFill]).catch(err => console.error("MathJax error on fill:", err));
+                }
+            }
+        }
+
+        // ΑΛΛΑΓΗ: Ενημέρωση για καθαρισμό πολλαπλών πεδίων εισαγωγής
+        function clearCurrentQuestionChoices() {
+            const q = currentQuizQuestions[currentQuestionIndex];
+
+            if (q.type === "fillBlank") {
+                userAnswersForCurrentQuestion = new Array(q.correctAnswers.length).fill(null);
+                nextBlankToFillIndex = 0;
+                document.querySelectorAll(".blank-space").forEach(blank => {
+                    blank.innerHTML = "___";
+                    blank.classList.remove("filled");
+                });
+                optionButtons.forEach(button => button.disabled = false);
+                MathJax.typesetPromise([document.querySelector(".sentence-container")]).catch(err => console.error("MathJax error on clear:", err));
+            } else if (q.type === "multipleChoiceMultSelect") {
+                document.querySelectorAll(`input[type="checkbox"][name="question-${currentQuestionIndex}-option"]`).forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                selectedOptionsArray = [];
+            } else if (q.type === "fillBlankKeyboard") { 
+                if (currentTextAnswerInputs && currentTextAnswerInputs.length > 0) {
+                    currentTextAnswerInputs.forEach(input => input.value = "");
+                    currentTextAnswerInputs[0].focus(); // Focus στο πρώτο input
+                }
+            } 
+        }
+        
+        // ΑΛΛΑΓΗ: Ενημέρωση της λογικής ελέγχου για fillBlankKeyboard
+        function checkAnswer() {
+            const q = currentQuizQuestions[currentQuestionIndex];
+            let isCorrect = false;
+
+            if (q.type === "fillBlank") {
+                const allBlanksFilled = userAnswersForCurrentQuestion.every(answer => answer !== null);
+                if (allBlanksFilled && userAnswersForCurrentQuestion.length === q.correctAnswers.length) {
+                    isCorrect = q.orderMatters === false
+                        ? new Set(q.correctAnswers.map(String)).size === new Set(userAnswersForCurrentQuestion.map(String)).size &&
+                          [...new Set(q.correctAnswers.map(String))].every(val => new Set(userAnswersForCurrentQuestion.map(String)).has(val))
+                        : q.correctAnswers.every((ans, i) => userAnswersForCurrentQuestion[i] === ans);
+                }
+            } else if (q.type === "multipleChoice") {
+                isCorrect = selectedOption !== null && selectedOption === q.correctIndex;
+            } else if (q.type === "multipleChoiceMultSelect") {
+                if (q.correctIndices && Array.isArray(q.correctIndices)) {
+                    const correct = [...q.correctIndices].sort((a, b) => a - b);
+                    const selected = [...selectedOptionsArray].sort((a, b) => a - b);
+                    isCorrect = correct.length === selected.length && correct.every((val, index) => val === selected[index]);
+                }
+            } else if (q.type === "fillBlankKeyboard") { 
+                if (currentTextAnswerInputs && currentTextAnswerInputs.length > 0 && q.answers && q.answers.length === currentTextAnswerInputs.length) {
+                    isCorrect = true; // Assume correct initially
+                    for (let i = 0; i < q.answers.length; i++) {
+                        const userAnswer = currentTextAnswerInputs[i].value.trim();
+                        if (userAnswer !== q.answers[i]) {
+                            isCorrect = false; // If any answer is wrong, mark as incorrect
+                            break;
+                        }
+                    }
+                } else {
+                     isCorrect = false; // Mismatch in number of inputs and answers
+                }
+            } 
+
+
+            if (isCorrect) {
+                currentAttemptScore++;
+            } else {
+                currentAttemptErrors++;
+                if (!isMode2) {
+                    incorrectQuestionsThisRound.push(q);
+                    const originalIndex = quizData.findIndex(origQ => JSON.stringify(origQ) === JSON.stringify(q));
+                    if (originalIndex !== -1) { 
+                        currentRoundIncorrectQuestionNumbersDisplay.push(originalIndex + 1);
+                    }
+                }
+            }
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < currentQuizQuestions.length) {
+                loadQuestion();
+            } else {
+                clearInterval(timerInterval);
+                showResults();
+            }
+        }
+
+        function showResults() {
+            const now = new Date();
+            const elapsed = Math.floor((now - startTime) / 1000);
+            const totalQuestionsInRound = currentQuizQuestions.length;
+            const percentage = (totalQuestionsInRound > 0) ? ((currentAttemptScore / totalQuestionsInRound) * 100).toFixed(2) : 0;
+
+            attemptsData.push({
+                attempt: attempt,
+                score: currentAttemptScore,
+                errors: isMode2 ? totalQuestionsInRound - currentAttemptScore : currentAttemptErrors,
+                totalQuestions: totalQuestionsInRound,
+                percentage: percentage,
+                timeTaken: elapsed,
+                timeLimitExceeded: timeLimitExceeded,
+                incorrectQuestionNumbers: isMode2 ? null : [...new Set(currentRoundIncorrectQuestionNumbersDisplay)].sort((a,b) => a-b),
+                modeLabel: isMode2 ? 'Attempt' : 'Round' 
+            });
+
+            const resultDiv = document.getElementById("result");
+            resultDiv.classList.remove("hidden");
+            document.getElementById("quiz").classList.add("hidden");
+            document.getElementById("submit").classList.add("hidden");
+            exitQuizButton.classList.add("hidden"); 
+            document.getElementById("clear-choices").classList.add("hidden");
+            document.getElementById("timer").classList.remove("timeout");
+
+            let message = "";
+            let startNext = false;
+            const allQuizQuestions = quizData.length; 
+
+            if (isMode2) { 
+                if (currentAttemptScore === allQuizQuestions && !timeLimitExceeded) {
+                    message = `Συγχαρητήρια! Ολοκλήρωσες την ${attempt}η προσπάθεια επιτυχώς!`;
+                    message += `<br>Τελικά αποτελέσματα: ${currentAttemptScore}/${totalQuestionsInRound} (${percentage}%)<br>Χρόνος: ${formatTime(elapsed)}`;
+                } else {
+                    message = `Στην ${attempt}η προσπάθεια:`;
+                    if (currentAttemptScore < totalQuestionsInRound) {
+                        message += `<br>Είχες λάθη (${totalQuestionsInRound - currentAttemptScore} λάθος απαντήσεις).`;
+                    }
+                    if (timeLimitExceeded) {
+                        message += `<br>Πέρασες το προκαθορισμένο χρονικό όριο (${formatTime(elapsed)} > ${formatTime(TIME_LIMIT)}).`;
+                    }
+                    message += `<br>Αποτελέσματα: ${currentAttemptScore}/${totalQuestionsInRound} (${percentage}%)<br>Χρόνος: ${formatTime(elapsed)}`;
+                    message += `<br>Θα επαναλάβεις ολόκληρο το quiz.`;
+                    startNext = true;
+                }
+            } else { // Mode 1: Error Repeat
+                if (currentAttemptErrors === 0) {
+                    message = `Συγχαρητήρια! Ολοκλήρωσες τον ${attempt}ο γύρο επιτυχώς (0 λάθη)!`;
+                    if (totalQuestionsInRound === allQuizQuestions) { 
+                        message += `<br>Τελείωσες ολόκληρο το quiz!`;
+                    } else { 
+                        message += `<br>Απάντησες όλες τις εναπομείνασες ερωτήσεις επιτυχώς. Το quiz τελείωσε!`;
+                    }
+                } else {
+                    message = `Στον ${attempt}ο γύρο, είχες ${currentAttemptErrors} λάθη ${totalQuestionsInRound} ερωτήσεις συνολικά.`;
+                    if (currentRoundIncorrectQuestionNumbersDisplay.length > 0) {
+                        message += ` (Οι ερωτήσεις που έκανες λάθος: ${[...new Set(currentRoundIncorrectQuestionNumbersDisplay)].sort((a,b)=>a-b).join(', ')})`;
+                    }
+                    message += `<br>Αριθμός ερωτήσεων που θα επαναλάβεις: ${incorrectQuestionsThisRound.length}.`;
+                    startNext = true;
+                }
+                message += `<br>Αποτελέσματα γύρου: ${currentAttemptScore}/${totalQuestionsInRound} (${percentage}%)<br>Χρόνος γύρου: ${formatTime(elapsed)}`;
+            }
+
+            if (timeLimitExceeded && !(isMode2 && currentAttemptScore === allQuizQuestions && !timeLimitExceeded)) {
+                 message += `<br>${isMode2 ? 'Σημείωση:' : 'Πρόσεχε τον χρόνο.'} (Το προκαθορισμένο χρονικό όριο έχει ξεπεραστεί.)`;
+            }
+
+
+            resultDiv.innerHTML = `<p>${message}</p>`;
+
+            const timerElement = document.getElementById("timer");
+            const finalTimeText = `Τελικός χρόνος ${isMode2 ? 'Προσπάθεια' : 'Γύρος'} ${attempt}: ${formatTime(elapsed)}`;
+            timerElement.textContent = `${finalTimeText}${timeLimitExceeded && !(isMode2 && currentAttemptScore === allQuizQuestions && !timeLimitExceeded) ? " (Time limit exceeded)" : ""}`;
+
+
+            if (startNext) {
+                attempt++;
+                setTimeout(() => {
+                    resultDiv.classList.add("hidden");
+                    startQuiz();
+                }, 5000);
+            } else {
+                document.getElementById("download").classList.remove("hidden");
+            }
+        }
+        
+        function handleExitQuiz() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            const now = new Date();
+            const elapsedForCurrentRound = Math.floor((now - startTime) / 1000);
+
+            document.getElementById("quiz").classList.add("hidden");
+            document.getElementById("submit").classList.add("hidden");
+            document.getElementById("clear-choices").classList.add("hidden");
+            exitQuizButton.classList.add("hidden");
+            document.getElementById("timer").textContent = "Έξοδος από το quiz. Δημιουργία αναφοράς...";
+
+            const reportData = JSON.parse(JSON.stringify(attemptsData)); 
+
+            const questionsAnsweredThisAttempt = currentQuestionIndex; 
+            
+            if (questionsAnsweredThisAttempt < currentQuizQuestions.length || attemptsData.length === 0 ) { 
+                const scoreThisAttempt = currentAttemptScore;
+                const percentageThisAttempt = (questionsAnsweredThisAttempt > 0) ? ((scoreThisAttempt / questionsAnsweredThisAttempt) * 100).toFixed(2) : "0.00";
+
+                const currentPartialData = {
+                    attempt: attempt,
+                    modeLabel: isMode2 ? 'Attempt' : 'Round',
+                    questionsSeen: questionsAnsweredThisAttempt, 
+                    score: scoreThisAttempt,
+                    percentage: percentageThisAttempt,
+                    timeTaken: elapsedForCurrentRound,
+                    isPartial: true 
+                };
+                const lastAttemptData = attemptsData.length > 0 ? attemptsData[attemptsData.length -1] : null;
+                if (!lastAttemptData || lastAttemptData.attempt < attempt || (lastAttemptData.attempt === attempt && questionsAnsweredThisAttempt > 0) ) {
+                    let currentRoundAlreadyFullyLogged = false;
+                    if (lastAttemptData && lastAttemptData.attempt === attempt && lastAttemptData.totalQuestions === currentQuizQuestions.length) {
+                        currentRoundAlreadyFullyLogged = true;
+                    }
+
+                    if (!currentRoundAlreadyFullyLogged && questionsAnsweredThisAttempt < currentQuizQuestions.length ) {
+                        reportData.push(currentPartialData);
+                    } else if (!lastAttemptData && questionsAnsweredThisAttempt < currentQuizQuestions.length) { 
+                        reportData.push(currentPartialData);
+                    }
+                }
+            }
+
+
+            generateIncompleteQuizPDF(reportData);
+
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = `<p>Έγινε έξοδος από το quiz. Η πρόοδός σας μέχρι αυτό το σημείο έχει καταγραφεί στο PDF που έγινε λήψη.</p>
+                                <p>Μπορείτε να ξεκινήσετε ένα νέο quiz ή να επιστρέψετε στην τάξη σας.</p>`;
+            resultDiv.classList.remove("hidden");
+            document.getElementById("intro").querySelector("#start").textContent = "Start New Quiz"; 
+            document.getElementById("intro").classList.remove("hidden"); 
+            document.getElementById("timer").classList.add("hidden");
+        }
+
+        function generateIncompleteQuizPDF(reportData) {
+            try {
+                if (typeof window.jspdf !== 'undefined') {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(16);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text("INCOMPLETE QUIZ REPORT", 105, 15, { align: 'center' });
+
+                    doc.setFontSize(10);
+                    doc.setFont("helvetica", "normal");
+                    const now = new Date();
+                    doc.text(`Date: ${now.toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'medium' })}`, 105, 25, { align: 'center' });
+
+                    let yPos = 40;
+                    const pageHeight = doc.internal.pageSize.height;
+                    const bottomMargin = 20;
+                    const lineHeight = 6;
+
+                    if (reportData.length === 0) {
+                        doc.text("No round data available for display.", 20, yPos);
+                    }
+
+                    reportData.forEach((roundD) => {
+                        const sectionHeightEstimate = 7 * lineHeight;
+                        if (yPos + sectionHeightEstimate > pageHeight - bottomMargin) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+                        
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(12);
+                        doc.text(`For ${roundD.modeLabel} ${roundD.attempt}:`, 20, yPos);
+                        yPos += lineHeight * 1.5;
+
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(10);
+
+                        let questionsSeenForPdf = roundD.isPartial ? roundD.questionsSeen : roundD.totalQuestions;
+                        let percentageForPdf = roundD.percentage;
+                        if (roundD.isPartial && questionsSeenForPdf === 0) {
+                             percentageForPdf = "0.00";
+                        }
+
+                        doc.text(`  Total questions seen by user: ${questionsSeenForPdf}`, 25, yPos);
+                        yPos += lineHeight;
+                        doc.text(`  Correct answers: ${roundD.score}`, 25, yPos);
+                        yPos += lineHeight;
+                        doc.text(`  Success percentage: ${percentageForPdf}%`, 25, yPos);
+                        yPos += lineHeight;
+                        doc.text(`  Time taken: ${formatTime(roundD.timeTaken)}`, 25, yPos);
+                        yPos += lineHeight * 2;
+                    });
+
+                    doc.save('incomplete_quiz_report.pdf');
+                } else {
+                    throw new Error("jsPDF not loaded");
+                }
+            } catch (error) {
+                console.error("PDF generation error (incomplete quiz):", error);
+                alert("An error occurred while generating the PDF.\n" + error.message);
+            }
+        }
+
+        function generatePDF() { 
+            try {
+                if (typeof window.jspdf !== 'undefined') {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(18);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text("Math Quiz Results", 105, 15, { align: 'center' });
+
+                    doc.setFontSize(12);
+                    doc.setFont("helvetica", "normal");
+                    const now = new Date();
+                    doc.text(`Date: ${now.toLocaleString('el-GR', { dateStyle: 'full', timeStyle: 'medium', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })}`, 105, 25, { align: 'center' });
+
+
+                    let yPos = 40;
+                    const pageHeight = doc.internal.pageSize.height;
+                    const bottomMargin = 20;
+
+                    attemptsData.forEach((attemptData) => {
+                        const sectionHeightEstimate = 50 + (attemptData.incorrectQuestionNumbers && !isMode2 && attemptData.incorrectQuestionNumbers.length > 0 ? (Math.ceil(attemptData.incorrectQuestionNumbers.join(', ').length / 70) * 5) : 0) ;
+
+                        if (yPos + sectionHeightEstimate > pageHeight - bottomMargin) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+
+                        doc.setFillColor(220, 220, 220);
+                        doc.rect(15, yPos - 5, 180, 8, 'F');
+
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFontSize(12);
+                        doc.setFont("helvetica", "bold");
+                        doc.text(`${attemptData.modeLabel} ${attemptData.attempt}`, 20, yPos); 
+
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFontSize(10);
+                        doc.setFont("helvetica", "normal");
+                        yPos += 8;
+
+                        doc.text(`Questions: ${attemptData.totalQuestions}`, 20, yPos);
+                        doc.text(`Correct: ${attemptData.score}`, 20, yPos + 6);
+
+                        if (isMode2) {
+                            doc.text(`Wrong: ${attemptData.totalQuestions - attemptData.score}`, 20, yPos + 12);
+                        } else {
+                            doc.text(`Errors: ${attemptData.errors}`, 20, yPos + 12);
+                        }
+
+                        doc.text(`Time: ${formatTime(attemptData.timeTaken)}`, 100, yPos);
+
+                        let statusText = "Completed";
+                        const allQuizQuestionsCount = quizData.length; 
+
+                        if (isMode2) {
+                            if (attemptData.score < allQuizQuestionsCount || (attemptData.timeLimitExceeded && attemptData.score < allQuizQuestionsCount)) {
+                                statusText = "Repeat Required";
+                            }
+                        } else { // Mode 1
+                            if (attemptData.errors > 0) {
+                                statusText = "Repeat Errors";
+                            }
+                        }
+
+                        if (attemptData.timeLimitExceeded) {
+                            if (!(isMode2 && attemptData.score === allQuizQuestionsCount && !attemptData.timeLimitExceeded)) {
+                                statusText += (statusText === "Completed" ? " (Time Exceeded)" : " & Time Exceeded");
+                            } else if (isMode2 && attemptData.score === allQuizQuestionsCount && attemptData.timeLimitExceeded) {
+                                // No change, already "Completed"
+                            }
+                        }
+
+
+                        doc.text(`Status: ${statusText}`, 100, yPos + 6);
+                        doc.text(`Percentage: ${attemptData.percentage}%`, 100, yPos + 12);
+                        yPos += 12;
+
+                        if (!isMode2 && attemptData.incorrectQuestionNumbers && attemptData.incorrectQuestionNumbers.length > 0) {
+                            yPos += 6;
+                            let numbersText = attemptData.incorrectQuestionNumbers.join(', ');
+                            const splitText = doc.splitTextToSize(`Incorrect Original Question Nos.: ${numbersText}`, 160);
+                            doc.text(splitText, 20, yPos);
+                            yPos += (splitText.length * 5);
+                        }
+                        yPos += 10;
+                    });
+
+                    const lastAttempt = attemptsData[attemptsData.length - 1];
+                    let quizCompletedSuccessfully = false;
+                    const allQuizQuestionsCount = quizData.length;
+
+                    if (lastAttempt) { 
+                        if (isMode2) {
+                            if (lastAttempt.score === allQuizQuestionsCount && !lastAttempt.timeLimitExceeded) {
+                                quizCompletedSuccessfully = true;
+                            }
+                        } else {
+                            if (lastAttempt.errors === 0) {
+                               quizCompletedSuccessfully = true;
+                            }
+                        }
+                    }
+
+
+                    if (quizCompletedSuccessfully) {
+                        if (yPos + 50 > pageHeight - bottomMargin) {
+                           doc.addPage();
+                           yPos = 30;
+                        } else {
+                           yPos = Math.max(yPos, 50);
+                        }
+                        doc.setFontSize(20);
+                        doc.setTextColor(34, 139, 34);
+                        doc.setFont("helvetica", "bold");
+                        doc.text("CONGRATULATIONS!", 105, yPos, { align: 'center' });
+                        yPos += 15;
+                        doc.setFontSize(14);
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFont("helvetica", "normal");
+                        doc.text(`You completed the quiz successfully`, 105, yPos, { align: 'center' });
+                        yPos += 10;
+                        doc.text(`in ${attemptsData.length} ${lastAttempt.modeLabel === 'Attempt' ? (attemptsData.length === 1 ? 'attempt' : 'attempts') : (attemptsData.length === 1 ? 'round' : 'rounds')}!`, 105, yPos, { align: 'center' });
+                    }
+
+                    doc.save('math_quiz_results.pdf');
+                } else {
+                    throw new Error("jsPDF not loaded");
+                }
+            } catch (error) {
+                console.error("PDF generation error:", error);
+                alert("An error occurred while generating the PDF. Please try again or refresh the page.\n" + error.message);
+            }
+        }
+
+
+        quizModeToggle.addEventListener('change', function() {
+            isMode2 = this.checked;
+            timeLimitInfo.textContent = `Χρόνος για κάθε ${this.checked ? 'προσπάθεια' : 'γύρο'}: 15 λεπτά`;
+        });
+
+        timeLimitInfo.textContent = `Χρόνος για κάθε ${quizModeToggle.checked ? 'προσπάθεια' : 'γύρο'}: 15 λεπτά`;
+
+
+        document.getElementById("start").addEventListener("click", startQuiz);
+        document.getElementById("submit").addEventListener("click", checkAnswer);
+        document.getElementById("clear-choices").addEventListener("click", clearCurrentQuestionChoices);
+        exitQuizButton.addEventListener("click", handleExitQuiz); 
+        document.getElementById("otherpage").addEventListener("click", function() {
+            window.location.href = 'your_class_url_here'; 
+        });
+        document.getElementById("download").addEventListener("click", generatePDF);
+
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById("quiz").classList.contains("hidden") && !document.getElementById("submit").classList.contains("hidden")) {
+                e.preventDefault();
+                document.getElementById("submit").click();
+            }
+        });
+
+        document.getElementById("quiz").classList.add("hidden");
+        document.getElementById("timer").classList.add("hidden");
+        document.getElementById("submit").classList.add("hidden");
+        exitQuizButton.classList.add("hidden"); 
+        document.getElementById("result").classList.add("hidden");
+        document.getElementById("download").classList.add("hidden");
+        document.getElementById("clear-choices").classList.add("hidden");
+
+    </script>
+</body>
+</html>
