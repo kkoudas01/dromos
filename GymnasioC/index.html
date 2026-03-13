@@ -221,15 +221,29 @@ body::after{
 @keyframes rippleAnim{to{transform:scale(4);opacity:0}}
 @media(max-width:700px){
   #menu-toggle{display:block}
-  #sidebar{position:fixed;left:0;top:56px;bottom:0;z-index:200;transform:translateX(-110%);overflow-y:auto}
+  #sidebar{
+    position:fixed;left:0;top:56px;bottom:0;z-index:200;
+    transform:translateX(-110%);
+    overflow-y:auto;
+    /* ύψος = όλη η οθόνη μείον topbar, με scroll αν χρειαστεί */
+    max-height:calc(100vh - 56px);
+    height:calc(100vh - 56px);
+  }
   #sidebar.open{transform:translateX(0)}
   #search-input{width:140px}
 }
 @media(max-width:700px) and (orientation:landscape){
-  html,body{height:auto;overflow:auto}
-  #layout{min-height:calc(100vh - 56px);overflow:visible}
-  #main{overflow:visible;height:auto}
-  #sidebar{position:fixed;top:56px;bottom:0;overflow-y:auto}
+  /* Σε landscape η οθόνη είναι κοντή — το sidebar πρέπει να scrollάρει */
+  #sidebar{
+    /* ξαναορίζουμε ύψος με βάση το 100dvh αν υποστηρίζεται, αλλιώς 100vh */
+    height:calc(100dvh - 56px);
+    max-height:calc(100dvh - 56px);
+    overflow-y:auto;
+    /* scrollbar πάντα ορατό ώστε να ξέρει ο χρήστης ότι υπάρχει κύλιση */
+    overscroll-behavior:contain;
+  }
+  /* Επιτρέπουμε scroll στο main περιεχόμενο */
+  #main{overflow-y:auto}
 }
 </style>
 </head>

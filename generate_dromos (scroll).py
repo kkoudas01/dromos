@@ -1,9 +1,225 @@
-<!DOCTYPE html>
-<html lang="el">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Β Λυκείου</title>
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+generate_dromos.py
+Διαβάζει το sxediagramma.txt και παράγει:
+  - index.html (κύρια σελίδα)
+  - <folder>/index.html για κάθε # με <folder>name</folder>
+  - Αν υπάρχει <folder-all> σε κάποιο #, αυτό το section μπαίνει σε ΟΛΑ τα subfolders.
+"""
+
+import re
+import os
+import sys
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PARSING
+# ─────────────────────────────────────────────────────────────────────────────
+
+def parse_inline(text):
+    """[label](url) → <a target=_blank με Tor fallback>"""
+    return re.sub(
+        r'\[([^\]]+)\]\(([^)]+)\)',
+        lambda m: (
+            f'<a href="{m.group(2)}" target="_blank" '
+            f'onclick="return openLink(event,\'{m.group(2)}\')">'
+            f'{m.group(1)}</a>'
+        ),
+        text
+    )
+
+def parse_file(path):
+    """
+    Επιστρέφει (popup_node, nodes).
+    Κάθε node είναι dict με:
+      type: 'popup'|'h1'|'h2'|'h3'|'link'|'hline'
+      label, url, body, children, folder, folder_all
+    """
+    with open(path, encoding='utf-8') as f:
+        raw = f.read()
+
+    # ── popup ──
+    popup_node = None
+    popup_match = re.search(r'<popup>(.*?)</popup>', raw, re.DOTALL)
+    if popup_match:
+        popup_raw = popup_match.group(1).strip()
+        titles = re.findall(r'\{(.*?)\}', popup_raw, re.DOTALL)
+        popup_node = {
+            'type': 'popup',
+            'label': titles[0].strip() if titles else 'Info',
+            'body':  titles[1].strip() if len(titles) > 1 else '',
+        }
+        raw = raw[:popup_match.start()] + raw[popup_match.end():]
+
+    nodes = []
+    current_h1 = None
+    current_h2 = None
+
+    if popup_node:
+        nodes.append(popup_node)
+
+    for line in raw.splitlines():
+        line = line.rstrip()
+        if not line:
+            continue
+
+        if line.strip() == '--hline--':
+            nodes.append({'type': 'hline'})
+            current_h1 = None
+            current_h2 = None
+            continue
+
+        # ── h1: ищем тег folder / folder-all ──
+        h1m = re.match(r'^# (.+)', line)
+        h2m = re.match(r'^## (.+)', line)
+        h3m = re.match(r'^### (.+)', line)
+        lkm = re.match(r'^\[([^\]]+)\]\(([^)]+)\)', line)
+
+        if h1m:
+            raw_label = h1m.group(1)
+            folder_all = bool(re.search(r'<folder-all\s*/?\s*>', raw_label))
+            folder_m   = re.search(r'<folder>([^<]+)</folder>', raw_label)
+            folder     = folder_m.group(1).strip() if folder_m else None
+            # καθαρό label (αφαιρούμε tags)
+            clean_label = re.sub(r'<folder[^>]*>.*?</folder>', '', raw_label)
+            clean_label = re.sub(r'<folder-all\s*/?\s*>', '', clean_label).strip()
+            node = {
+                'type': 'h1', 'label': clean_label, 'children': [],
+                'folder': folder, 'folder_all': folder_all,
+            }
+            nodes.append(node)
+            current_h1 = node
+            current_h2 = None
+
+        elif h2m:
+            node = {'type': 'h2', 'label': h2m.group(1).strip(), 'children': []}
+            if current_h1:
+                current_h1['children'].append(node)
+            else:
+                nodes.append(node)
+            current_h2 = node
+
+        elif h3m:
+            node = {'type': 'h3', 'label': h3m.group(1).strip(), 'children': []}
+            if current_h2:
+                current_h2['children'].append(node)
+            elif current_h1:
+                current_h1['children'].append(node)
+            else:
+                nodes.append(node)
+
+        elif lkm:
+            node = {'type': 'link', 'label': lkm.group(1), 'url': lkm.group(2)}
+
+            def last_h3(parent):
+                if parent and parent['children'] and parent['children'][-1]['type'] == 'h3':
+                    return parent['children'][-1]
+                return None
+
+            if current_h2:
+                lh3 = last_h3(current_h2)
+                (lh3 if lh3 else current_h2)['children'].append(node)
+            elif current_h1:
+                lh3 = last_h3(current_h1)
+                (lh3 if lh3 else current_h1)['children'].append(node)
+            else:
+                nodes.append(node)
+
+    return popup_node, nodes
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# HTML RENDERING
+# ─────────────────────────────────────────────────────────────────────────────
+
+_uid = [0]
+
+def new_uid():
+    _uid[0] += 1
+    return f'menu_{_uid[0]}'
+
+def reset_uid():
+    _uid[0] = 0
+
+def render_link(node):
+    url, label = node['url'], node['label']
+    return (f'<li class="menu-link">'
+            f'<a href="{url}" target="_blank" onclick="return openLink(event,\'{url}\')">'
+            f'{label}</a></li>')
+
+def render_h3(node):
+    uid = new_uid()
+    inner = '\n'.join(render_node(c) for c in node['children'])
+    if node['children']:
+        return f'''<li class="h3-item">
+  <button class="toggle-btn h3-btn" onclick="toggleMenu('{uid}')">
+    <span class="arrow">▸</span>{node["label"]}
+  </button>
+  <ul id="{uid}" class="submenu">{inner}</ul>
+</li>'''
+    return f'<li class="h3-item h3-leaf"><span class="leaf-label">◦ {node["label"]}</span></li>'
+
+def render_h2(node):
+    uid = new_uid()
+    inner = '\n'.join(render_node(c) for c in node['children'])
+    if node['children']:
+        return f'''<li class="h2-item">
+  <button class="toggle-btn h2-btn" onclick="toggleMenu('{uid}')">
+    <span class="arrow">▸</span>{node["label"]}
+  </button>
+  <ul id="{uid}" class="submenu">{inner}</ul>
+</li>'''
+    return f'<li class="h2-item h2-leaf"><span class="leaf-label">· {node["label"]}</span></li>'
+
+def render_h1(node):
+    uid = new_uid()
+    inner = '\n'.join(render_node(c) for c in node['children'])
+    if node['children']:
+        return f'''<li class="h1-item">
+  <button class="toggle-btn h1-btn" onclick="toggleMenu('{uid}')">
+    <span class="arrow">▸</span>{node["label"]}
+  </button>
+  <ul id="{uid}" class="submenu">{inner}</ul>
+</li>'''
+    return f'<li class="h1-item h1-leaf"><span class="leaf-label">{node["label"]}</span></li>'
+
+def render_popup(node):
+    uid = new_uid()
+    paragraphs = re.split(r'\n\s*\n', node['body'].strip())
+    paras_html = ''.join(
+        '<p>' + parse_inline(p.replace('\n', '<br>')) + '</p>'
+        for p in paragraphs if p.strip()
+    )
+    return f'''<li class="menu-link popup-item">
+  <button class="popup-trigger" onclick="showPopup(\'{uid}\')">{node["label"]}</button>
+</li>
+<div id="{uid}" class="popup-overlay" onclick="closePopup(event,\'{uid}\')">
+  <div class="popup-box">
+    <button class="popup-close" onclick="closePopupDirect(\'{uid}\')">✕</button>
+    {paras_html}
+  </div>
+</div>'''
+
+def render_node(node):
+    t = node['type']
+    if t == 'hline':  return '<li class="menu-hline"><hr></li>'
+    if t == 'link':   return render_link(node)
+    if t == 'h1':     return render_h1(node)
+    if t == 'h2':     return render_h2(node)
+    if t == 'h3':     return render_h3(node)
+    if t == 'popup':  return render_popup(node)
+    return ''
+
+def build_sidebar(nodes):
+    items = '\n'.join(render_node(n) for n in nodes)
+    return f'<ul class="sidebar-menu">{items}</ul>'
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CSS + JS (κοινό για όλες τις σελίδες)
+# ─────────────────────────────────────────────────────────────────────────────
+
+COMMON_CSS = '''\
 <style>
 :root{
   --bg:#0d0e14;
@@ -245,93 +461,9 @@ body::after{
   /* Επιτρέπουμε scroll στο main περιεχόμενο */
   #main{overflow-y:auto}
 }
-</style>
-</head>
-<body>
-<div id="bg-layer"></div>
-<div id="blob1"></div>
-<div id="blob2"></div>
-<div id="topbar">
-  <button id="menu-toggle" onclick="toggleSidebar()" aria-label="Μενού">☰</button>
-  <h1>Β Λυκείου</h1>
-  <a id="back-btn" href="../index.html">← Αρχική</a>
-  <div id="search-box">
-    <input id="search-input" type="text" placeholder="Αναζήτηση Wolfram…"
-           onkeydown="if(event.key==='Enter')doSearch()">
-    <button id="search-go" onclick="doSearch()" title="Αναζήτηση">⏎</button>
-    <button id="search-close-btn" onclick="closeSearch()">✕</button>
-  </div>
-  <button id="search-btn" onclick="toggleSearch()" title="Αναζήτηση">🔍</button>
-</div>
-<div id="layout">
-  <nav id="sidebar" aria-label="Πλαϊνό μενού">
-    <ul class="sidebar-menu"><li class="menu-link popup-item">
-  <button class="popup-trigger" onclick="showPopup('menu_1')">Περί τίνος πρόκειται;</button>
-</li>
-<div id="menu_1" class="popup-overlay" onclick="closePopup(event,'menu_1')">
-  <div class="popup-box">
-    <button class="popup-close" onclick="closePopupDirect('menu_1')">✕</button>
-    <p>🔬 H σελίδα αυτή περιέχει υλικό σχετικό με την εκπαίδευση των μαθηματικών και γενικότερα των θετικών επιστημών.</p><p>🧙‍♂️ Εγώ ονομάζομαι Κώστας Κούδας. Είμαι μαθηματικός, εργάζομαι στην Κέρκυρα.</p><p>🌐 Επιπλέον ιστοσελίδες μου μπορείτε να βρείτε <a href="porfolio.html" target="_blank" onclick="return openLink(event,'porfolio.html')">εδώ</a></p>
-  </div>
-</div>
-<li class="h1-item">
-  <button class="toggle-btn h1-btn" onclick="toggleMenu('menu_2')">
-    <span class="arrow">▸</span>Χρήσιμοι σύνδεσμοι
-  </button>
-  <ul id="menu_2" class="submenu"><li class="menu-link"><a href="https://www.wolframalpha.com/" target="_blank" onclick="return openLink(event,'https://www.wolframalpha.com/')">Wolfram Alpha</a></li>
-<li class="menu-link"><a href="https://www.wolframcloud.com/" target="_blank" onclick="return openLink(event,'https://www.wolframcloud.com/')">Wolfram Cloud</a></li>
-<li class="menu-link"><a href="https://www.desmos.com/calculator?lang=el" target="_blank" onclick="return openLink(event,'https://www.desmos.com/calculator?lang=el')">Desmos</a></li>
-<li class="menu-link"><a href="https://www.geogebra.org/" target="_blank" onclick="return openLink(event,'https://www.geogebra.org/')">Geogebra-geometry 2D</a></li>
-<li class="menu-link"><a href="https://phet.colorado.edu/" target="_blank" onclick="return openLink(event,'https://phet.colorado.edu/')">Phet</a></li>
-<li class="menu-link"><a href="https://javalab.org/en/" target="_blank" onclick="return openLink(event,'https://javalab.org/en/')">Javalab</a></li></ul>
-</li>
-<li class="h1-item">
-  <button class="toggle-btn h1-btn" onclick="toggleMenu('menu_3')">
-    <span class="arrow">▸</span>Β Λυκείου
-  </button>
-  <ul id="menu_3" class="submenu"><li class="h2-item">
-  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_4')">
-    <span class="arrow">▸</span>Άλγεβρα
-  </button>
-  <ul id="menu_4" class="submenu"><li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_5')">
-    <span class="arrow">▸</span>Συναρτήσεις
-  </button>
-  <ul id="menu_5" class="submenu"><li class="menu-link"><a href="xaraktirismosSynartisis.html" target="_blank" onclick="return openLink(event,'xaraktirismosSynartisis.html')">Quiz: Πώς θα χαρακτήριζες τη συνάρτηση;</a></li>
-<li class="menu-link"><a href="symmetries.html" target="_blank" onclick="return openLink(event,'symmetries.html')">Quiz: Κατακόρυφη/οριζόντια μετατόπιση και συμμετρίες</a></li></ul>
-</li>
-<li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_6')">
-    <span class="arrow">▸</span>Τριγωνομετρία
-  </button>
-  <ul id="menu_6" class="submenu"><li class="menu-link"><a href="TrigonCyklos.html" target="_blank" onclick="return openLink(event,'TrigonCyklos.html')">Quiz: Κατανόηση του τριγωνομετρικού κύκλου</a></li>
-<li class="menu-link"><a href="anagogiAtetartimorio.html" target="_blank" onclick="return openLink(event,'anagogiAtetartimorio.html')">Quiz: Αναγωγή στο 1ο τεταρτημόριο</a></li>
-<li class="menu-link"><a href="TrigonomSynart.html" target="_blank" onclick="return openLink(event,'TrigonomSynart.html')">Quiz: Τριγωνομετρικές συναρτήσεις</a></li>
-<li class="menu-link"><a href="TrigonomExis.html" target="_blank" onclick="return openLink(event,'TrigonomExis.html')">Quiz: Τριγωνομετρικές εξισώσεις</a></li>
-<li class="menu-link"><a href="Trigonometria.html" target="_blank" onclick="return openLink(event,'Trigonometria.html')">Quiz: Επανάληψη στην τριγωνομετρία (υπό κατασκευή)</a></li></ul>
-</li>
-<li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_7')">
-    <span class="arrow">▸</span>Επαναληπτικά
-  </button>
-  <ul id="menu_7" class="submenu"><li class="menu-link"><a href="GrigoroiYpologismoi.html" target="_blank" onclick="return openLink(event,'GrigoroiYpologismoi.html')">Quiz: Γρήγοροι υπολογισμοί</a></li></ul>
-</li></ul>
-</li>
-<li class="h2-item">
-  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_8')">
-    <span class="arrow">▸</span>Κατεύθυνση
-  </button>
-  <ul id="menu_8" class="submenu"><li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_9')">
-    <span class="arrow">▸</span>Επαναληπτικά
-  </button>
-  <ul id="menu_9" class="submenu"><li class="menu-link"><a href="KateythEpan.html" target="_blank" onclick="return openLink(event,'KateythEpan.html')">Quiz: Γενική επανάληψη</a></li></ul>
-</li></ul>
-</li></ul>
-</li></ul>
-  </nav>
-  <main id="main"></main>
-</div>
+</style>'''
+
+COMMON_JS = '''\
 <script>
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
 document.addEventListener('click',function(e){
@@ -375,6 +507,153 @@ document.addEventListener('click',function(e){
   el.style.position='relative';el.style.overflow='hidden';
   el.appendChild(r);setTimeout(()=>r.remove(),580);
 });
-</script>
+</script>'''
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PAGE BUILDERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def make_topbar(title='Δρόμος', back=False, bg_path='MyBackground.svg'):
+    """Επιστρέφει topbar HTML. back=True → κουμπί επιστροφής."""
+    back_btn = ''
+    if back:
+        back_btn = '<a id="back-btn" href="../index.html">← Αρχική</a>'
+    return f'''\
+<div id="topbar">
+  <button id="menu-toggle" onclick="toggleSidebar()" aria-label="Μενού">☰</button>
+  <h1>{title}</h1>
+  {back_btn}
+  <div id="search-box">
+    <input id="search-input" type="text" placeholder="Αναζήτηση Wolfram…"
+           onkeydown="if(event.key==='Enter')doSearch()">
+    <button id="search-go" onclick="doSearch()" title="Αναζήτηση">⏎</button>
+    <button id="search-close-btn" onclick="closeSearch()">✕</button>
+  </div>
+  <button id="search-btn" onclick="toggleSearch()" title="Αναζήτηση">🔍</button>
+</div>'''
+
+
+def build_page(sidebar_html, title='Δρόμος', back=False, bg_path='MyBackground.svg'):
+    """Φτιάχνει ολόκληρη HTML σελίδα."""
+    # Το bg path στο CSS διαφέρει: ρίζα vs subfolder
+    css = COMMON_CSS
+    if back:
+        # Στα subfolders το SVG είναι ../MyBackground.svg (ήδη στο COMMON_CSS)
+        pass
+    else:
+        # Στο root το SVG είναι MyBackground.svg
+        css = css.replace("url('../MyBackground.svg')", "url('MyBackground.svg')")
+
+    topbar = make_topbar(title=title, back=back)
+
+    return f'''\
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{title}</title>
+{css}
+</head>
+<body>
+<div id="bg-layer"></div>
+<div id="blob1"></div>
+<div id="blob2"></div>
+{topbar}
+<div id="layout">
+  <nav id="sidebar" aria-label="Πλαϊνό μενού">
+    {sidebar_html}
+  </nav>
+  <main id="main"></main>
+</div>
+{COMMON_JS}
 </body>
 </html>
+'''
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MAIN
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+import copy
+
+def strip_folder_prefix(nodes, folder):
+    """
+    Επιστρέφει deep copy των nodes με τα URLs απαλλαγμένα
+    από το prefix 'folder/' (case-sensitive).
+    """
+    prefix = folder.rstrip('/') + '/'
+    def fix_node(n):
+        n = dict(n)
+        if n.get('type') == 'link':
+            url = n['url']
+            if url.startswith(prefix):
+                n['url'] = url[len(prefix):]
+        if 'children' in n:
+            n['children'] = [fix_node(c) for c in n['children']]
+        return n
+    return [fix_node(n) for n in nodes]
+
+def main():
+    script_dir  = os.path.dirname(os.path.abspath(__file__))
+    input_path  = os.path.join(script_dir, 'sxediagramma.txt')
+    output_path = os.path.join(script_dir, 'index.html')
+
+    popup_node, nodes = parse_file(input_path)
+
+    # ── 1. Κύριο index.html ──────────────────────────────────────────────────
+    reset_uid()
+    sidebar_nodes = nodes  # όλοι οι nodes (popup + h1 + hline κτλ.)
+    sidebar_html  = build_sidebar(sidebar_nodes)
+    html = build_page(sidebar_html, title='Δρόμος', back=False)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(html)
+    print(f'✓ {output_path}')
+
+    # ── 2. Βρες folder-all sections ──────────────────────────────────────────
+    folder_all_nodes = [n for n in nodes if n.get('type') == 'h1' and n.get('folder_all')]
+
+    # ── 3. Sub-folder index.html για κάθε <folder> ───────────────────────────
+    for node in nodes:
+        if node.get('type') != 'h1':
+            continue
+        folder = node.get('folder')
+        if not folder:
+            continue
+
+        folder_path = os.path.join(script_dir, folder)
+        if not os.path.isdir(folder_path):
+            print(f'⚠  Ο φάκελος "{folder}" δεν βρέθηκε — παράλειψη.')
+            continue
+
+        # Δόμηση sidebar για subfolder:
+        # popup (αν υπάρχει) + folder-all sections + το ίδιο το section
+        sub_nodes = []
+        if popup_node:
+            sub_nodes.append(popup_node)
+        for fa in folder_all_nodes:
+            # Αποφύγαμε διπλοεγγραφή αν το ίδιο node είναι και folder_all
+            if fa is not node:
+                sub_nodes.append(fa)
+        sub_nodes.append(node)
+
+        reset_uid()
+        sub_nodes = strip_folder_prefix(sub_nodes, folder)
+        sub_sidebar = build_sidebar(sub_nodes)
+        sub_html = build_page(
+            sub_sidebar,
+            title=node['label'],
+            back=True,
+        )
+        sub_output = os.path.join(folder_path, 'index.html')
+        with open(sub_output, 'w', encoding='utf-8') as f:
+            f.write(sub_html)
+        print(f'✓ {sub_output}')
+
+    print('\nΟλοκληρώθηκε.')
+
+if __name__ == '__main__':
+    main()
