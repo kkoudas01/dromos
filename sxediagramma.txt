@@ -7,7 +7,7 @@
 🌐 Επιπλέον ιστοσελίδες μου μπορείτε να βρείτε [εδώ](porfolio.html)}
 </popup>
 
-# Χρήσιμοι σύνδεσμοι
+# Χρήσιμοι σύνδεσμοι <folder-all></folder>
 
 [Wolfram Alpha](https://www.wolframalpha.com/)
 
@@ -23,7 +23,7 @@
 
 --hline--
 
-# Α Γυμνασίου
+# Α Γυμνασίου <folder>GymnasioA</folder>
 
 ## Άλγεβρα
 
@@ -33,7 +33,7 @@
 
 [Quiz στους αρνητικούς - με ανακάτεμα επιλογών](GymnasioA/arnitikoiarithmoiSUFFLE.html)
 
-# Γ Γυμνασίου
+# Γ Γυμνασίου <folder>GymnasioC</folder>
 
 ## Γεωμετρία
 
@@ -41,7 +41,7 @@
 
 [Quiz: Τριγωνομετρικοί αριθμοί κυρτών γωνιών](GymnasioC/trigonArithGgymnSel.html)
 
-# Β Λυκείου
+# Β Λυκείου <folder>LykeioB</folder>
 
 ## Άλγεβρα
 
@@ -73,7 +73,7 @@
 
 [Quiz: Γενική επανάληψη](LykeioB/KateythEpan.html)
 
-# Γ Λυκείου
+# Γ Λυκείου <folder>LykeioC</folder>
 
 ## Κατεύθυνση
 
