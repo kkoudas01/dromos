@@ -26,11 +26,17 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
+@media(max-height:500px){body{overflow:auto}}
 body{background:var(--bg);color:var(--text);font-family:var(--font-ui);display:flex;flex-direction:column}
 #bg-layer{
   position:fixed;inset:0;z-index:0;
-  background:url('../MyBackground.svg') center/cover no-repeat;
+  background:url('../MyBackground.svg') center center/contain no-repeat;
   opacity:.45;pointer-events:none;
+}
+@media(min-width:701px){
+  #bg-layer{
+    left:var(--sidebar-w);
+  }
 }
 #blob1{
   position:fixed;width:520px;height:520px;border-radius:50%;z-index:0;
@@ -117,12 +123,12 @@ body::after{
 #search-go:hover{transform:scale(1.25);color:var(--accent3)}
 #search-close-btn{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:.85rem;transition:color var(--transition)}
 #search-close-btn:hover{color:#fff}
-#layout{position:relative;z-index:1;display:flex;flex:1;overflow:hidden}
+#layout{position:relative;z-index:1;display:flex;flex:1;overflow:hidden;min-height:0}
 #sidebar{
   width:var(--sidebar-w);flex-shrink:0;
   background:linear-gradient(180deg,#0f0f1c 0%,#0c0c15 100%);
   border-right:1px solid var(--sidebar-border);
-  overflow-y:auto;overflow-x:hidden;height:100%;
+  overflow-y:auto;overflow-x:hidden;height:100%;min-height:0;
   transition:transform var(--transition),box-shadow var(--transition);
   scrollbar-width:thin;scrollbar-color:var(--accent) transparent;
 }
@@ -130,7 +136,7 @@ body::after{
 #sidebar::-webkit-scrollbar{width:3px}
 #sidebar::-webkit-scrollbar-thumb{background:linear-gradient(var(--accent),var(--accent3));border-radius:2px}
 #sidebar::before{content:'';display:block;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),transparent);opacity:.75}
-#main{flex:1;overflow:auto;padding:32px 36px;height:100%}
+#main{flex:1;overflow:auto;padding:32px 36px;height:100%;min-height:0}
 .sidebar-menu{list-style:none;padding:8px 0}
 .menu-hline{padding:4px 12px}
 .menu-hline hr{border:none;height:2px;margin:6px 0;background:linear-gradient(90deg,transparent,var(--hline) 25%,var(--hline) 75%,transparent);border-radius:1px;box-shadow:0 0 6px rgba(74,72,112,.5)}
@@ -215,9 +221,15 @@ body::after{
 @keyframes rippleAnim{to{transform:scale(4);opacity:0}}
 @media(max-width:700px){
   #menu-toggle{display:block}
-  #sidebar{position:fixed;left:0;top:56px;bottom:0;z-index:200;transform:translateX(-110%)}
+  #sidebar{position:fixed;left:0;top:56px;bottom:0;z-index:200;transform:translateX(-110%);overflow-y:auto}
   #sidebar.open{transform:translateX(0)}
   #search-input{width:140px}
+}
+@media(max-width:700px) and (orientation:landscape){
+  html,body{height:auto;overflow:auto}
+  #layout{min-height:calc(100vh - 56px);overflow:visible}
+  #main{overflow:visible;height:auto}
+  #sidebar{position:fixed;top:56px;bottom:0;overflow-y:auto}
 }
 </style>
 </head>
