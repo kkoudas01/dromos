@@ -1,63 +1,50 @@
 import os
 import base64
 import mimetypes
+import tkinter as tk
+from tkinter import filedialog, messagebox
 from io import BytesIO
 from PIL import Image
 from bs4 import BeautifulSoup
 
-# Παράμετροι συμπίεσης (προσαρμόστε όπως θέλετε)
-MAX_WIDTH = 1024          # μέγιστο πλάτος σε pixels
-MAX_HEIGHT = 1024         # μέγιστο ύψος σε pixels
-JPEG_QUALITY = 85         # ποιότητα JPEG (1-100, 85 είναι καλή ισορροπία)
+# Παράμετροι συμπίεσης
+MAX_WIDTH = 1024
+MAX_HEIGHT = 1024
+JPEG_QUALITY = 85
 
 def resize_image_if_needed(image_path):
-    """
-    Ανοίγει την εικόνα, ελέγχει αν χρειάζεται αλλαγή μεγέθους.
-    Επιστρέφει τα bytes της (πιθανώς συμπιεσμένης) εικόνας και το MIME type.
-    """
-    # Προσδιορισμός τύπου εικόνας από την επέκταση (για την τελική αποθήκευση)
+    """Ανοίγει την εικόνα, ελέγχει αν χρειάζεται αλλαγή μεγέθους και επιστρέφει bytes, mime type."""
     mime_type, _ = mimetypes.guess_type(image_path)
     if mime_type is None:
         mime_type = 'image/octet-stream'
 
-    # Άνοιγμα εικόνας με PIL
     with Image.open(image_path) as img:
-        # Αν είναι animated GIF, το αφήνουμε ως έχει (χωρίς αλλαγή μεγέθους)
         if getattr(img, 'is_animated', False):
             print(f"  Animated GIF, δεν αλλάζουμε μέγεθος.")
             with open(image_path, 'rb') as f:
                 return f.read(), mime_type
 
         original_width, original_height = img.size
-        # Έλεγχος αν χρειάζεται resize
         if original_width <= MAX_WIDTH and original_height <= MAX_HEIGHT:
             print(f"  Δεν χρειάζεται resize ({original_width}x{original_height})")
-            # Διαβάζουμε το αρχικό αρχείο χωρίς αλλαγές
             with open(image_path, 'rb') as f:
                 return f.read(), mime_type
 
-        # Υπολογισμός νέων διαστάσεων διατηρώντας την αναλογία
         ratio = min(MAX_WIDTH / original_width, MAX_HEIGHT / original_height)
         new_width = int(original_width * ratio)
         new_height = int(original_height * ratio)
         print(f"  Resize: {original_width}x{original_height} -> {new_width}x{new_height}")
 
-        # Αλλαγή μεγέθους (χρήση φίλτρου Lanczos για καλή ποιότητα)
         img_resized = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-
-        # Αποθήκευση σε buffer ανάλογα με τον τύπο
         buffer = BytesIO()
+
         if mime_type == 'image/jpeg':
             img_resized.save(buffer, format='JPEG', quality=JPEG_QUALITY, optimize=True)
         elif mime_type == 'image/png':
-            # Για PNG, αποθηκεύουμε με βέλτιστη συμπίεση (χωρίς απώλειες)
             img_resized.save(buffer, format='PNG', optimize=True)
         elif mime_type == 'image/gif' and not getattr(img, 'is_animated', False):
-            # Στατικό GIF -> το αποθηκεύουμε ως GIF
             img_resized.save(buffer, format='GIF', optimize=True)
         else:
-            # Για άλλες μορφές (π.χ. BMP, WebP) αποθηκεύουμε χωρίς ιδιαίτερες ρυθμίσεις
-            # ή μετατρέπουμε σε JPEG/PNG ανάλογα; εδώ απλά κρατάμε την ίδια μορφή
             format = mime_type.split('/')[-1].upper()
             if format == 'JPG':
                 format = 'JPEG'
@@ -84,11 +71,9 @@ def process_html_file(html_path, input_folder, output_folder):
         if not src:
             continue
 
-        # Αγνοούμε εξωτερικά URLs ή ήδη ενσωματωμένες εικόνες
         if src.startswith(('http://', 'https://', 'data:')):
             continue
 
-        # Δημιουργούμε την απόλυτη διαδρομή προς το αρχείο εικόνας
         img_abs_path = os.path.join(input_folder, src)
         if not os.path.exists(img_abs_path):
             print(f"Προσοχή: Η εικόνα {img_abs_path} δεν βρέθηκε. Αγνοείται.")
@@ -113,21 +98,42 @@ def process_html_file(html_path, input_folder, output_folder):
     else:
         print(f"Δεν βρέθηκαν εικόνες προς ενσωμάτωση στο {html_path}")
 
-def main():
-    input_folder = "MyFolder"        # Ο φάκελος με τα αρχικά HTML και εικόνες
-    output_folder = "MyFolderBASE64" # Ο φάκελος για τα νέα HTML
+def select_folder():
+    """Ανοίγει διάλογο επιλογής φακέλου και επιστρέφει τη διαδρομή."""
+    root = tk.Tk()
+    root.withdraw()  # Απόκρυψη του κύριου παραθύρου
+    folder = filedialog.askdirectory(title="Επιλέξτε τον φάκελο που περιέχει τα HTML και τις εικόνες")
+    root.destroy()
+    return folder
 
-    if not os.path.exists(input_folder):
-        print(f"Ο φάκελος {input_folder} δεν υπάρχει.")
+def main():
+    # Επιλογή φακέλου εισόδου
+    input_folder = select_folder()
+    if not input_folder:
+        print("Δεν επιλέχθηκε φάκελος. Τερματισμός.")
         return
 
+    # Δημιουργία ονόματος φακέλου εξόδου: input_folder + "BASE64"
+    base_name = os.path.basename(input_folder)
+    parent_dir = os.path.dirname(input_folder)
+    output_folder = os.path.join(parent_dir, base_name + "BASE64")
+
+    print(f"Φάκελος εισόδου: {input_folder}")
+    print(f"Φάκελος εξόδου: {output_folder}")
+
+    # Δημιουργία φακέλου εξόδου
     os.makedirs(output_folder, exist_ok=True)
 
+    # Επεξεργασία όλων των .html / .htm αρχείων αναδρομικά
     for root, dirs, files in os.walk(input_folder):
         for file in files:
             if file.lower().endswith(('.html', '.htm')):
                 html_path = os.path.join(root, file)
                 process_html_file(html_path, input_folder, output_folder)
+
+    print("Η διαδικασία ολοκληρώθηκε.")
+    # Εμφάνιση μηνύματος ολοκλήρωσης
+    messagebox.showinfo("Ολοκλήρωση", f"Η επεξεργασία ολοκληρώθηκε.\nΤα αρχεία αποθηκεύτηκαν στον φάκελο:\n{output_folder}")
 
 if __name__ == "__main__":
     main()

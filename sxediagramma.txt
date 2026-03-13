@@ -1,0 +1,96 @@
+<popup>
+{Περί τίνος πρόκειται;}
+{🔬 H σελίδα αυτή περιέχει υλικό σχετικό με την εκπαίδευση των μαθηματικών και γενικότερα των θετικών επιστημών.
+
+🧙‍♂️ Εγώ ονομάζομαι Κώστας Κούδας. Είμαι μαθηματικός, εργάζομαι στην Κέρκυρα.
+
+🌐 Επιπλέον ιστοσελίδες μου μπορείτε να βρείτε [εδώ](porfolio.html)}
+</popup>
+
+# Χρήσιμοι σύνδεσμοι
+
+[Wolfram Alpha](https://www.wolframalpha.com/)
+
+[Wolfram Cloud](https://www.wolframcloud.com/)
+
+[Desmos](https://www.desmos.com/calculator?lang=el)
+
+[Geogebra-geometry 2D](https://www.geogebra.org/)
+
+[Phet](https://phet.colorado.edu/)
+
+[Javalab](https://javalab.org/en/)
+
+--hline--
+
+# Α Γυμνασίου
+
+## Άλγεβρα
+
+### Αρνητικοί αριθμοί
+
+[Quiz στους αρνητικούς](GymnasioA/arnitikoiarithmoi.html)
+
+[Quiz στους αρνητικούς - με ανακάτεμα επιλογών](GymnasioA/arnitikoiarithmoiSUFFLE.html)
+
+# Γ Γυμνασίου
+
+## Γεωμετρία
+
+### Τριγωνομετρία
+
+[Quiz: Τριγωνομετρικοί αριθμοί κυρτών γωνιών](GymnasioC/trigonArithGgymnSel.html)
+
+# Β Λυκείου
+
+## Άλγεβρα
+
+### Συναρτήσεις
+
+[Quiz: Πώς θα χαρακτήριζες τη συνάρτηση;](LykeioB/xaraktirismosSynartisis.html)
+
+[Quiz: Κατακόρυφη/οριζόντια μετατόπιση και συμμετρίες](LykeioB/symmetries.html)
+
+### Τριγωνομετρία
+
+[Quiz: Κατανόηση του τριγωνομετρικού κύκλου](LykeioB/TrigonCyklos.html)
+
+[Quiz: Αναγωγή στο 1ο τεταρτημόριο](LykeioB/anagogiAtetartimorio.html)
+
+[Quiz: Τριγωνομετρικές συναρτήσεις](LykeioB/TrigonomSynart.html)
+
+[Quiz: Τριγωνομετρικές εξισώσεις](LykeioB/TrigonomExis.html)
+
+[Quiz: Επανάληψη στην τριγωνομετρία (υπό κατασκευή)](LykeioB/Trigonometria.html)
+
+### Επαναληπτικά
+
+[Quiz: Γρήγοροι υπολογισμοί](LykeioB/GrigoroiYpologismoi.html)
+
+## Κατεύθυνση
+
+### Επαναληπτικά
+
+[Quiz: Γενική επανάληψη](LykeioB/KateythEpan.html)
+
+# Γ Λυκείου
+
+## Κατεύθυνση
+
+### Εισαγωγή στις συναρτήσεις
+
+[Πρώτα βήματα](LykeioC/functionsIntro_Tiled/presentationTILES.html)
+
+[Γραφικές παραστάσεις](LykeioC/graphs_Tiled/presentationTILES.html)
+
+[Μετασχηματισμοί γραφικών παραστάσεων](LykeioC/symmetriesSynart_Tiled/presentationTILES.html)
+
+[Πράξεις και σχέσεις συναρτήσεων](LykeioC/praxeisSxeseis_Tiled/presentationTILES.html)
+
+[Μονοτονία-ακρότατα](LykeioC/monotoniaAkrotata_Tiled/presentationTILES.html)
+
+[Αντιστρέψιμες συναρτήσεις](LykeioC/antistrepsimes_Tiled/presentationTILES.html)
+
+[Quiz: Γραφικές παραστάσεις](LykeioC/EidosGrapg.html)
+
+

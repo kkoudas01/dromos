@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Επανάληψη στην τριγωνομετρία</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .quiz-container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .question-area { /* Για να ομαδοποιήσει την ερώτηση και το κουμπί καθαρισμού */
+        margin-bottom: 20px;
+    }
+    .question-prompt {
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+    .sentence-container {
+      display: flex;
+      flex-wrap: wrap; /* Επιτρέπει στα τμήματα της πρότασης να αναδιπλωθούν αν δεν χωράνε */
+      align-items: center; /* Στοιχίζει τα τμήματα της πρότασης και τα κενά κάθετα */
+      gap: 5px; /* Μικρό κενό μεταξύ των τμημάτων */
+      margin: 15px 0;
+      min-height: 30px; /* Ελάχιστο ύψος για να μην "πηδάει" η διάταξη */
+    }
+    .blank-space {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 8px 12px; /* Περισσότερο padding για να φαίνεται σαν πεδίο */
+      min-width: 50px; /* Ελάχιστο πλάτος για τα κενά */
+      text-align: center;
+      font-weight: bold;
+      background-color: #f9f9f9;
+      display: inline-block; /* Για να συμπεριφέρεται σωστά με το padding/min-width */
+    }
+    .blank-space.filled {
+        background-color: #e0ffe0; /* Ελαφρύ πράσινο όταν συμπληρωθεί */
+        border-color: #a0c0a0;
+    }
+    #question-image-container img {
+      display: block; /* Για να πιάνει όλο το πλάτος και να λειτουργούν τα margin auto */
+      margin: 10px auto 15px auto; /* Κεντράρισμα και περιθώρια */
+      max-width: 80%;  /* Προσαρμόστε ανάλογα με τις ανάγκες σας */
+      max-height: 300px; /* Ορίστε ένα μέγιστο ύψος αν θέλετε */
+      border: 1px solid #ddd; /* Ένα διακριτικό περίγραμμα */
+      border-radius: 5px; /* Στρογγυλεμένες γωνίες */
+  }
+    .options-container {
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .option-button {
+      background-color: #007bff;
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    .option-button:hover {
+      background-color: #0056b3;
+    }
+    .option-button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    #clear-choices {
+        background-color: #ffc107;
+        color: black;
+    }
+    #clear-choices:hover {
+        background-color: #e0a800;
+    }
+    button {
+      background-color: #28a745; /* Γενικό κουμπί υποβολής */
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    #timer, #result {
+      font-size: 1.2em;
+      margin: 10px 0;
+    }
+    .hidden {
+      display: none;
+    }
+    .timeout {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div id="intro">
+      <h1>Επανάληψη στην τριγωνομετρία</h1>
+      <p>Στο παρόν quiz θα χρειαστεί να ξέρεις ό,τι έχεις διδαχθεί από το κεφάλαιο της τριγωνομετρίας.</p>
+      <p>Χρονικό όριο: 15 λεπτά</p>
+      <button id="start">Ξεκίνα το Κουίζ</button>
+      <button id="otherpage">Πήγαινε πίσω στην τάξη σου</button>
+    </div>
+    <div id="timer" class="hidden">Χρόνος: 15:00</div>
+    <div id="quiz" class="hidden">
+        <div class="question-area">
+            <h3 id="question-number-title"></h3>
+            <div id="question-prompt-text" class="question-prompt"></div>
+            <div id="question-image-container"></div> <div id="sentence-container" class="sentence-container"></div>
+            <div id="sentence-container" class="sentence-container">
+                </div>
+            <div id="options-container">
+                </div>
+        </div>
+        <button id="clear-choices" class="hidden">Καθαρισμός Επιλογών</button>
+    </div>
+    <button id="submit" class="hidden">Υποβολή Απάντησης</button>
+    <div id="result" class="hidden"></div>
+    <button id="download" class="hidden">Λήψη Αποτελεσμάτων (PDF)</button>
+  </div>
+
+  <script>
+    // ΠΡΟΣΑΡΜΟΣΜΕΝΟ quizData
+    const quizData = [
+      {
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( ημ(- x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["-","\\(ημ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( σφ\\left(\\frac{π}{2} - x\\right)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["+","\\(εφ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( εφ\\left(\\frac{π}{2} + x\\right)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["-","\\(σφ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( συν(π - x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["-", "\\(συν\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( εφ(π + x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["+", "\\(εφ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( συν\\left(\\frac{π}{2} - x\\right)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["+","\\(ημ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( ημ\\left(\\frac{π}{2} + x\\right)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["+","\\(συν\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( σφ(2π + x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["+", "\\(σφ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( ημ(π- x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["+","\\(ημ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( σφ\\left(\\frac{π}{2} + x\\right)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["-","\\(εφ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( εφ\\left(\\frac{π}{2} - x\\right)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["+","\\(σφ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( συν(π+ x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["-", "\\(συν\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( εφ(2π+ x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["+", "\\(εφ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( ημ\\left(\\frac{π}{2} - x\\right)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["+","\\(συν\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( συν\\left(\\frac{π}{2} + x\\right)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["-","\\(ημ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( σφ(- x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["-", "\\(σφ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( ημ(π+ x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["-","\\(ημ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( συν(2π+ x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["+", "\\(συν\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( εφ(- x)=\\) ", null, null," \\(εφ(x)\\)"],
+        correctAnswers: ["-", "\\(εφ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( σφ(π- x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["-", "\\(σφ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( ημ(2π+ x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["+","\\(ημ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( συν(- x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["+", "\\(συν\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( εφ(π- x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["-", "\\(εφ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+{
+        questionPrompt: "Συμπλήρωσε την ισότητα:",
+        sentenceTemplate: ["\\( σφ(π+ x)=\\) ", null, null," \\((x)\\)"],
+        correctAnswers: ["+", "\\(σφ\\)"],
+        options: ["+", "-","\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+      },
+      {
+        questionPrompt: "Συμπλήρωσε το πρόσημο:",
+        sentenceTemplate: ["\\( ημ\\left(\\dfrac{π}{6}\\right)=\\) ", null],
+        correctAnswers: ["\\(\\dfrac{1}{2}\\)"],
+        options: ["\\(0\\)", "\\(1\\)", "\\(-1\\)","\\(\\sqrt{3}\\)", "\\(\\dfrac{1}{2}\\)", "\\(\\dfrac{\\sqrt{2}}{2}\\)",
+         "\\(\\dfrac{\\sqrt{3}}{2}\\)", "\\(\\dfrac{\\sqrt{3}}{3}\\)"]
+      },
+      {
+        questionPrompt: "Να λύσεις την εξίσωση στο \\(\\mathbb{R}\\) (η σειρά ΔΕΝ έχει σημασία):",
+        sentenceTemplate: [
+            "\\(ημ(x)=1\\Leftrightarrow x= \\)", null, "\\(+\\)", null
+            // Π.χ. ο χρήστης μπορεί να βάλει "Οξυγόνο" στο πρώτο κενό και "Υδρογόνο" στο δεύτερο, ή ανάποδα.
+        ],
+        correctAnswers: ["\\(2κπ\\)", "\\(\\dfrac{π}{2}\\)"], // Οι σωστές απαντήσεις
+        options: ["\\(0\\)","\\(\\dfrac{π}{2}\\)", "\\(π\\)","\\(\\dfrac{3π}{2}\\)","\\(κπ\\)", "\\(2κπ\\)"],
+        orderMatters: false // ΣΗΜΑΝΤΙΚΟ: Η σειρά δεν έχει σημασία
+    },
+    {
+      questionPrompt: "Να λύσεις την εξίσωση στο \\([0,2π]\\) (η σειρά ΔΕΝ έχει σημασία):",
+      sentenceTemplate: [
+          "\\(ημ(x)=0\\Leftrightarrow x= \\)", null, " ή \\(x=\\)", null, " ή \\(x=\\)", null
+          // Π.χ. ο χρήστης μπορεί να βάλει "Οξυγόνο" στο πρώτο κενό και "Υδρογόνο" στο δεύτερο, ή ανάποδα.
+      ],
+      correctAnswers: ["\\(0\\)", "\\(π\\)", "\\(2π\\)"], // Οι σωστές απαντήσεις
+      options: ["\\(0\\)","\\(\\dfrac{π}{6}\\)","\\(\\dfrac{π}{4}\\)","\\(\\dfrac{π}{3}\\)",
+      "\\(\\dfrac{π}{2}\\)", "\\(π\\)","\\(\\dfrac{3π}{2}\\)","\\(2π\\)"],
+      orderMatters: false // ΣΗΜΑΝΤΙΚΟ: Η σειρά δεν έχει σημασία
+  },
+    {
+        questionPrompt: "Να συμπληρώσεις τον τύπο της συνάρτησης.",
+        imageURL: "sinCDOT2.png",
+        sentenceTemplate: [
+            "\\( f(x) = \\)", null, "\\( \\cdot \\)", null, "\\((x)\\)"
+        ],
+        correctAnswers: ["\\(2\\)", "\\(ημ\\)"],
+        options: ["\\(2\\)", "\\(-2\\)", "\\(ημ\\)", "\\(συν\\)", "\\(εφ\\)", "\\(σφ\\)"]
+        // Μπορείτε να παραλείψετε το 'orderMatters: true' αν η προεπιλογή είναι true
+        // orderMatters: true
+    }
+    ];
+
+    const TIME_LIMIT = 900; // 15 λεπτά σε δευτερόλεπτα
+
+    let currentQuestion = 0;
+    let score = 0;
+    let startTime;
+    let timerInterval;
+    let attempt = 1;
+    let timeLimitExceeded = false;
+    const attemptsData = [];
+
+    let userAnswersForCurrentQuestion = [];
+    let nextBlankToFillIndex = 0; // Δείκτης για το επόμενο κενό προς συμπλήρωση
+    let optionButtons = []; // Για να κρατάμε αναφορές στα κουμπιά επιλογών
+
+    function startQuiz() {
+      document.getElementById("intro").classList.add("hidden");
+      document.getElementById("timer").classList.remove("hidden");
+      document.getElementById("quiz").classList.remove("hidden");
+      document.getElementById("submit").classList.remove("hidden");
+      document.getElementById("clear-choices").classList.remove("hidden");
+      document.getElementById("result").classList.add("hidden");
+      document.getElementById("download").classList.add("hidden");
+
+      startTime = new Date();
+      timeLimitExceeded = false;
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+      timerInterval = setInterval(updateTimer, 1000);
+
+      currentQuestion = 0;
+      score = 0;
+      loadQuestion();
+    }
+
+    function updateTimer() {
+      const now = new Date();
+      const elapsed = Math.floor((now - startTime) / 1000);
+      const remaining = TIME_LIMIT - elapsed;
+
+      const minutes = Math.floor(remaining / 60).toString().padStart(2, "0");
+      const seconds = (remaining % 60).toString().padStart(2, "0");
+      
+      const timerElement = document.getElementById("timer");
+      timerElement.textContent = `Χρόνος: ${minutes}:${seconds}`;
+      
+      if (remaining <= 0) {
+        timeLimitExceeded = true;
+        timerElement.classList.add("timeout");
+        timerElement.textContent = `Χρόνος: 00:00 (Έχει παρέλθει ο χρόνος, αλλά συνεχίζεις)`;
+        // Δεν σταματάμε το quiz αυτόματα, ο χρήστης μπορεί να συνεχίσει
+      }
+    }
+
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
+      const secs = (seconds % 60).toString().padStart(2, "0");
+      return `${minutes}:${secs}`;
+    }
+
+    function loadQuestion() {
+      const q = quizData[currentQuestion];
+      const questionNumberTitle = document.getElementById("question-number-title");
+      const questionPromptText = document.getElementById("question-prompt-text");
+      const questionImageContainer = document.getElementById("question-image-container"); // Πάρτε το νέο container
+      const sentenceContainer = document.getElementById("sentence-container");
+      const optionsContainer = document.getElementById("options-container");
+  
+      questionNumberTitle.textContent = `Ερώτηση ${currentQuestion + 1}`;
+      questionPromptText.textContent = q.questionPrompt;
+  
+      // Διαχείριση και εμφάνιση της εικόνας
+      questionImageContainer.innerHTML = ''; // Καθαρισμός τυχόν προηγούμενης εικόνας
+      if (q.imageURL) {
+          const imgElement = document.createElement("img");
+          imgElement.src = q.imageURL;
+          imgElement.alt = q.questionPrompt || "Εικόνα Ερώτησης"; // Καλό για προσβασιμότητα
+          // Μπορείτε να προσθέσετε κλάσεις ή στυλ απευθείας εδώ αν θέλετε
+          // imgElement.classList.add("question-image-style");
+          imgElement.style.maxWidth = "100%"; // Απλό στυλ για να μην ξεχειλίζει
+          imgElement.style.height = "auto";
+          imgElement.style.marginTop = "10px";
+          imgElement.style.marginBottom = "15px";
+          questionImageContainer.appendChild(imgElement);
+      }
+  
+      sentenceContainer.innerHTML = '';
+      optionsContainer.innerHTML = '';
+  
+      userAnswersForCurrentQuestion = new Array(q.correctAnswers.length).fill(null);
+      nextBlankToFillIndex = 0;
+      optionButtons = [];
+  
+      let blankIndex = 0;
+      if (q.sentenceTemplate && Array.isArray(q.sentenceTemplate)) { // Έλεγχος αν υπάρχει και είναι πίνακας
+          q.sentenceTemplate.forEach(part => {
+              if (part === null) {
+                  const blankSpan = document.createElement("span");
+                  blankSpan.classList.add("blank-space");
+                  blankSpan.dataset.blankIndex = blankIndex;
+                  blankSpan.innerHTML = "___";
+                  sentenceContainer.appendChild(blankSpan);
+                  blankIndex++;
+              } else {
+                  const partSpan = document.createElement("span");
+                  partSpan.innerHTML = part;
+                  sentenceContainer.appendChild(partSpan);
+              }
+          });
+      }
+  
+      if (q.options && Array.isArray(q.options)) { // Έλεγχος αν υπάρχει και είναι πίνακας
+          q.options.forEach(optionText => {
+              const button = document.createElement("button");
+              button.classList.add("option-button");
+              button.innerHTML = optionText;
+              button.dataset.value = optionText;
+              button.addEventListener("click", handleOptionClick);
+              optionsContainer.appendChild(button);
+              optionButtons.push(button);
+          });
+      }
+  
+      document.getElementById("clear-choices").classList.remove("hidden");
+  
+      // Ανανέωση MathJax για όλα τα σχετικά στοιχεία
+      const elementsToTypeset = [sentenceContainer, optionsContainer, questionPromptText];
+      MathJax.typesetPromise(elementsToTypeset).catch(err => console.error("MathJax typeset error:", err));
+  }
+
+    function handleOptionClick(event) {
+      const selectedButton = event.currentTarget;
+
+
+      const valueToFill = selectedButton.dataset.value;
+      console.log("Value to fill:", valueToFill); // Για έλεγχο
+      
+      if (nextBlankToFillIndex < quizData[currentQuestion].correctAnswers.length) {
+        const blankToFill = document.querySelector(`.blank-space[data-blank-index="${nextBlankToFillIndex}"]`);
+        if (blankToFill) {
+          blankToFill.innerHTML = valueToFill; // Χρησιμοποιούμε innerHTML για LaTeX
+          blankToFill.classList.add("filled");
+          userAnswersForCurrentQuestion[nextBlankToFillIndex] = valueToFill;
+          nextBlankToFillIndex++;
+          selectedButton.disabled = true; // Απενεργοποίηση του κουμπιού
+          MathJax.typesetPromise([blankToFill]).catch(err => console.error("MathJax error on fill:", err));
+        }
+      }
+    }
+
+    function clearCurrentQuestionChoices() {
+        const q = quizData[currentQuestion];
+        userAnswersForCurrentQuestion = new Array(q.correctAnswers.length).fill(null);
+        nextBlankToFillIndex = 0;
+
+        const blankSpaces = document.querySelectorAll(".blank-space");
+        blankSpaces.forEach(blank => {
+            blank.innerHTML = "___"; // Επαναφορά placeholder
+            blank.classList.remove("filled");
+        });
+
+        optionButtons.forEach(button => {
+            button.disabled = false; // Ενεργοποίηση όλων των κουμπιών επιλογών
+        });
+        MathJax.typesetPromise([document.getElementById("sentence-container")]).catch(err => console.error("MathJax error on clear:", err));
+    }
+
+
+    function checkAnswer() {
+        const q = quizData[currentQuestion];
+        let isCorrect = false; // Αρχικοποιούμε ως λάθος
+    
+        // Πρώτα, ελέγχουμε αν έχουν δοθεί απαντήσεις για όλα τα κενά
+        // και αν ο αριθμός των απαντήσεων ταιριάζει με τον αριθμό των σωστών απαντήσεων.
+        const allBlanksFilled = userAnswersForCurrentQuestion.every(answer => answer !== null);
+    
+        if (allBlanksFilled && userAnswersForCurrentQuestion.length === q.correctAnswers.length) {
+            // Ορίζουμε την προεπιλεγμένη συμπεριφορά για το orderMatters αν δεν έχει οριστεί (π.χ., true)
+            const orderActuallyMatters = (typeof q.orderMatters === 'undefined') ? true : q.orderMatters;
+    
+            if (!orderActuallyMatters) {
+                // Η σειρά ΔΕΝ έχει σημασία
+                // Για να το ελέγξουμε, μπορούμε να ταξινομήσουμε και τις δύο λίστες (αντίγραφα)
+                // ή, πιο σωστά, να ελέγξουμε αν κάθε στοιχείο της μιας λίστας περιέχεται στην άλλη.
+                // Η χρήση Sets είναι ένας καλός τρόπος για σύγκριση περιεχομένου ανεξαρτήτως σειράς.
+    
+                const userAnswersSet = new Set(userAnswersForCurrentQuestion);
+                const correctAnswersSet = new Set(q.correctAnswers);
+    
+                if (userAnswersSet.size === correctAnswersSet.size) { // Ελέγχουμε αν έχουν τον ίδιο αριθμό *μοναδικών* απαντήσεων
+                    isCorrect = true; // Υποθέτουμε ότι είναι σωστό αρχικά
+                    for (const userAnswer of userAnswersSet) {
+                        if (!correctAnswersSet.has(userAnswer)) {
+                            isCorrect = false; // Αν έστω και μία απάντηση του χρήστη δεν είναι στις σωστές, είναι λάθος
+                            break;
+                        }
+                    }
+                }
+                // Αν isCorrect παραμείνει true, σημαίνει ότι όλες οι μοναδικές απαντήσεις του χρήστη
+                // βρίσκονται στις σωστές απαντήσεις και ο αριθμός των μοναδικών απαντήσεων ταιριάζει.
+            } else {
+                // Η σειρά ΕΧΕΙ σημασία (προεπιλεγμένη συμπεριφορά)
+                isCorrect = true; // Υποθέτουμε ότι είναι σωστό αρχικά
+                for (let i = 0; i < q.correctAnswers.length; i++) {
+                    if (userAnswersForCurrentQuestion[i] !== q.correctAnswers[i]) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
+            }
+        }
+        // Αν δεν έχουν συμπληρωθεί όλα τα κενά ή ο αριθμός τους δεν ταιριάζει, το isCorrect παραμένει false.
+    
+    
+        if (isCorrect) {
+            score++;
+        }
+    
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            clearInterval(timerInterval); // Σταματάμε το χρονόμετρο όταν τελειώσουν οι ερωτήσεις
+            showResults();
+        }
+    }
+    function showResults() {
+      const now = new Date();
+      const elapsed = Math.floor((now - startTime) / 1000);
+      const percentage = ((score / quizData.length) * 100).toFixed(2);
+
+      attemptsData.push({
+        attempt: attempt,
+        score: score,
+        totalQuestions: quizData.length,
+        percentage: percentage,
+        timeTaken: elapsed,
+        timeLimitExceeded: timeLimitExceeded
+      });
+
+      const resultDiv = document.getElementById("result");
+      resultDiv.classList.remove("hidden");
+      document.getElementById("quiz").classList.add("hidden");
+      document.getElementById("submit").classList.add("hidden");
+      document.getElementById("clear-choices").classList.add("hidden");
+      document.getElementById("timer").classList.remove("timeout"); // Επαναφορά χρώματος χρονομέτρου
+
+      let message = "";
+      let restart = false;
+
+      if (score === quizData.length && !timeLimitExceeded) {
+        message = `Συγχαρητήρια! Τελείωσες το quiz με επιτυχία!<br>Σκορ: ${score}/${quizData.length} (${percentage}%)<br>Χρόνος: ${formatTime(elapsed)}`;
+      } else if (score === quizData.length && timeLimitExceeded) {
+        message = `Σωστά απάντησες, αλλά αργοπορημένα. Πάμε ξανά πιο γρήγορα.<br>Τελικό σκορ: ${score}/${quizData.length}<br>Χρόνος: ${formatTime(elapsed)} (πάνω από το όριο των ${formatTime(TIME_LIMIT)})`;
+        restart = true;
+      } else if (score < quizData.length && timeLimitExceeded) {
+        message = `Είχες λάθη και άργησες. Πάμε άλλη μια φορά πιο προσεκτικά και πιο σβέλτα.<br>Τελικό σκορ: ${score}/${quizData.length}<br>Χρόνος: ${formatTime(elapsed)} (πάνω από το όριο των ${formatTime(TIME_LIMIT)})`;
+        restart = true;
+      } else if (score < quizData.length && !timeLimitExceeded) {
+        message = `Είχες λάθη, αλλά πήγαινες σβέλτα. Πάμε άλλη μια φορά πιο προσεκτικά με την ίδια ταχύτητα.<br>Τελικό σκορ: ${score}/${quizData.length}<br>Χρόνος: ${formatTime(elapsed)}`;
+        restart = true;
+      }
+
+      resultDiv.innerHTML = `<p>${message}</p>`;
+
+      if (restart) {
+        attempt++;
+        setTimeout(() => {
+          resultDiv.classList.add("hidden");
+          startQuiz();
+        }, 5000); // 5 δευτερόλεπτα καθυστέρηση πριν την επανεκκίνηση
+      } else {
+        document.getElementById("download").classList.remove("hidden");
+      }
+    }
+
+    function generatePDF() {
+      try {
+        if (typeof window.jspdf !== 'undefined') {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+          
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(18);
+          doc.setTextColor(0, 0, 0);
+          doc.text("Math Quiz Attempts Summary", 105, 15, { align: 'center' });
+          
+          doc.setFontSize(12);
+          doc.setFont("helvetica", "normal");
+          const now = new Date();
+          doc.text(`Generated on: ${now.toLocaleString('el-GR')}`, 105, 25, { align: 'center' });
+          
+          let yPos = 40;
+          
+          attemptsData.forEach((attemptData, index) => { // Άλλαξα το όνομα της μεταβλητής για σαφήνεια
+            doc.setFillColor(0, 0, 0); // Μαύρο φόντο για την επικεφαλίδα της προσπάθειας
+            // Σχεδίαση ενός ορθογωνίου για την επικεφαλίδα κάθε προσπάθειας
+            doc.rect(15, yPos - 7, 180, 10, 'F'); // X, Y, Width, Height, Style (F for Fill)
+            
+            doc.setTextColor(255, 255, 255); // Λευκό κείμενο για την επικεφαλίδα
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Attempt #${attemptData.attempt}`, 20, yPos);
+            
+            doc.setTextColor(0, 0, 0); // Επαναφορά σε μαύρο κείμενο για τις λεπτομέρειες
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "normal");
+            yPos += 10; // Αύξηση yPos για τις λεπτομέρειες κάτω από την επικεφαλίδα
+            
+            doc.text(`Correct: ${attemptData.score}`, 20, yPos);
+            doc.text(`Wrong: ${attemptData.totalQuestions - attemptData.score}`, 20, yPos + 8);
+            doc.text(`Total: ${attemptData.totalQuestions}`, 20, yPos + 16);
+            
+            doc.text(`Time taken: ${formatTime(attemptData.timeTaken)}`, 100, yPos);
+            doc.text(`Status: ${attemptData.timeLimitExceeded ? "TIMED OUT" : (attemptData.score === attemptData.totalQuestions ? "COMPLETED" : "INCOMPLETE")}`, 100, yPos + 8);
+            doc.text(`Score: ${attemptData.percentage}%`, 100, yPos + 16);
+            
+            yPos += 30; // Αύξηση yPos για την επόμενη προσπάθεια, αφήνοντας λίγο κενό
+            
+            if (yPos > 250 && index < attemptsData.length - 1) {
+              doc.addPage();
+              yPos = 30; // Επαναφορά yPos για τη νέα σελίδα
+            }
+          });
+          
+          if (attemptsData.length > 0 && attemptsData[attemptsData.length - 1].score === attemptsData[attemptsData.length - 1].totalQuestions && !attemptsData[attemptsData.length-1].timeLimitExceeded) {
+            // Προσθήκη σελίδας συγχαρητηρίων μόνο αν η τελευταία προσπάθεια ήταν επιτυχής και εντός χρόνου
+            doc.addPage();
+            doc.setFontSize(22);
+            doc.setTextColor(0, 128, 0); // Πράσινο χρώμα
+            doc.setFont("helvetica", "bold");
+            doc.text("ΣΥΓΧΑΡΗΤΗΡΙΑ!", 105, 50, { align: 'center' });
+            doc.setFontSize(16);
+            doc.setTextColor(0, 0, 0); // Επαναφορά σε μαύρο
+            doc.setFont("helvetica", "normal");
+            doc.text(`Ολοκλήρωσες το quiz με επιτυχία`, 105, 70, { align: 'center' });
+            doc.text(`σε ${attemptsData.length} προσπάθεια(ες)!`, 105, 90, { align: 'center' });
+          }
+          
+          doc.save('math_quiz_results.pdf');
+        } else {
+          throw new Error("jsPDF not loaded");
+        }
+      } catch (error) {
+        console.error("PDF generation error:", error);
+        alert("Παρουσιάστηκε σφάλμα κατά τη δημιουργία του PDF. Παρακαλώ δοκιμάστε ξανά ή ανανεώστε τη σελίδα.");
+      }
+    }
+
+    document.getElementById("start").addEventListener("click", startQuiz);
+    document.getElementById("submit").addEventListener("click", checkAnswer);
+    document.getElementById("clear-choices").addEventListener("click", clearCurrentQuestionChoices);
+    document.getElementById("otherpage").addEventListener("click", function() {
+      // Αντικαταστήστε με την πραγματική διεύθυνση URL της τάξης σας
+      window.location.href = 'index.html'; 
+    });
+    document.getElementById("download").addEventListener("click", generatePDF);
+
+    // Επιτρέπει την υποβολή με Enter, μόνο όταν το quiz είναι ενεργό
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && !document.getElementById("quiz").classList.contains("hidden") && !document.getElementById("submit").classList.contains("hidden")) {
+        e.preventDefault(); // Αποτροπή άλλων ενεργειών του Enter
+        document.getElementById("submit").click();
+      }
+    });
+
+  </script>
+</body>
+</html>

@@ -1,3 +1,210 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+generate_dromos.py
+Διαβάζει το sxediagramma.txt και παράγει index.html με dark theme, sidebar και αναζήτηση Wolfram Alpha.
+"""
+
+import re
+import os
+
+# ── helpers ──────────────────────────────────────────────────────────────────
+
+def parse_inline(text):
+    """Μετατρέπει [label](url) → <a> με target=_blank + fallback."""
+    return re.sub(
+        r'\[([^\]]+)\]\(([^)]+)\)',
+        r'<a href="\2" target="_blank" onclick="return openLink(event,\'\2\')">\1</a>',
+        text
+    )
+
+def parse_file(path):
+    """
+    Επιστρέφει μια λίστα από dict-nodes:
+      type: 'popup' | 'h1' | 'h2' | 'h3' | 'link' | 'hline'
+      label, url (για link), body (για popup), children (για h1/h2/h3)
+    """
+    with open(path, encoding='utf-8') as f:
+        raw = f.read()
+
+    nodes = []
+    # ── popup ──
+    popup_match = re.search(r'<popup>(.*?)</popup>', raw, re.DOTALL)
+    popup_node = None
+    if popup_match:
+        popup_raw = popup_match.group(1).strip()
+        # πρώτο {} = τίτλος (single-line), δεύτερο {} = σώμα (multiline)
+        # Χρησιμοποιούμε re.DOTALL ώστε το {} να αγκαλιάζει και κενές γραμμές
+        titles = re.findall(r'\{(.*?)\}', popup_raw, re.DOTALL)
+        popup_label = titles[0].strip() if len(titles) > 0 else 'Info'
+        popup_body  = titles[1].strip() if len(titles) > 1 else ''
+        popup_node = {'type': 'popup', 'label': popup_label, 'body': popup_body}
+        raw = raw[:popup_match.start()] + raw[popup_match.end():]
+
+    lines = raw.splitlines()
+
+    current_h1 = None
+    current_h2 = None
+
+    if popup_node:
+        nodes.append(popup_node)
+
+    for line in lines:
+        line = line.rstrip()
+        if not line:
+            continue
+
+        if line == '--hline--':
+            nodes.append({'type': 'hline'})
+            current_h1 = None
+            current_h2 = None
+            continue
+
+        h3 = re.match(r'^### (.+)', line)
+        h2 = re.match(r'^## (.+)', line)
+        h1 = re.match(r'^# (.+)', line)
+        lk = re.match(r'^\[([^\]]+)\]\(([^)]+)\)', line)
+
+        if h3:
+            node = {'type': 'h3', 'label': h3.group(1).strip(), 'children': []}
+            if current_h2:
+                current_h2['children'].append(node)
+            elif current_h1:
+                current_h1['children'].append(node)
+            else:
+                nodes.append(node)
+            # h3 δεν γίνεται parent για h4 (δεν υπάρχει στο spec)
+        elif h2:
+            node = {'type': 'h2', 'label': h2.group(1).strip(), 'children': []}
+            if current_h1:
+                current_h1['children'].append(node)
+            else:
+                nodes.append(node)
+            current_h2 = node
+        elif h1:
+            node = {'type': 'h1', 'label': h1.group(1).strip(), 'children': []}
+            nodes.append(node)
+            current_h1 = node
+            current_h2 = None
+        elif lk:
+            node = {'type': 'link', 'label': lk.group(1), 'url': lk.group(2)}
+            # προσθήκη στο πιο εσωτερικό ανοιχτό επίπεδο
+            # ψάχνουμε αν ο τελευταίος παιδί του current_h2/h1 είναι h3
+            def last_h3(parent):
+                if parent and parent['children'] and parent['children'][-1]['type'] == 'h3':
+                    return parent['children'][-1]
+                return None
+
+            if current_h2:
+                lh3 = last_h3(current_h2)
+                if lh3:
+                    lh3['children'].append(node)
+                else:
+                    current_h2['children'].append(node)
+            elif current_h1:
+                lh3 = last_h3(current_h1)
+                if lh3:
+                    lh3['children'].append(node)
+                else:
+                    current_h1['children'].append(node)
+            else:
+                nodes.append(node)
+
+    return nodes
+
+# ── HTML builders ─────────────────────────────────────────────────────────────
+
+uid_counter = [0]
+
+def new_uid():
+    uid_counter[0] += 1
+    return f'menu_{uid_counter[0]}'
+
+def render_link(node):
+    url = node['url']
+    label = node['label']
+    return (f'<li class="menu-link">'
+            f'<a href="{url}" target="_blank" onclick="return openLink(event,\'{url}\')">{label}</a>'
+            f'</li>')
+
+def render_h3(node):
+    uid = new_uid()
+    inner = '\n'.join(render_node(c) for c in node['children'])
+    has_children = bool(node['children'])
+    if has_children:
+        return f'''<li class="h3-item">
+  <button class="toggle-btn h3-btn" onclick="toggleMenu('{uid}')">
+    <span class="arrow">▸</span>{node["label"]}
+  </button>
+  <ul id="{uid}" class="submenu hidden">{inner}</ul>
+</li>'''
+    else:
+        return f'<li class="h3-item h3-leaf"><span class="leaf-label">◦ {node["label"]}</span></li>'
+
+def render_h2(node):
+    uid = new_uid()
+    inner = '\n'.join(render_node(c) for c in node['children'])
+    has_children = bool(node['children'])
+    if has_children:
+        return f'''<li class="h2-item">
+  <button class="toggle-btn h2-btn" onclick="toggleMenu('{uid}')">
+    <span class="arrow">▸</span>{node["label"]}
+  </button>
+  <ul id="{uid}" class="submenu hidden">{inner}</ul>
+</li>'''
+    else:
+        return f'<li class="h2-item h2-leaf"><span class="leaf-label">· {node["label"]}</span></li>'
+
+def render_h1(node):
+    uid = new_uid()
+    inner = '\n'.join(render_node(c) for c in node['children'])
+    has_children = bool(node['children'])
+    if has_children:
+        return f'''<li class="h1-item">
+  <button class="toggle-btn h1-btn" onclick="toggleMenu('{uid}')">
+    <span class="arrow">▸</span>{node["label"]}
+  </button>
+  <ul id="{uid}" class="submenu hidden">{inner}</ul>
+</li>'''
+    else:
+        return f'<li class="h1-item h1-leaf"><span class="leaf-label">{node["label"]}</span></li>'
+
+def render_popup(node):
+    uid = new_uid()
+    # Split on blank lines → paragraphs; single newlines → <br>
+    raw_body = node['body']
+    paragraphs = re.split(r'\n\s*\n', raw_body.strip())
+    paras_html = ''.join(
+        '<p>' + parse_inline(p.replace('\n', '<br>')) + '</p>'
+        for p in paragraphs if p.strip()
+    )
+    return f'''<li class="menu-link popup-item">
+  <button class="popup-trigger" onclick="showPopup(\'{uid}\')">{node["label"]}</button>
+</li>
+<div id="{uid}" class="popup-overlay" onclick="closePopup(event,\'{uid}\')">
+  <div class="popup-box">
+    <button class="popup-close" onclick="closePopupDirect(\'{uid}\')">✕</button>
+    {paras_html}
+  </div>
+</div>'''
+
+def render_node(node):
+    t = node['type']
+    if t == 'hline':   return '<li class="menu-hline"><hr></li>'
+    if t == 'link':    return render_link(node)
+    if t == 'h1':      return render_h1(node)
+    if t == 'h2':      return render_h2(node)
+    if t == 'h3':      return render_h3(node)
+    if t == 'popup':   return render_popup(node)
+    return ''
+
+def build_sidebar(nodes):
+    items = '\n'.join(render_node(n) for n in nodes)
+    return f'<ul class="sidebar-menu">{items}</ul>'
+
+# ── HTML template ─────────────────────────────────────────────────────────────
+
+HTML_TEMPLATE = '''\
 <!DOCTYPE html>
 <html lang="el">
 <head>
@@ -355,7 +562,7 @@ body::after{
   <h1>Δρόμος</h1>
   <div id="search-box">
     <input id="search-input" type="text" placeholder="Αναζήτηση Wolfram…"
-           onkeydown="if(event.key==='Enter')doSearch()">
+           onkeydown="if(event.key===\'Enter\')doSearch()">
     <button id="search-go" onclick="doSearch()" title="Αναζήτηση">⏎</button>
     <button id="search-close-btn" onclick="closeSearch()">✕</button>
   </div>
@@ -364,189 +571,88 @@ body::after{
 
 <div id="layout">
   <nav id="sidebar" aria-label="Πλαϊνό μενού">
-    <ul class="sidebar-menu"><li class="menu-link popup-item">
-  <button class="popup-trigger" onclick="showPopup('menu_1')">Περί τίνος πρόκειται;</button>
-</li>
-<div id="menu_1" class="popup-overlay" onclick="closePopup(event,'menu_1')">
-  <div class="popup-box">
-    <button class="popup-close" onclick="closePopupDirect('menu_1')">✕</button>
-    <p>🔬 H σελίδα αυτή περιέχει υλικό σχετικό με την εκπαίδευση των μαθηματικών και γενικότερα των θετικών επιστημών.</p><p>🧙‍♂️ Εγώ ονομάζομαι Κώστας Κούδας. Είμαι μαθηματικός, εργάζομαι στην Κέρκυρα.</p><p>🌐 Επιπλέον ιστοσελίδες μου μπορείτε να βρείτε <a href="porfolio.html" target="_blank" onclick="return openLink(event,\'porfolio.html\')">εδώ</a></p>
-  </div>
-</div>
-<li class="h1-item">
-  <button class="toggle-btn h1-btn" onclick="toggleMenu('menu_2')">
-    <span class="arrow">▸</span>Χρήσιμοι σύνδεσμοι
-  </button>
-  <ul id="menu_2" class="submenu hidden"><li class="menu-link"><a href="https://www.wolframalpha.com/" target="_blank" onclick="return openLink(event,'https://www.wolframalpha.com/')">Wolfram Alpha</a></li>
-<li class="menu-link"><a href="https://www.wolframcloud.com/" target="_blank" onclick="return openLink(event,'https://www.wolframcloud.com/')">Wolfram Cloud</a></li>
-<li class="menu-link"><a href="https://www.desmos.com/calculator?lang=el" target="_blank" onclick="return openLink(event,'https://www.desmos.com/calculator?lang=el')">Desmos</a></li>
-<li class="menu-link"><a href="https://www.geogebra.org/" target="_blank" onclick="return openLink(event,'https://www.geogebra.org/')">Geogebra-geometry 2D</a></li>
-<li class="menu-link"><a href="https://phet.colorado.edu/" target="_blank" onclick="return openLink(event,'https://phet.colorado.edu/')">Phet</a></li>
-<li class="menu-link"><a href="https://javalab.org/en/" target="_blank" onclick="return openLink(event,'https://javalab.org/en/')">Javalab</a></li></ul>
-</li>
-<li class="menu-hline"><hr></li>
-<li class="h1-item">
-  <button class="toggle-btn h1-btn" onclick="toggleMenu('menu_3')">
-    <span class="arrow">▸</span>Α Γυμνασίου
-  </button>
-  <ul id="menu_3" class="submenu hidden"><li class="h2-item">
-  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_4')">
-    <span class="arrow">▸</span>Άλγεβρα
-  </button>
-  <ul id="menu_4" class="submenu hidden"><li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_5')">
-    <span class="arrow">▸</span>Αρνητικοί αριθμοί
-  </button>
-  <ul id="menu_5" class="submenu hidden"><li class="menu-link"><a href="GymnasioA/arnitikoiarithmoi.html" target="_blank" onclick="return openLink(event,'GymnasioA/arnitikoiarithmoi.html')">Quiz στους αρνητικούς</a></li>
-<li class="menu-link"><a href="GymnasioA/arnitikoiarithmoiSUFFLE.html" target="_blank" onclick="return openLink(event,'GymnasioA/arnitikoiarithmoiSUFFLE.html')">Quiz στους αρνητικούς - με ανακάτεμα επιλογών</a></li></ul>
-</li></ul>
-</li></ul>
-</li>
-<li class="h1-item">
-  <button class="toggle-btn h1-btn" onclick="toggleMenu('menu_6')">
-    <span class="arrow">▸</span>Γ Γυμνασίου
-  </button>
-  <ul id="menu_6" class="submenu hidden"><li class="h2-item">
-  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_7')">
-    <span class="arrow">▸</span>Γεωμετρία
-  </button>
-  <ul id="menu_7" class="submenu hidden"><li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_8')">
-    <span class="arrow">▸</span>Τριγωνομετρία
-  </button>
-  <ul id="menu_8" class="submenu hidden"><li class="menu-link"><a href="GymnasioC/trigonArithGgymnSel.html" target="_blank" onclick="return openLink(event,'GymnasioC/trigonArithGgymnSel.html')">Quiz: Τριγωνομετρικοί αριθμοί κυρτών γωνιών</a></li></ul>
-</li></ul>
-</li></ul>
-</li>
-<li class="h1-item">
-  <button class="toggle-btn h1-btn" onclick="toggleMenu('menu_9')">
-    <span class="arrow">▸</span>Β Λυκείου
-  </button>
-  <ul id="menu_9" class="submenu hidden"><li class="h2-item">
-  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_10')">
-    <span class="arrow">▸</span>Άλγεβρα
-  </button>
-  <ul id="menu_10" class="submenu hidden"><li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_11')">
-    <span class="arrow">▸</span>Συναρτήσεις
-  </button>
-  <ul id="menu_11" class="submenu hidden"><li class="menu-link"><a href="LykeioB/xaraktirismosSynartisis.html" target="_blank" onclick="return openLink(event,'LykeioB/xaraktirismosSynartisis.html')">Quiz: Πώς θα χαρακτήριζες τη συνάρτηση;</a></li>
-<li class="menu-link"><a href="LykeioB/symmetries.html" target="_blank" onclick="return openLink(event,'LykeioB/symmetries.html')">Quiz: Κατακόρυφη/οριζόντια μετατόπιση και συμμετρίες</a></li></ul>
-</li>
-<li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_12')">
-    <span class="arrow">▸</span>Τριγωνομετρία
-  </button>
-  <ul id="menu_12" class="submenu hidden"><li class="menu-link"><a href="LykeioB/TrigonCyklos.html" target="_blank" onclick="return openLink(event,'LykeioB/TrigonCyklos.html')">Quiz: Κατανόηση του τριγωνομετρικού κύκλου</a></li>
-<li class="menu-link"><a href="LykeioB/anagogiAtetartimorio.html" target="_blank" onclick="return openLink(event,'LykeioB/anagogiAtetartimorio.html')">Quiz: Αναγωγή στο 1ο τεταρτημόριο</a></li>
-<li class="menu-link"><a href="LykeioB/TrigonomSynart.html" target="_blank" onclick="return openLink(event,'LykeioB/TrigonomSynart.html')">Quiz: Τριγωνομετρικές συναρτήσεις</a></li>
-<li class="menu-link"><a href="LykeioB/TrigonomExis.html" target="_blank" onclick="return openLink(event,'LykeioB/TrigonomExis.html')">Quiz: Τριγωνομετρικές εξισώσεις</a></li>
-<li class="menu-link"><a href="LykeioB/Trigonometria.html" target="_blank" onclick="return openLink(event,'LykeioB/Trigonometria.html')">Quiz: Επανάληψη στην τριγωνομετρία (υπό κατασκευή)</a></li></ul>
-</li>
-<li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_13')">
-    <span class="arrow">▸</span>Επαναληπτικά
-  </button>
-  <ul id="menu_13" class="submenu hidden"><li class="menu-link"><a href="LykeioB/GrigoroiYpologismoi.html" target="_blank" onclick="return openLink(event,'LykeioB/GrigoroiYpologismoi.html')">Quiz: Γρήγοροι υπολογισμοί</a></li></ul>
-</li></ul>
-</li>
-<li class="h2-item">
-  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_14')">
-    <span class="arrow">▸</span>Κατεύθυνση
-  </button>
-  <ul id="menu_14" class="submenu hidden"><li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_15')">
-    <span class="arrow">▸</span>Επαναληπτικά
-  </button>
-  <ul id="menu_15" class="submenu hidden"><li class="menu-link"><a href="LykeioB/KateythEpan.html" target="_blank" onclick="return openLink(event,'LykeioB/KateythEpan.html')">Quiz: Γενική επανάληψη</a></li></ul>
-</li></ul>
-</li></ul>
-</li>
-<li class="h1-item">
-  <button class="toggle-btn h1-btn" onclick="toggleMenu('menu_16')">
-    <span class="arrow">▸</span>Γ Λυκείου
-  </button>
-  <ul id="menu_16" class="submenu hidden"><li class="h2-item">
-  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_17')">
-    <span class="arrow">▸</span>Κατεύθυνση
-  </button>
-  <ul id="menu_17" class="submenu hidden"><li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_18')">
-    <span class="arrow">▸</span>Εισαγωγή στις συναρτήσεις
-  </button>
-  <ul id="menu_18" class="submenu hidden"><li class="menu-link"><a href="LykeioC/functionsIntro_Tiled/presentationTILES.html" target="_blank" onclick="return openLink(event,'LykeioC/functionsIntro_Tiled/presentationTILES.html')">Πρώτα βήματα</a></li>
-<li class="menu-link"><a href="LykeioC/graphs_Tiled/presentationTILES.html" target="_blank" onclick="return openLink(event,'LykeioC/graphs_Tiled/presentationTILES.html')">Γραφικές παραστάσεις</a></li>
-<li class="menu-link"><a href="LykeioC/symmetriesSynart_Tiled/presentationTILES.html" target="_blank" onclick="return openLink(event,'LykeioC/symmetriesSynart_Tiled/presentationTILES.html')">Μετασχηματισμοί γραφικών παραστάσεων</a></li>
-<li class="menu-link"><a href="LykeioC/praxeisSxeseis_Tiled/presentationTILES.html" target="_blank" onclick="return openLink(event,'LykeioC/praxeisSxeseis_Tiled/presentationTILES.html')">Πράξεις και σχέσεις συναρτήσεων</a></li>
-<li class="menu-link"><a href="LykeioC/monotoniaAkrotata_Tiled/presentationTILES.html" target="_blank" onclick="return openLink(event,'LykeioC/monotoniaAkrotata_Tiled/presentationTILES.html')">Μονοτονία-ακρότατα</a></li>
-<li class="menu-link"><a href="LykeioC/antistrepsimes_Tiled/presentationTILES.html" target="_blank" onclick="return openLink(event,'LykeioC/antistrepsimes_Tiled/presentationTILES.html')">Αντιστρέψιμες συναρτήσεις</a></li>
-<li class="menu-link"><a href="LykeioC/EidosGrapg.html" target="_blank" onclick="return openLink(event,'LykeioC/EidosGrapg.html')">Quiz: Γραφικές παραστάσεις</a></li></ul>
-</li></ul>
-</li></ul>
-</li></ul>
+    {SIDEBAR}
   </nav>
   <main id="main"></main>
 </div>
 
 <script>
 function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById(\'sidebar\').classList.toggle(\'open\');
 }
-document.addEventListener('click',function(e){
-  const sb=document.getElementById('sidebar');
-  if(sb.classList.contains('open')&&!sb.contains(e.target)&&e.target.id!=='menu-toggle')
-    sb.classList.remove('open');
+document.addEventListener(\'click\',function(e){
+  const sb=document.getElementById(\'sidebar\');
+  if(sb.classList.contains(\'open\')&&!sb.contains(e.target)&&e.target.id!==\'menu-toggle\')
+    sb.classList.remove(\'open\');
 });
 
 function toggleSearch(){
-  const box=document.getElementById('search-box');
-  box.classList.toggle('visible');
-  if(box.classList.contains('visible'))
-    setTimeout(()=>document.getElementById('search-input').focus(),40);
+  const box=document.getElementById(\'search-box\');
+  box.classList.toggle(\'visible\');
+  if(box.classList.contains(\'visible\'))
+    setTimeout(()=>document.getElementById(\'search-input\').focus(),40);
 }
-function closeSearch(){document.getElementById('search-box').classList.remove('visible')}
+function closeSearch(){document.getElementById(\'search-box\').classList.remove(\'visible\')}
 function doSearch(){
-  const q=document.getElementById('search-input').value.trim();
+  const q=document.getElementById(\'search-input\').value.trim();
   if(!q)return;
-  const url='https://www.wolframalpha.com/input?i='+encodeURIComponent(q);
-  const w=window.open(url,'_blank');
-  if(!w||w.closed||typeof w.closed==='undefined') window.location.href=url;
+  const url=\'https://www.wolframalpha.com/input?i=\'+encodeURIComponent(q);
+  const w=window.open(url,\'_blank\');
+  if(!w||w.closed||typeof w.closed===\'undefined\') window.location.href=url;
 }
 
 function toggleMenu(id){
   const ul=document.getElementById(id);
   const btn=ul.previousElementSibling;
-  ul.classList.toggle('open');
-  btn.classList.toggle('open');
+  ul.classList.toggle(\'open\');
+  btn.classList.toggle(\'open\');
 }
 
-function showPopup(id){document.getElementById(id).classList.add('active')}
+function showPopup(id){document.getElementById(id).classList.add(\'active\')}
 function closePopup(event,id){
   if(event.target===document.getElementById(id))
-    document.getElementById(id).classList.remove('active');
+    document.getElementById(id).classList.remove(\'active\');
 }
-function closePopupDirect(id){document.getElementById(id).classList.remove('active')}
+function closePopupDirect(id){document.getElementById(id).classList.remove(\'active\')}
 
 function openLink(event,url){
   event.preventDefault();
-  const w=window.open(url,'_blank');
-  if(!w||w.closed||typeof w.closed==='undefined') window.location.href=url;
+  const w=window.open(url,\'_blank\');
+  if(!w||w.closed||typeof w.closed===\'undefined\') window.location.href=url;
   return false;
 }
 
 /* ripple on all interactive elements */
-document.addEventListener('click',function(e){
-  const el=e.target.closest('button,.menu-link a');
+document.addEventListener(\'click\',function(e){
+  const el=e.target.closest(\'button,.menu-link a\');
   if(!el)return;
-  const r=document.createElement('span');
-  r.className='ripple';
+  const r=document.createElement(\'span\');
+  r.className=\'ripple\';
   const rect=el.getBoundingClientRect();
   const s=Math.max(rect.width,rect.height);
-  r.style.cssText='width:'+s+'px;height:'+s+'px;left:'+(e.clientX-rect.left-s/2)+'px;top:'+(e.clientY-rect.top-s/2)+'px;';
-  el.style.position='relative';el.style.overflow='hidden';
+  r.style.cssText=\'width:\'+s+\'px;height:\'+s+\'px;left:\'+(e.clientX-rect.left-s/2)+\'px;top:\'+(e.clientY-rect.top-s/2)+\'px;\';
+  el.style.position=\'relative\';el.style.overflow=\'hidden\';
   el.appendChild(r);
   setTimeout(()=>r.remove(),580);
 });
 </script>
 </body>
 </html>
+'''
+
+def main():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    input_path = os.path.join(script_dir, 'sxediagramma.txt')
+    output_path = os.path.join(script_dir, 'index.html')
+
+    nodes = parse_file(input_path)
+    sidebar_html = build_sidebar(nodes)
+    html = HTML_TEMPLATE.replace('{SIDEBAR}', sidebar_html)
+
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(html)
+
+    print(f'✓ Το index.html δημιουργήθηκε στο: {output_path}')
+
+if __name__ == '__main__':
+    main()
