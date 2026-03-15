@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Εξισώσεις 1ου Βαθμού</title>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --surface: #16213e;
+    --surface2: #0f3460;
+    --text: #e0e0e0;
+    --text-dim: #a0a0b0;
+    --border: #2a4a7f;
+    --locked-bg: #0d1b2a;
+    --locked-border: #1e3a5f;
+
+    /* Χρώματα φιλικά προς άτομα με προβλήματα όρασης */
+    --color-unknown: #FFD700;   /* Χρυσό - για αγνώστους (x) */
+    --color-known:   #56CFE1;   /* Κυανό - για γνωστούς αριθμούς */
+    --color-paren:   #FF6B6B;   /* Κόκκινο-πορτοκαλί - για παρενθέσεις */
+    --color-frac:    #98FB98;   /* Παλ-πράσινο - για κλάσμα */
+    --color-equals:  #a0a0b0;
+    --color-verdict: #FFB347;   /* Πορτοκαλί - για ταυτότητα/αδύνατη */
+
+    --btn-bg: #2a4a7f;
+    --btn-hover: #3a5a9f;
+    --btn-active: #1a3a6f;
+    --btn-confirm: #1a5c3a;
+    --btn-confirm-hover: #2a7c4a;
+    --radius: 6px;
+    --font: Georgia, 'Times New Roman', serif;
+    --font-ui: Verdana, Geneva, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    padding: 20px 10px 60px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.6em;
+    letter-spacing: 2px;
+    color: #c8d8f0;
+    margin-bottom: 30px;
+    font-family: var(--font-ui);
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 12px;
+  }
+
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 12px;
+    margin-bottom: 16px;
+  }
+
+  .step.locked {
+    background: var(--locked-bg);
+    border-color: var(--locked-border);
+    opacity: 0.8;
+  }
+
+  .eq-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .eq-input {
+    background: #0a1628;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 1.1em;
+    padding: 8px 10px;
+    min-width: 120px;
+    flex: 1;
+    transition: border-color 0.2s;
+  }
+
+  .eq-input:focus {
+    outline: none;
+    border-color: #56CFE1;
+  }
+
+  .eq-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .eq-display {
+    font-size: 1.15em;
+    padding: 8px 10px;
+    min-width: 120px;
+    flex: 1;
+    line-height: 1.6;
+    min-height: 38px;
+  }
+
+  .equals-sign {
+    font-size: 1.4em;
+    color: var(--color-equals);
+    padding: 0 4px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  .btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  button {
+    font-family: var(--font-ui);
+    font-size: 0.78em;
+    border: none;
+    border-radius: var(--radius);
+    padding: 7px 11px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    font-weight: bold;
+  }
+
+  button:active { transform: scale(0.96); }
+
+  .btn-action {
+    background: var(--btn-bg);
+    color: #c8d8ff;
+  }
+  .btn-action:hover { background: var(--btn-hover); }
+  .btn-action.active-mode {
+    background: #4a3a00;
+    color: var(--color-unknown);
+    border: 1px solid var(--color-unknown);
+  }
+
+  .btn-confirm {
+    background: var(--btn-confirm);
+    color: #90ffb0;
+  }
+  .btn-confirm:hover { background: var(--btn-confirm-hover); }
+
+  .btn-disabled {
+    background: #1a2a3a;
+    color: #556677;
+    cursor: not-allowed;
+  }
+
+  /* Disabled action button (another mode is active) */
+  .btn-action.btn-inactive {
+    background: #111a28;
+    color: #334455;
+    cursor: not-allowed;
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  /* Disabled action button (another mode is active) */
+  .btn-action.btn-inactive {
+    background: #111a28;
+    color: #334455;
+    cursor: not-allowed;
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  /* Spans μέσα στο display */
+  .tok-unknown { color: var(--color-unknown); font-weight: bold; }
+  .tok-known   { color: var(--color-known); font-weight: bold; }
+  .tok-paren   { color: var(--color-paren); }
+  .tok-other   { color: var(--text); }
+
+  .tok-clickable {
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 0 2px;
+    text-decoration: underline dotted;
+    transition: background 0.15s;
+  }
+  .tok-clickable:hover { background: rgba(255,255,255,0.15); }
+
+  /* Κλάσμα inline (mode divide) */
+  .inline-fraction {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.3;
+  }
+
+  .if-num, .if-den {
+    padding: 2px 6px;
+    font-size: 1em;
+  }
+
+  .if-line {
+    width: 100%;
+    border-top: 2px solid var(--color-frac);
+    margin: 1px 0;
+  }
+
+  /* When in divide mode, vertically center the = sign with the fraction bar */
+  .eq-row:has(.inline-fraction) .equals-sign {
+    align-self: center;
+  }
+
+  /* Step label */
+  .step-label {
+    font-size: 0.72em;
+    color: var(--text-dim);
+    font-family: var(--font-ui);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  /* Live blinking dot */
+  .live-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ff3030;
+    flex-shrink: 0;
+    animation: blink-live 1.1s ease-in-out infinite;
+    box-shadow: 0 0 6px #ff3030;
+  }
+  @keyframes blink-live {
+    0%, 100% { opacity: 1; box-shadow: 0 0 6px #ff3030; }
+    50%       { opacity: 0.15; box-shadow: none; }
+  }
+
+  /* Verdict (ταυτότητα / αδύνατη) */
+  .verdict-label {
+    color: var(--color-verdict);
+    font-weight: bold;
+    font-size: 1.05em;
+    margin-left: 10px;
+    align-self: center;
+    flex-shrink: 0;
+  }
+
+  /* Zero-div message inline */
+  .zero-div-msg {
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: #2a1a00;
+    border: 1px solid #aa6600;
+    border-radius: var(--radius);
+    color: #ffcc88;
+    font-family: var(--font-ui);
+    font-size: 0.85em;
+  }
+  .zero-div-btns {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .btn-verdict {
+    background: #3a2500;
+    color: var(--color-verdict);
+    border: 1px solid var(--color-verdict);
+    border-radius: var(--radius);
+    padding: 6px 14px;
+    font-family: var(--font-ui);
+    font-weight: bold;
+    font-size: 0.82em;
+    cursor: pointer;
+  }
+  .btn-verdict:hover { background: #4a3500; }
+
+  /* Simplified fraction (horizontal, with optional leading minus) */
+  .result-frac {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    vertical-align: middle;
+  }
+  .result-frac .rf-sign {
+    font-size: 1.1em;
+    color: var(--text);
+  }
+  .result-frac .rf-body {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.2;
+  }
+  .result-frac .rf-num,
+  .result-frac .rf-den {
+    padding: 1px 5px;
+    font-size: 0.95em;
+  }
+  .result-frac .rf-line {
+    width: 100%;
+    border-top: 2px solid var(--text);
+    margin: 1px 0;
+  }
+  /* Solved overlay */
+  #solved-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,16,30,0.82);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  #solved-overlay.visible { display: flex; }
+
+  .solved-box {
+    background: #0d1b2a;
+    border: 2px solid #2a7c4a;
+    border-radius: 10px;
+    padding: 32px 28px 24px;
+    max-width: 520px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(42,124,74,0.35);
+  }
+  .solved-title {
+    font-family: var(--font-ui);
+    font-size: 1.35em;
+    color: #90ffb0;
+    margin-bottom: 22px;
+    letter-spacing: 1px;
+  }
+  .solved-btns {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-solved {
+    font-family: var(--font-ui);
+    font-size: 0.9em;
+    font-weight: bold;
+    padding: 10px 22px;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-review {
+    background: #2a4a7f;
+    color: #c8d8ff;
+  }
+  .btn-review:hover { background: #3a5a9f; }
+  .btn-new {
+    background: #1a5c3a;
+    color: #90ffb0;
+  }
+  .btn-new:hover { background: #2a7c4a; }
+
+  /* Review mode: steps panel */
+  #review-panel {
+    display: none;
+    max-width: 680px;
+    margin: 20px auto;
+    padding: 0 10px 60px;
+  }
+  #review-panel.visible { display: block; }
+  .review-title {
+    font-family: var(--font-ui);
+    font-size: 1.1em;
+    color: #c8d8f0;
+    text-align: center;
+    margin-bottom: 18px;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .btn-back-wrap {
+    text-align: center;
+    margin-top: 18px;
+  }
+  .btn-back {
+    background: #2a4a7f;
+    color: #c8d8ff;
+    font-family: var(--font-ui);
+    font-size: 0.85em;
+    font-weight: bold;
+    padding: 8px 20px;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .btn-back:hover { background: #3a5a9f; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Back button */
+  .btn-home {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 200;
+    background: var(--btn-bg);
+    color: #c8d8ff;
+    font-family: var(--font-ui);
+    font-size: 0.78em;
+    font-weight: bold;
+    padding: 7px 13px;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.15s;
+  }
+  .btn-home:hover { background: var(--btn-hover); }
+
+  /* Signature */
+  .signature {
+    position: fixed;
+    bottom: 12px;
+    left: 14px;
+    z-index: 200;
+    font-family: var(--font);
+    font-size: 0.72em;
+    color: var(--text-dim);
+    font-style: italic;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+
+<a class="btn-home" href="index.html">&#8592; Αρχική</a>
+
+<h1>Εξισώσεις 1ου Βαθμού</h1>
+
+<div id="steps-container"></div>
+
+<!-- Solved overlay -->
+<div id="solved-overlay">
+  <div class="solved-box">
+    <div class="solved-title">✓ Η εξίσωση λύθηκε.</div>
+    <div class="solved-btns">
+      <button class="btn-solved btn-review" onclick="showReview()">Επισκόπηση</button>
+      <button class="btn-solved btn-new" onclick="newEquation()">Νέα εξίσωση</button>
+    </div>
+  </div>
+</div>
+
+<!-- Review panel (shown after Επισκόπηση) -->
+<div id="review-panel">
+  <div class="review-title">ΕΠΙΣΚΟΠΗΣΗ ΕΠΙΛΥΣΗΣ</div>
+  <div id="review-steps"></div>
+  <div class="btn-back-wrap">
+    <button class="btn-back" onclick="closeReview()">← Πίσω</button>
+  </div>
+</div>
+
+<script>
+// ==================== MATH UTILITIES ====================
+
+function gcd(a, b) {
+  a = Math.abs(a); b = Math.abs(b);
+  while (b) { [a, b] = [b, a % b]; }
+  return a;
+}
+
+function simplifyFraction(num, den) {
+  if (den === 0) return [num, den];
+  const g = gcd(Math.abs(num), Math.abs(den));
+  let n = num / g, d = den / g;
+  if (d < 0) { n = -n; d = -d; }
+  return [n, d];
+}
+
+// ==================== TOKENIZER ====================
+// Μετατρέπει string σε tokens για parsing/display
+// Token types: 'paren_expr', 'monomial', 'integer', 'op', 'eq', 'space', 'other'
+
+function tokenize(expr) {
+  const tokens = [];
+  let i = 0;
+  while (i < expr.length) {
+    // Skip spaces
+    if (expr[i] === ' ') { i++; continue; }
+
+    // Parenthesized expression: (±ax±b) or (±x±b)
+    if (expr[i] === '(') {
+      let j = expr.indexOf(')', i);
+      if (j !== -1) {
+        tokens.push({ type: 'paren_expr', val: expr.slice(i, j+1) });
+        i = j + 1;
+        continue;
+      }
+    }
+
+    // Sign (standalone + or - that precedes a number/x)
+    // We accumulate sign + number/monomial
+    let sign = '';
+    if ((expr[i] === '+' || expr[i] === '-')) {
+      sign = expr[i];
+      i++;
+    }
+
+    // Number possibly followed by x -> monomial or integer
+    let numStr = '';
+    while (i < expr.length && (expr[i] >= '0' && expr[i] <= '9')) {
+      numStr += expr[i++];
+    }
+
+    if (i < expr.length && expr[i] === 'x') {
+      // monomial: sign + num + x
+      const coeff = (sign === '-' ? -1 : 1) * (numStr === '' ? 1 : parseInt(numStr));
+      tokens.push({ type: 'monomial', coeff, val: sign + numStr + 'x' });
+      i++;
+      continue;
+    }
+
+    if (numStr !== '') {
+      const val = (sign === '-' ? -1 : 1) * parseInt(numStr);
+      tokens.push({ type: 'integer', val, str: sign + numStr });
+      continue;
+    }
+
+    if (sign !== '') {
+      // standalone operator
+      tokens.push({ type: 'op', val: sign });
+      continue;
+    }
+
+    // x alone at current position
+    if (expr[i] === 'x') {
+      tokens.push({ type: 'monomial', coeff: 1, val: 'x' });
+      i++;
+      continue;
+    }
+
+    // other char
+    tokens.push({ type: 'other', val: expr[i] });
+    i++;
+  }
+  return tokens;
+}
+
+// ==================== ΕΠΙΜΕΡΙΣΤΙΚΗ ====================
+
+function applyDistributive(parenStr) {
+  // Expected format: coefficient(ax+b) where coeff is before the paren
+  // Actually we call this on the full expression, find the paren, get coeff before it
+  // Here parenStr is just the (ax+b) part, the outer coeff is passed separately
+  // Actually let's do it in the step logic
+  return parenStr;
+}
+
+// Parse a paren expression → ordered list of terms [{type:'monomial'|'integer', coeff/val}]
+function parseParen(str) {
+  const inner = str.slice(1, -1).trim();
+  const terms = [];
+  const termRe = /([+-]?)(\d+x?|x)/g;
+  let m;
+  while ((m = termRe.exec(inner)) !== null) {
+    const sign = m[1], body = m[2];
+    const s = (sign === '-') ? -1 : 1;
+    if (body === 'x') {
+      terms.push({ type: 'monomial', coeff: s });
+    } else if (body.endsWith('x')) {
+      terms.push({ type: 'monomial', coeff: s * parseInt(body.slice(0, -1)) });
+    } else {
+      terms.push({ type: 'integer', val: s * parseInt(body) });
+    }
+  }
+  return terms.length ? terms : null;
+}
+
+// Build expression string from ordered terms
+function termsToExpr(terms) {
+  let result = '';
+  for (const t of terms) {
+    let piece = '';
+    if (t.type === 'monomial') {
+      const c = t.coeff;
+      if      (c ===  1) piece = 'x';
+      else if (c === -1) piece = '-x';
+      else               piece = c + 'x';
+    } else {
+      piece = String(t.val);
+    }
+    if (result === '') {
+      result = piece;
+    } else {
+      // piece already carries its sign (negative starts with -)
+      if (piece.startsWith('-')) result += piece;
+      else                       result += '+' + piece;
+    }
+  }
+  return result || '0';
+}
+
+// Full expression distributive: find "N(ax+b)" or "N(b+ax)" and expand IN PLACE
+function expandDistributiveInExpr(expr, parenIndex) {
+  const afterParen = expr.indexOf(')', parenIndex);
+  if (afterParen === -1) return expr;
+
+  const before      = expr.slice(0, parenIndex);
+  const parenContent = expr.slice(parenIndex, afterParen + 1);
+  const suffix       = expr.slice(afterParen + 1);
+
+  // Extract outer coefficient from end of 'before'
+  let outerCoeff = 1, outerLen = 0;
+  const numMatch  = before.match(/([+-]?\d+)$/);
+  const signOnly  = before.match(/([+-])$/);
+  if (numMatch) {
+    outerCoeff = parseInt(numMatch[1]);
+    outerLen   = numMatch[1].length;
+    // but if the sign is standalone (e.g. prefix="3-" → numMatch won't fire; signOnly will)
+    // double-check: does the match include a leading sign that belongs to prefix?
+    // e.g. before="3-2" → numMatch[1]="-2" (outerCoeff=-2), prefix="3" ✓
+    // e.g. before="3+"  → numMatch won't match; signOnly → outerCoeff=1, prefix="3" ✓
+  } else if (signOnly) {
+    outerCoeff = signOnly[1] === '-' ? -1 : 1;
+    outerLen   = 1;
+  }
+
+  const terms = parseParen(parenContent);
+  if (!terms) return expr;
+
+  // Multiply each term by outerCoeff, preserving order
+  const expanded = terms.map(t => {
+    if (t.type === 'monomial') return { type: 'monomial', coeff: outerCoeff * t.coeff };
+    else                       return { type: 'integer',  val:   outerCoeff * t.val   };
+  });
+
+  const expandedStr = termsToExpr(expanded);
+  const prefix = before.slice(0, before.length - outerLen);
+
+  // Join prefix + expanded + suffix with correct connector
+  let full;
+  if (prefix === '') {
+    full = expandedStr + suffix;
+  } else {
+    // If expanded starts with '-', just concatenate; otherwise add '+'
+    const connector = expandedStr.startsWith('-') ? '' : '+';
+    full = prefix + connector + expandedStr + suffix;
+  }
+  // Clean up any double signs
+  full = full.replace(/\+\-/g, '-').replace(/\-\+/g, '-').replace(/^\+/, '');
+  return full;
+}
+
+// ==================== EXPRESSION SIMPLIFICATION ====================
+
+// Sum monomials and integers in a side
+function simplifyExprSide(expr) {
+  const tokens = tokenize(expr);
+  let xSum = 0, numSum = 0;
+
+  for (const t of tokens) {
+    if (t.type === 'monomial') xSum += t.coeff;
+    else if (t.type === 'integer') numSum += t.val;
+  }
+
+  let result = '';
+  if (xSum === 1) result = 'x';
+  else if (xSum === -1) result = '-x';
+  else if (xSum !== 0) result = xSum + 'x';
+
+  if (numSum !== 0) {
+    if (result === '') result = String(numSum);
+    else if (numSum > 0) result += '+' + numSum;
+    else result += numSum;
+  }
+
+  if (result === '') result = '0';
+  return result;
+}
+
+// Get x-coefficient from a side expression (after simplification)
+function getXCoeff(expr) {
+  const tokens = tokenize(expr);
+  let xSum = 0;
+  for (const t of tokens) if (t.type === 'monomial') xSum += t.coeff;
+  return xSum;
+}
+
+// Get constant sum from a side
+function getConstSum(expr) {
+  const tokens = tokenize(expr);
+  let s = 0;
+  for (const t of tokens) if (t.type === 'integer') s += t.val;
+  return s;
+}
+
+// ==================== RENDER HTML FOR EXPRESSION ====================
+
+function renderExpr(expr, mode, side, stepId, den, step) {
+  if (!expr) return '<span class="tok-other">—</span>';
+
+  if (mode === 'paren')    return renderParenMode(expr, stepId, side);
+  if (mode === 'separate') return renderSeparateMode(expr, side, stepId);
+  if (mode === 'divide' || mode === 'divide_ready') return renderDivideMode(expr, side, stepId, den || 1);
+
+  if (mode === 'simplified' && side === 'right' && step && step.resultFrac) {
+    const f = step.resultFrac;
+    const signHtml = f.neg ? '<span class="rf-sign">−</span>' : '';
+    return `<span class="tok-other">
+      <span class="result-frac">
+        ${signHtml}
+        <span class="rf-body">
+          <span class="rf-num">${f.num}</span>
+          <span class="rf-line"></span>
+          <span class="rf-den">${f.den}</span>
+        </span>
+      </span></span>`;
+  }
+
+  return '<span class="tok-other">' + escHtml(expr) + '</span>';
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderParenMode(expr, stepId, side) {
+  let html = '';
+  let i = 0;
+  while (i < expr.length) {
+    if (expr[i] === '(') {
+      let j = expr.indexOf(')', i);
+      if (j !== -1) {
+        let parenIdx = i;
+        html += '<span class="tok-paren tok-clickable paren-tok"' +
+          ' data-step="' + escHtml(stepId) + '"' +
+          ' data-side="' + escHtml(side) + '"' +
+          ' data-idx="' + parenIdx + '"' +
+          ' title="Επιμεριστική ιδιότητα">' +
+          escHtml(expr.slice(i, j+1)) + '</span>';
+        i = j + 1;
+        continue;
+      }
+    }
+    html += '<span class="tok-other">' + escHtml(expr[i]) + '</span>';
+    i++;
+  }
+  return html;
+}
+
+function renderSeparateMode(expr, side, stepId) {
+  const tokens = tokenize(expr);
+  let html = '';
+  for (const t of tokens) {
+    if (t.type === 'monomial') {
+      html += '<span class="tok-unknown tok-clickable sep-tok"' +
+        ' data-step="' + escHtml(stepId) + '"' +
+        ' data-side="' + escHtml(side) + '"' +
+        ' data-val="' + t.coeff + '"' +
+        ' data-type="monomial"' +
+        ' title="Μεταφορά στο άλλο μέλος">' +
+        escHtml(t.val || (t.coeff + 'x')) + '</span>';
+    } else if (t.type === 'integer') {
+      html += '<span class="tok-known tok-clickable sep-tok"' +
+        ' data-step="' + escHtml(stepId) + '"' +
+        ' data-side="' + escHtml(side) + '"' +
+        ' data-val="' + t.val + '"' +
+        ' data-type="integer"' +
+        ' title="Μεταφορά στο άλλο μέλος">' +
+        escHtml(t.str || String(t.val)) + '</span>';
+    } else {
+      html += '<span class="tok-other">' + escHtml(t.val) + '</span>';
+    }
+  }
+  return html || '<span class="tok-other">0</span>';
+}
+
+function renderDivideMode(expr, side, stepId, den) {
+  // Show the expression as a fraction: expr on top, den on bottom
+  const denDisplay = String(Math.abs(den)) + (den < 0 ? ' (αρν.)' : '');
+  // Actually just show the number without parens — sign is clear from context
+  const denStr = String(den);
+  return `
+    <div class="inline-fraction">
+      <div class="if-num" style="color:var(--color-frac)">${escHtml(expr)}</div>
+      <div class="if-line"></div>
+      <div class="if-den" style="color:var(--color-frac)">${escHtml(denStr)}</div>
+    </div>`;
+}
+
+// ==================== STEP MANAGEMENT ====================
+
+let steps = [];
+let stepCounter = 0;
+
+function createStep(leftVal, rightVal) {
+  const id = 'step_' + (++stepCounter);
+  const step = {
+    id,
+    left: leftVal || '',
+    right: rightVal || '',
+    locked: false,
+    mode: 'normal', // 'normal' | 'paren' | 'separate' | 'divide' | 'simplified'
+    fracRow: null, // for divide mode: {num, den}
+  };
+  steps.push(step);
+  return step;
+}
+
+function renderAllSteps() {
+  const container = document.getElementById('steps-container');
+  container.innerHTML = '';
+  for (const step of steps) {
+    container.appendChild(buildStepElement(step));
+  }
+}
+
+// Event delegation for dynamically rendered clickable tokens
+document.addEventListener('click', function(e) {
+  const sep = e.target.closest('.sep-tok');
+  if (sep) {
+    const stepId = sep.dataset.step;
+    const side = sep.dataset.side;
+    const val = parseFloat(sep.dataset.val);
+    const type = sep.dataset.type;
+    onSeparateClick(stepId, side, val, type);
+    return;
+  }
+  const par = e.target.closest('.paren-tok');
+  if (par) {
+    const stepId = par.dataset.step;
+    const side = par.dataset.side;
+    const idx = parseInt(par.dataset.idx);
+    onParenClick(stepId, side, idx);
+    return;
+  }
+});
+
+function buildStepElement(step) {
+  const div = document.createElement('div');
+  div.className = 'step' + (step.locked ? ' locked' : '');
+  div.id = 'step_div_' + step.id;
+
+  const labelEl = document.createElement('div');
+  labelEl.className = 'step-label';
+  if (step.locked) {
+    labelEl.textContent = step.lockedAction || '✓ ΚΑΤΟΧΥΡΩΜΕΝΗ';
+  } else {
+    const dot = document.createElement('span');
+    dot.className = 'live-dot';
+    labelEl.appendChild(dot);
+    const txt = document.createElement('span');
+    txt.textContent = 'ΥΠΟ ΕΠΕΞΕΡΓΑΣΙΑ';
+    labelEl.appendChild(txt);
+  }
+  div.appendChild(labelEl);
+
+  if (step.locked) {
+    const row = document.createElement('div');
+    row.className = 'eq-row';
+
+    const lMode = step.lockedMode || 'normal';
+    const lFrac = step.lockedFracRow || null;
+    const den   = (lMode === 'divide' && lFrac) ? lFrac.den : undefined;
+
+    // Build a fake step-like object for renderExpr
+    const fakeStep = { resultFrac: step.lockedResFrac || null };
+
+    const leftD = document.createElement('div');
+    leftD.className = 'eq-display';
+    if (lMode === 'divide' && den !== undefined) {
+      leftD.innerHTML = renderDivideMode(step.left, 'left', step.id, den);
+    } else {
+      leftD.innerHTML = renderExpr(step.left, lMode, 'left', step.id, undefined, fakeStep);
+    }
+
+    const eqSign = document.createElement('div');
+    eqSign.className = 'equals-sign';
+    eqSign.textContent = '=';
+
+    const rightD = document.createElement('div');
+    rightD.className = 'eq-display';
+    if (lMode === 'divide' && den !== undefined) {
+      rightD.innerHTML = renderDivideMode(step.right, 'right', step.id, den);
+    } else {
+      rightD.innerHTML = renderExpr(step.right, lMode, 'right', step.id, undefined, fakeStep);
+    }
+
+    row.append(leftD, eqSign, rightD);
+
+    if (step.lockedVerdict) {
+      const vl = document.createElement('div');
+      vl.className = 'verdict-label';
+      vl.textContent = ': ' + step.lockedVerdict;
+      row.appendChild(vl);
+    }
+
+    div.appendChild(row);
+  } else {
+    // Editable or interactive
+    const row = document.createElement('div');
+    row.className = 'eq-row';
+
+    if (step.mode === 'normal') {
+      // Text inputs
+      const leftIn = document.createElement('input');
+      leftIn.type = 'text';
+      leftIn.className = 'eq-input';
+      leftIn.value = step.left;
+      leftIn.placeholder = 'Αριστερό μέλος';
+      leftIn.oninput = () => { step.left = leftIn.value; };
+
+      const eqSign = document.createElement('div');
+      eqSign.className = 'equals-sign';
+      eqSign.textContent = '=';
+
+      const rightIn = document.createElement('input');
+      rightIn.type = 'text';
+      rightIn.className = 'eq-input';
+      rightIn.value = step.right;
+      rightIn.placeholder = 'Δεξί μέλος';
+      rightIn.oninput = () => { step.right = rightIn.value; };
+
+      row.append(leftIn, eqSign, rightIn);
+    } else {
+      // Display mode with colored tokens
+      const leftD = document.createElement('div');
+      leftD.className = 'eq-display';
+      leftD.id = 'display_left_' + step.id;
+      const den = ((step.mode === 'divide' || step.mode === 'divide_ready') && step.fracRow) ? step.fracRow.den : undefined;
+      leftD.innerHTML = renderExpr(step.left, step.mode, 'left', step.id, den, step);
+
+      const eqSign = document.createElement('div');
+      eqSign.className = 'equals-sign';
+      eqSign.textContent = '=';
+
+      const rightD = document.createElement('div');
+      rightD.className = 'eq-display';
+      rightD.id = 'display_right_' + step.id;
+      rightD.innerHTML = renderExpr(step.right, step.mode, 'right', step.id, den, step);
+
+      row.append(leftD, eqSign, rightD);
+
+      // Verdict label (inline after the equation)
+      if (step.mode === 'verdict' && step.verdict) {
+        const vl = document.createElement('div');
+        vl.className = 'verdict-label';
+        vl.textContent = ': ' + step.verdict;
+        row.appendChild(vl);
+      }
+    }
+
+    div.appendChild(row);
+
+    // Zero-div message and verdict buttons
+    if (step.mode === 'zerodiv') {
+      const msg = document.createElement('div');
+      msg.className = 'zero-div-msg';
+      msg.innerHTML = '⚠ Απαγορεύεται η διαίρεση με το 0.';
+      const bRow = document.createElement('div');
+      bRow.className = 'zero-div-btns';
+      ['ταυτότητα', 'αδύνατη'].forEach(v => {
+        const b = document.createElement('button');
+        b.className = 'btn-verdict';
+        b.textContent = v;
+        b.onclick = () => onVerdictClick(step.id, v);
+        bRow.appendChild(b);
+      });
+      msg.appendChild(bRow);
+      div.appendChild(msg);
+    }
+
+    // Buttons
+    const btns = document.createElement('div');
+    btns.className = 'btns';
+    btns.id = 'btns_' + step.id;
+
+    const btnConf = document.createElement('button');
+    btnConf.className = 'btn-confirm';
+    btnConf.textContent = 'Κατοχύρωση';
+    btnConf.onclick = () => lockStep(step.id);
+    btns.appendChild(btnConf);
+
+    const actions = [
+      { key: 'paren', label: 'Επιμεριστική' },
+      { key: 'separate', label: 'Χωρίζω γνωστούς από αγνώστους' },
+      { key: 'calc', label: 'Πράξεις' },
+      { key: 'divide', label: 'Διαιρώ με συντελεστή αγνώστου' },
+      { key: 'simplify', label: 'Απλοποιώ' },
+    ];
+
+    // Determine which action key is currently "active" (if any)
+    const modeToKey = { paren:'paren', separate:'separate', calc:'calc',
+                        divide:'divide', zerodiv:'divide', verdict:'divide',
+                        simplified:'simplify'
+                        /* divide_ready: not listed → activeKey=null → all buttons enabled */ };
+    const activeKey = modeToKey[step.mode] || null;
+
+    for (const a of actions) {
+      const btn = document.createElement('button');
+      const isActive   = activeKey === a.key;
+      const isDisabled = activeKey && !isActive;
+      btn.className = 'btn-action' +
+        (isActive   ? ' active-mode'  : '') +
+        (isDisabled ? ' btn-inactive' : '');
+      btn.textContent = a.label;
+      if (!isDisabled) btn.onclick = () => onActionBtn(step.id, a.key);
+      btns.appendChild(btn);
+    }
+
+    div.appendChild(btns);
+  }
+
+  return div;
+}
+
+function buildFractionHTML(num, den, left, right) {
+  // Show: left/den = right/den
+  const denDisplay = den < 0 ? '(' + den + ')' : String(den);
+  return `
+    <div class="fraction">
+      <div class="frac-num">${escHtml(left)}</div>
+      <div class="frac-line"></div>
+      <div class="frac-den">${escHtml(denDisplay)}</div>
+    </div>
+    <span class="fraction-equals">=</span>
+    <div class="fraction">
+      <div class="frac-num">${escHtml(right)}</div>
+      <div class="frac-line"></div>
+      <div class="frac-den">${escHtml(denDisplay)}</div>
+    </div>
+  `;
+}
+
+// ==================== ACTIONS ====================
+
+function lockStep(stepId) {
+  const step = steps.find(s => s.id === stepId);
+  if (!step) return;
+
+  if (step.mode === 'normal') {
+    const leftIn = document.querySelector('#step_div_' + stepId + ' input[placeholder="Αριστερό μέλος"]');
+    const rightIn = document.querySelector('#step_div_' + stepId + ' input[placeholder="Δεξί μέλος"]');
+    if (leftIn) step.left = leftIn.value;
+    if (rightIn) step.right = rightIn.value;
+  }
+
+  // Freeze visual state
+  step.lockedMode    = step.mode;
+  step.lockedFracRow = step.fracRow   ? { ...step.fracRow }   : null;
+  step.lockedResFrac = step.resultFrac ? { ...step.resultFrac } : null;
+  step.lockedVerdict = step.verdict   || null;
+
+  // Label describing what action produced this locked step
+  const modeLabels = {
+    normal:       'Αρχική εξίσωση',
+    paren:        'Επιμεριστική',
+    separate:     'Χωρισμός γνωστών/αγνώστων',
+    calc:         'Πράξεις',
+    divide:       'Διαίρεση με συντελεστή',
+    divide_ready: 'Διαίρεση με συντελεστή',
+    zerodiv:      'Διαίρεση με 0',
+    verdict:      step.verdict ? ('Εξίσωση: ' + step.verdict) : 'Verdict',
+    simplified:   'Απλοποίηση',
+  };
+  // First locked step is always "Αρχική εξίσωση"
+  const isFirst = steps.filter(s => s.locked).length === 0;
+  step.lockedAction = isFirst ? 'Αρχική εξίσωση' : (modeLabels[step.mode] || 'Κατοχύρωση');
+
+  step.locked = true;
+
+  // New editable step: if locked from divide, show fraction but keep all buttons enabled
+  const newStep = createStep(step.left, step.right);
+  if (step.lockedMode === 'divide' && step.lockedFracRow) {
+    newStep.mode    = 'divide_ready';
+    newStep.fracRow = { ...step.lockedFracRow };
+  }
+
+  // Reset working fields on locked step
+  step.mode      = 'normal';
+  step.fracRow   = null;
+  step.resultFrac = null;
+  step.verdict   = null;
+
+  // Detect if this was a final step (simplified or verdict)
+  if (['simplified', 'verdict'].includes(step.lockedMode)) {
+    renderAllSteps();
+    document.getElementById('solved-overlay').classList.add('visible');
+    return;
+  }
+
+  renderAllSteps();
+}
+
+function onActionBtn(stepId, action) {
+  const step = steps.find(s => s.id === stepId);
+  if (!step || step.locked) return;
+
+  // Read inputs if in normal mode
+  if (step.mode === 'normal') {
+    const leftIn = document.querySelector('#step_div_' + stepId + ' input[placeholder="Αριστερό μέλος"]');
+    const rightIn = document.querySelector('#step_div_' + stepId + ' input[placeholder="Δεξί μέλος"]');
+    if (leftIn) step.left = leftIn.value;
+    if (rightIn) step.right = rightIn.value;
+  }
+
+  if (action === 'paren') {
+    step.mode = step.mode === 'paren' ? 'normal' : 'paren';
+    renderAllSteps();
+    return;
+  }
+
+  if (action === 'separate') {
+    step.mode = step.mode === 'separate' ? 'normal' : 'separate';
+    renderAllSteps();
+    return;
+  }
+
+  if (action === 'calc') {
+    step.left  = simplifyExprSide(step.left);
+    step.right = simplifyExprSide(step.right);
+    step.mode  = 'calc';   // disables other buttons until next Κατοχύρωση
+    renderAllSteps();
+    return;
+  }
+
+  if (action === 'divide') {
+    const xCoeff = getXCoeff(step.left) || getXCoeff(step.right);
+    if (xCoeff === 0) {
+      // Show zero-division prompt
+      step.mode = 'zerodiv';
+      renderAllSteps();
+      return;
+    }
+    step.fracRow = { num: null, den: xCoeff };
+    step.mode = 'divide';
+    renderAllSteps();
+    return;
+  }
+
+  if (action === 'simplify') {
+    const leftXCoeff  = getXCoeff(step.left);
+    const rightXCoeff = getXCoeff(step.right);
+    const xCoeff = leftXCoeff !== 0 ? leftXCoeff : rightXCoeff;
+    if (xCoeff === 0) { alert('Δεν βρέθηκε συντελεστής αγνώστου.'); return; }
+    const numerator = leftXCoeff !== 0 ? getConstSum(step.right) : getConstSum(step.left);
+    step.left = 'x';
+    const [sn, sd] = simplifyFraction(numerator, xCoeff);
+    if (sd === 1) {
+      step.right = String(sn);
+      step.resultFrac = null;
+    } else {
+      // Store as fraction object; keep slash string for text operations
+      step.right = sn + '/' + sd;
+      step.resultFrac = { num: Math.abs(sn), den: Math.abs(sd), neg: sn < 0 };
+    }
+    step.mode = 'simplified';
+    step.fracRow = null;
+    renderAllSteps();
+    return;
+  }
+}
+
+// Called when user clicks on a parenthesized expression
+function onVerdictClick(stepId, verdict) {
+  const step = steps.find(s => s.id === stepId);
+  if (!step) return;
+  step.mode = 'verdict';
+  step.verdict = verdict;
+  renderAllSteps();
+}
+
+function onParenClick(stepId, side, parenIdx) {
+  const step = steps.find(s => s.id === stepId);
+  if (!step) return;
+
+  const sideKey = side === 'left' ? 'left' : 'right';
+  step[sideKey] = expandDistributiveInExpr(step[sideKey], parenIdx);
+  step.mode = 'paren';
+  renderAllSteps();
+}
+
+// Called when user clicks on a monomial/integer in separate mode
+function onSeparateClick(stepId, side, val, type) {
+  const step = steps.find(s => s.id === stepId);
+  if (!step) return;
+
+  // Remove token from current side, add negated to other side
+  if (type === 'monomial') {
+    const coeff = val; // number
+    // Remove from current side
+    step[side] = removeMonomialFromExpr(step[side], coeff);
+    // Add negated to other side
+    const otherSide = side === 'left' ? 'right' : 'left';
+    step[otherSide] = addMonomialToExpr(step[otherSide], -coeff);
+  } else {
+    // integer
+    const intVal = val;
+    step[side] = removeIntegerFromExpr(step[side], intVal);
+    const otherSide = side === 'left' ? 'right' : 'left';
+    step[otherSide] = addIntegerToExpr(step[otherSide], -intVal);
+  }
+
+  renderAllSteps();
+}
+
+function removeMonomialFromExpr(expr, coeff) {
+  const tokens = tokenize(expr);
+  let removed = false;
+  const newTokens = tokens.filter(t => {
+    if (!removed && t.type === 'monomial' && t.coeff === coeff) {
+      removed = true;
+      return false;
+    }
+    return true;
+  });
+  return rebuildExpr(newTokens);
+}
+
+function removeIntegerFromExpr(expr, val) {
+  const tokens = tokenize(expr);
+  let removed = false;
+  const newTokens = tokens.filter(t => {
+    if (!removed && t.type === 'integer' && t.val === val) {
+      removed = true;
+      return false;
+    }
+    return true;
+  });
+  return rebuildExpr(newTokens);
+}
+
+function addMonomialToExpr(expr, coeff) {
+  if (coeff === 0) return expr;
+  let term;
+  if (coeff === 1) term = 'x';
+  else if (coeff === -1) term = '-x';
+  else term = coeff + 'x';
+
+  if (!expr || expr === '0') return term;
+  if (coeff > 0) return expr + '+' + term;
+  return expr + term;
+}
+
+function addIntegerToExpr(expr, val) {
+  if (val === 0) return expr;
+  if (!expr || expr === '0') return String(val);
+  if (val > 0) return expr + '+' + val;
+  return expr + val;
+}
+
+function rebuildExpr(tokens) {
+  if (tokens.length === 0) return '0';
+  let result = '';
+  for (const t of tokens) {
+    if (t.type === 'monomial') {
+      const s = t.coeff === 1 ? 'x' : t.coeff === -1 ? '-x' : t.coeff + 'x';
+      if (result === '' || result === '0') result = s;
+      else if (t.coeff > 0) result += '+' + s;
+      else result += s;
+    } else if (t.type === 'integer') {
+      if (result === '' || result === '0') result = String(t.val);
+      else if (t.val > 0) result += '+' + t.val;
+      else result += t.val;
+    } else if (t.type === 'paren_expr') {
+      result += t.val;
+    }
+  }
+  return result || '0';
+}
+
+// ==================== SOLVED / REVIEW ====================
+
+function showReview() {
+  document.getElementById('solved-overlay').classList.remove('visible');
+  // Clone all locked steps into review panel
+  const reviewSteps = document.getElementById('review-steps');
+  reviewSteps.innerHTML = '';
+  for (const step of steps) {
+    if (!step.locked) continue;
+    const el = buildStepElement(step);
+    // Remove buttons if any leaked through
+    const btns = el.querySelector('.btns');
+    if (btns) btns.remove();
+    reviewSteps.appendChild(el);
+  }
+  document.getElementById('steps-container').style.display = 'none';
+  document.getElementById('review-panel').classList.add('visible');
+}
+
+function closeReview() {
+  document.getElementById('review-panel').classList.remove('visible');
+  document.getElementById('steps-container').style.display = 'none';
+  document.getElementById('solved-overlay').classList.add('visible');
+}
+
+function newEquation() {
+  document.getElementById('solved-overlay').classList.remove('visible');
+  document.getElementById('review-panel').classList.remove('visible');
+  document.getElementById('steps-container').style.display = '';
+  steps = [];
+  stepCounter = 0;
+  createStep('', '');
+  renderAllSteps();
+}
+
+// ==================== INIT ====================
+
+function init() {
+  createStep('', '');
+  renderAllSteps();
+}
+
+init();
+</script>
+
+<div class="signature">Κώστας Κούδας</div>
+</body>
+</html>

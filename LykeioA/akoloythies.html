@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Αριθμητική Ακολουθία</title>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --panel: #16213e;
+    --card: #0f3460;
+    --accent1: #e94560;
+    --accent2: #f5a623;
+    --accent3: #4ecdc4;
+    --text: #f0f0f0;
+    --text2: #b0c4de;
+    --chair-empty: #4a6fa5;
+    --chair-filled: #e94560;
+    --input-bg: #0a1628;
+    --border: #4ecdc4;
+    --success: #2ecc71;
+    --font-main: Georgia, 'Times New Roman', serif;
+    --font-mono: 'Courier New', Courier, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-image: radial-gradient(ellipse at 20% 20%, #0f3460 0%, transparent 50%),
+                      radial-gradient(ellipse at 80% 80%, #16213e 0%, transparent 50%);
+  }
+
+  h1 {
+    font-size: 2rem;
+    color: var(--accent3);
+    text-align: center;
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px rgba(78,205,196,0.4);
+  }
+
+  .screen {
+    display: none;
+    width: 100%;
+    max-width: 720px;
+    animation: fadeIn 0.4s ease;
+  }
+  .screen.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === SCREEN 0: CHOICE === */
+  .choice-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-top: 40px;
+  }
+  .choice-label {
+    font-size: 1.3rem;
+    color: var(--accent2);
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .choice-btn {
+    width: 280px;
+    padding: 18px 24px;
+    border: 2px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 1.1rem;
+    font-family: var(--font-main);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .choice-btn:hover, .choice-btn:focus {
+    background: var(--accent3);
+    color: #000;
+    border-color: var(--accent3);
+    transform: scale(1.04);
+    outline: 3px solid var(--accent2);
+  }
+
+  /* === FORMULA INPUT === */
+  .section {
+    background: var(--panel);
+    border: 1px solid var(--card);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .section-title {
+    font-size: 1rem;
+    color: var(--accent2);
+    margin-bottom: 14px;
+    letter-spacing: 1px;
+  }
+
+  .formula-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .formula-label {
+    font-size: 1.4rem;
+    color: var(--accent3);
+    font-style: italic;
+    white-space: nowrap;
+  }
+  .formula-input {
+    flex: 1;
+    min-width: 140px;
+    padding: 10px 14px;
+    background: var(--input-bg);
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 1.1rem;
+    font-family: var(--font-mono);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .formula-input:focus { border-color: var(--accent2); }
+  .formula-input::placeholder { color: #556; }
+
+  .confirm-btn {
+    padding: 10px 20px;
+    background: var(--accent3);
+    border: none;
+    border-radius: 6px;
+    color: #000;
+    font-size: 1rem;
+    font-family: var(--font-main);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .confirm-btn:hover, .confirm-btn:focus {
+    background: var(--accent2);
+    outline: 2px solid var(--text);
+  }
+  .confirm-btn:disabled {
+    background: #444;
+    color: #888;
+    cursor: default;
+  }
+
+  .rendered-formula {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--input-bg);
+    border-radius: 8px;
+    font-size: 1.2rem;
+    color: var(--success);
+    min-height: 44px;
+    display: none;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+  }
+  .rendered-formula.show { display: flex; }
+  .rendered-formula .math-var { color: var(--accent2); font-style: italic; }
+  .rendered-formula .math-frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    margin: 0 3px;
+    font-size: 0.9em;
+  }
+  .rendered-formula .math-frac .num { border-bottom: 1px solid var(--text); padding: 1px 3px; }
+  .rendered-formula .math-frac .den { padding: 1px 3px; }
+
+  /* === CHAIRS === */
+  .chairs-section { margin-bottom: 20px; }
+  .chairs-title {
+    font-size: 1rem;
+    color: var(--accent2);
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+  .chairs-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  .chair-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .chair-label {
+    font-size: 0.85rem;
+    color: var(--text2);
+  }
+  .chair-value {
+    display: none;
+  }
+
+  svg.chair { overflow: visible; }
+
+  /* === STEPS === */
+  .steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .step-card {
+    background: var(--panel);
+    border-left: 4px solid var(--accent3);
+    border-radius: 6px;
+    padding: 14px 18px;
+    animation: slideIn 0.35s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-16px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .step-expr { font-size: 1.1rem; color: var(--text); line-height: 1.7; }
+  .step-expr .math-var { color: var(--accent2); font-style: italic; }
+  .step-expr sub { font-size: 0.7em; }
+  .step-result { color: var(--accent3); font-weight: bold; }
+  .step-expr .math-frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    margin: 0 2px;
+    font-size: 0.88em;
+  }
+  .step-expr .math-frac .num { border-bottom: 1px solid var(--text); padding: 0 3px; }
+  .step-expr .math-frac .den { padding: 0 3px; }
+
+  .next-btn {
+    padding: 12px 28px;
+    background: var(--accent1);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1.1rem;
+    font-family: var(--font-main);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: block;
+    margin: 0 auto 20px;
+  }
+  .next-btn:hover, .next-btn:focus {
+    background: var(--accent2);
+    color: #000;
+    outline: 2px solid var(--text);
+    transform: scale(1.04);
+  }
+  .next-btn:disabled {
+    background: #555;
+    color: #999;
+    cursor: default;
+    transform: none;
+  }
+
+  .back-btn {
+    display: block;
+    margin: 10px auto 0;
+    padding: 8px 20px;
+    background: transparent;
+    border: 2px solid var(--text2);
+    border-radius: 6px;
+    color: var(--text2);
+    font-size: 0.95rem;
+    font-family: var(--font-main);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .back-btn:hover, .back-btn:focus {
+    border-color: var(--accent3);
+    color: var(--accent3);
+    outline: none;
+  }
+
+  .error-msg {
+    color: var(--accent1);
+    font-size: 0.9rem;
+    margin-top: 6px;
+    min-height: 18px;
+  }
+
+  /* Accessibility: high contrast focus */
+  *:focus-visible { outline: 3px solid var(--accent2); outline-offset: 2px; }
+
+  /* Back button */
+  .btn-home {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 200;
+    background: #1e3a5f;
+    color: #b0c4de;
+    font-family: var(--font-main);
+    font-size: 0.78em;
+    font-weight: bold;
+    padding: 7px 13px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.15s;
+  }
+  .btn-home:hover { background: #2a4a7f; }
+
+  /* Signature */
+  .signature {
+    position: fixed;
+    bottom: 12px;
+    left: 14px;
+    z-index: 200;
+    font-family: var(--font-main);
+    font-size: 0.72em;
+    color: var(--text2);
+    font-style: italic;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+
+<a class="btn-home" href="index.html">&#8592; Αρχική</a>
+
+<h1>Αριθμητικές Ακολουθίες</h1>
+
+<!-- SCREEN 0: CHOICE -->
+<div id="screen0" class="screen active">
+  <div class="choice-container">
+    <div class="choice-label">Επιλέξτε τύπο ακολουθίας:</div>
+    <button class="choice-btn" onclick="chooseType('recursive')">📐 Αναδρομικός τύπος</button>
+    <button class="choice-btn" onclick="chooseType('nterm')">🔢 n-οστός όρος</button>
+  </div>
+</div>
+
+<!-- SCREEN 1: INPUT FORMULA (recursive) -->
+<div id="screen1r" class="screen">
+  <div class="section">
+    <div class="section-title">ΑΝΑΔΡΟΜΙΚΟΣ ΤΥΠΟΣ</div>
+    <div class="formula-row">
+      <span class="formula-label">α<sub>n</sub> =</span>
+      <input class="formula-input" id="inputRecFormula" type="text"
+             placeholder="π.χ. 4*pr - 1/pr"
+             aria-label="Αναδρομικός τύπος, χρησιμοποιήστε pr για τον προηγούμενο όρο">
+      <button class="confirm-btn" onclick="confirmRecFormula()">✔ Καταχώρηση</button>
+    </div>
+    <div class="error-msg" id="errRecFormula"></div>
+    <div class="formula-label" style="font-size:0.85rem;color:var(--text2);margin-top:8px;">
+      Χρησιμοποιήστε <strong style="color:var(--accent2)">pr</strong> για τον προηγούμενο όρο α<sub>n-1</sub>. Πράξεις: + − * /
+    </div>
+    <div class="rendered-formula" id="renderedRecFormula" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="section" id="sectionA1" style="display:none;">
+    <div class="section-title">ΠΡΩΤΟΣ ΟΡΟΣ</div>
+    <div class="formula-row">
+      <span class="formula-label">α<sub>1</sub> =</span>
+      <input class="formula-input" id="inputA1" type="text" placeholder="π.χ. 2"
+             aria-label="Πρώτος όρος">
+      <button class="confirm-btn" onclick="confirmA1()">✔ Καταχώρηση</button>
+    </div>
+    <div class="error-msg" id="errA1"></div>
+    <div class="rendered-formula" id="renderedA1" role="status" aria-live="polite"></div>
+  </div>
+
+  <button class="back-btn" onclick="goBack()">← Πίσω</button>
+</div>
+
+<!-- SCREEN 1: INPUT FORMULA (n-term) -->
+<div id="screen1n" class="screen">
+  <div class="section">
+    <div class="section-title">n-ΟΣΤΟΣ ΟΡΟΣ</div>
+    <div class="formula-row">
+      <span class="formula-label">α<sub>n</sub> =</span>
+      <input class="formula-input" id="inputNFormula" type="text"
+             placeholder="π.χ. 3*n + 1"
+             aria-label="Τύπος n-οστού όρου, χρησιμοποιήστε n">
+      <button class="confirm-btn" onclick="confirmNFormula()">✔ Καταχώρηση</button>
+    </div>
+    <div class="error-msg" id="errNFormula"></div>
+    <div class="formula-label" style="font-size:0.85rem;color:var(--text2);margin-top:8px;">
+      Χρησιμοποιήστε <strong style="color:var(--accent2)">n</strong> για τη θέση. Πράξεις: + − * /
+    </div>
+    <div class="rendered-formula" id="renderedNFormula" role="status" aria-live="polite"></div>
+  </div>
+  <button class="back-btn" onclick="goBack()">← Πίσω</button>
+</div>
+
+<!-- SCREEN 2: CHAIRS + STEPS -->
+<div id="screen2" class="screen">
+  <div class="section chairs-section">
+    <div class="chairs-title">Οι πρώτοι 6 όροι:</div>
+    <div class="chairs-row" id="chairsRow"></div>
+  </div>
+
+  <button class="next-btn" id="nextBtn" onclick="showNextStep()">Επόμενο ▶</button>
+
+  <div class="steps-container" id="stepsContainer"></div>
+  <button class="back-btn" onclick="goBack()">← Νέα ακολουθία</button>
+</div>
+
+<script>
+// ===== STATE =====
+var appType = ''; // 'recursive' | 'nterm'
+var recFormula = '';
+var a1Value = NaN;
+var nFormula = '';
+var currentStep = 0;
+var terms = [];
+
+// ===== NAVIGATION =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+
+function chooseType(t) {
+  appType = t;
+  currentStep = 0;
+  terms = [];
+  if (t === 'recursive') {
+    document.getElementById('inputRecFormula').value = '';
+    document.getElementById('renderedRecFormula').classList.remove('show');
+    document.getElementById('renderedRecFormula').innerHTML = '';
+    document.getElementById('errRecFormula').textContent = '';
+    document.getElementById('sectionA1').style.display = 'none';
+    document.getElementById('inputA1').value = '';
+    document.getElementById('renderedA1').classList.remove('show');
+    document.getElementById('errA1').textContent = '';
+    showScreen('screen1r');
+  } else {
+    document.getElementById('inputNFormula').value = '';
+    document.getElementById('renderedNFormula').classList.remove('show');
+    document.getElementById('errNFormula').textContent = '';
+    showScreen('screen1n');
+  }
+}
+
+function goBack() {
+  showScreen('screen0');
+}
+
+// ===== FORMULA PARSING & RENDERING =====
+// Safe eval: only allow digits, operators, parentheses, and our variables (pr or n)
+function safeEval(expr, vars) {
+  // Replace variable names with values
+  var e = expr;
+  for (var k in vars) {
+    e = e.split(k).join('(' + vars[k] + ')');
+  }
+  // Check for unsafe chars
+  if (/[^0-9+\-*/().e\s]/.test(e)) return NaN;
+  try {
+    // Use Function constructor for eval in strict scope
+    var result = Function('"use strict"; return (' + e + ')')();
+    return result;
+  } catch(err) { return NaN; }
+}
+
+// Render expression to pretty HTML
+// For recursive: variable is 'pr', display as α_{n-1}
+// For n-term: variable is 'n', display as n
+function renderExprHTML(expr, varName, displayHTML) {
+  // We'll try to detect division and render as fraction
+  // Strategy: tokenize and build HTML
+  // Simple approach: find division operator at "top level" (not inside parens)
+  // If entire expression is A/B, render as fraction
+  // Otherwise inline with /
+  var html = renderNode(expr.trim(), varName, displayHTML);
+  return html;
+}
+
+// Try to split expr at top-level operator (lowest precedence first: +-, then */)
+function renderNode(expr, varName, displayHTML) {
+  expr = expr.trim();
+  // Remove outer parens
+  expr = stripOuterParens(expr);
+
+  // Try split at top-level + or - (left to right, respecting parens)
+  var split = splitTopLevel(expr, ['+', '-']);
+  if (split) {
+    var left = renderNode(split.left, varName, displayHTML);
+    var right = renderNode(split.right, varName, displayHTML);
+    var op = split.op;
+    // If right starts with -, add space
+    return left + ' ' + op + ' ' + right;
+  }
+
+  // Try split at top-level * or /
+  split = splitTopLevel(expr, ['*', '/']);
+  if (split) {
+    if (split.op === '/') {
+      var num = renderNode(split.left, varName, displayHTML);
+      var den = renderNode(split.right, varName, displayHTML);
+      return '<span class="math-frac"><span class="num">' + num + '</span><span class="den">' + den + '</span></span>';
+    } else {
+      // multiplication: omit * if both sides are single tokens
+      var l = renderNode(split.left, varName, displayHTML);
+      var r = renderNode(split.right, varName, displayHTML);
+      // Check if l is a number and r starts with variable
+      return l + '·' + r;
+    }
+  }
+
+  // Leaf: number or variable
+  if (expr === varName) {
+    return '<span class="math-var">' + displayHTML + '</span>';
+  }
+  // number
+  return expr;
+}
+
+function stripOuterParens(expr) {
+  if (expr[0] !== '(') return expr;
+  var depth = 0;
+  for (var i = 0; i < expr.length; i++) {
+    if (expr[i] === '(') depth++;
+    else if (expr[i] === ')') depth--;
+    if (depth === 0) {
+      if (i === expr.length - 1) return stripOuterParens(expr.slice(1, -1).trim());
+      else return expr;
+    }
+  }
+  return expr;
+}
+
+// Split expr at LAST top-level occurrence of any op in ops array
+// Returns {left, op, right} or null
+function splitTopLevel(expr, ops) {
+  var depth = 0;
+  var bestIdx = -1;
+  var bestOp = '';
+  for (var i = 0; i < expr.length; i++) {
+    var c = expr[i];
+    if (c === '(') { depth++; continue; }
+    if (c === ')') { depth--; continue; }
+    if (depth === 0) {
+      // For +/-, skip if it's a unary sign at start or after operator
+      for (var j = 0; j < ops.length; j++) {
+        if (c === ops[j]) {
+          // Check if it could be unary: position 0, or previous non-space char is an operator
+          if ((c === '+' || c === '-') && i === 0) continue;
+          if ((c === '+' || c === '-')) {
+            var prev = expr.slice(0, i).trim();
+            if (prev === '' || /[+\-*/]$/.test(prev)) continue;
+          }
+          bestIdx = i;
+          bestOp = ops[j];
+        }
+      }
+    }
+  }
+  if (bestIdx === -1) return null;
+  return {
+    left: expr.slice(0, bestIdx).trim(),
+    op: bestOp,
+    right: expr.slice(bestIdx + 1).trim()
+  };
+}
+
+// Validate formula: only allows digits, +,-,*,/, parens, spaces, and our var
+function validateFormula(expr, varName) {
+  // Allow: digits, operators, parens, dot, spaces, and varName letters
+  var safe = expr.replace(new RegExp(varName, 'g'), '0');
+  // After replacing varname, should only have digits, ops, parens, dot, space
+  return /^[0-9+\-*/().\s]+$/.test(safe);
+}
+
+// ===== RECURSIVE FLOW =====
+function confirmRecFormula() {
+  var val = document.getElementById('inputRecFormula').value.trim();
+  var err = document.getElementById('errRecFormula');
+  var rendered = document.getElementById('renderedRecFormula');
+  err.textContent = '';
+  if (!val) { err.textContent = 'Παρακαλώ εισάγετε παράσταση.'; return; }
+  if (!validateFormula(val, 'pr')) {
+    err.textContent = 'Επιτρέπονται μόνο αριθμοί, +  −  *  /  ( ) και η μεταβλητή pr.'; return;
+  }
+  // Try eval with dummy pr=2 to check syntax
+  var test = safeEval(val, {pr: 2});
+  if (isNaN(test)) { err.textContent = 'Μη έγκυρη έκφραση. Ελέγξτε τη σύνταξη.'; return; }
+
+  recFormula = val;
+  var html = 'α<sub>n</sub> = ' + renderExprHTML(val, 'pr', 'α<sub>n−1</sub>');
+  rendered.innerHTML = html;
+  rendered.classList.add('show');
+
+  // Show a1 section
+  document.getElementById('sectionA1').style.display = 'block';
+}
+
+function confirmA1() {
+  var val = document.getElementById('inputA1').value.trim();
+  var err = document.getElementById('errA1');
+  var rendered = document.getElementById('renderedA1');
+  err.textContent = '';
+  var num = parseFloat(val);
+  if (val === '' || isNaN(num)) { err.textContent = 'Παρακαλώ εισάγετε έγκυρο αριθμό.'; return; }
+
+  a1Value = num;
+  rendered.innerHTML = 'α<sub>1</sub> = <span class="step-result">' + formatNum(num) + '</span>';
+  rendered.classList.add('show');
+
+  // Compute all 6 terms
+  computeTermsRecursive();
+  buildChairsScreen();
+  showScreen('screen2');
+}
+
+function computeTermsRecursive() {
+  terms = [a1Value];
+  for (var i = 1; i < 6; i++) {
+    var pr = terms[i - 1];
+    var next = safeEval(recFormula, {pr: pr});
+    terms.push(next);
+  }
+}
+
+// ===== N-TERM FLOW =====
+function confirmNFormula() {
+  var val = document.getElementById('inputNFormula').value.trim();
+  var err = document.getElementById('errNFormula');
+  var rendered = document.getElementById('renderedNFormula');
+  err.textContent = '';
+  if (!val) { err.textContent = 'Παρακαλώ εισάγετε παράσταση.'; return; }
+  if (!validateFormula(val, 'n')) {
+    err.textContent = 'Επιτρέπονται μόνο αριθμοί, +  −  *  /  ( ) και η μεταβλητή n.'; return;
+  }
+  var test = safeEval(val, {n: 1});
+  if (isNaN(test)) { err.textContent = 'Μη έγκυρη έκφραση. Ελέγξτε τη σύνταξη.'; return; }
+
+  nFormula = val;
+  var html = 'α<sub>n</sub> = ' + renderExprHTML(val, 'n', '<span class="math-var">n</span>');
+  rendered.innerHTML = html;
+  rendered.classList.add('show');
+
+  // Compute terms immediately
+  computeTermsNth();
+  buildChairsScreen();
+  showScreen('screen2');
+}
+
+function computeTermsNth() {
+  terms = [];
+  for (var i = 1; i <= 6; i++) {
+    terms.push(safeEval(nFormula, {n: i}));
+  }
+}
+
+// ===== CHAIRS SCREEN =====
+function buildChairsScreen() {
+  currentStep = 0;
+  document.getElementById('stepsContainer').innerHTML = '';
+  document.getElementById('nextBtn').disabled = false;
+
+  var row = document.getElementById('chairsRow');
+  row.innerHTML = '';
+  for (var i = 0; i < 6; i++) {
+    var wrap = document.createElement('div');
+    wrap.className = 'chair-wrap';
+    wrap.id = 'chair-wrap-' + i;
+
+    var svg = createChairSVG(i + 1, false, '');
+    svg.id = 'chair-svg-' + i;
+
+    wrap.appendChild(svg);
+    row.appendChild(wrap);
+  }
+}
+
+function createChairSVG(num, filled, valueStr) {
+  // Layout (viewBox 0 0 80 120):
+  //   y=0..18   : label zone (α_n or value) — floats ABOVE the seat
+  //   y=18..27  : seat plank top bar
+  //   y=27..88  : chair body (backrest + legs)
+  //   Seat plank: y=54, h=11
+  //   Legs:       y=65 down to y=100
+  //   Index badge between legs: cy=82
+
+  var ns = 'http://www.w3.org/2000/svg';
+  var svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('class', 'chair');
+  svg.setAttribute('width', '80');
+  svg.setAttribute('height', '120');
+  svg.setAttribute('viewBox', '0 0 80 120');
+  svg.setAttribute('aria-label', 'Καρέκλα ' + num + (valueStr ? ' = ' + valueStr : ''));
+  svg.setAttribute('role', 'img');
+
+  var bodyColor = filled ? '#e94560' : '#4a6fa5';
+  var seatColor = filled ? '#c73050' : '#3a5a8a';
+  var legColor  = filled ? '#b02040' : '#2e4870';
+  var idxBg     = filled ? '#f5a623' : '#1a1a2e';
+  var idxStroke = filled ? '#fff'    : '#b0c4de';
+  var idxFill   = filled ? '#000'    : '#b0c4de';
+
+  function mkRect(x,y,w,h,rx,fill) {
+    var r = document.createElementNS(ns,'rect');
+    r.setAttribute('x',x); r.setAttribute('y',y);
+    r.setAttribute('width',w); r.setAttribute('height',h);
+    r.setAttribute('rx',rx); r.setAttribute('fill',fill);
+    return r;
+  }
+
+  // ── Chair body ──
+  // Backrest top bar
+  svg.appendChild(mkRect(8, 22, 64, 9, 3, bodyColor));
+  // Backrest vertical post
+  svg.appendChild(mkRect(36, 30, 8, 26, 2, bodyColor));
+  // Seat plank
+  svg.appendChild(mkRect(4, 54, 72, 11, 3, seatColor));
+  // Left leg
+  svg.appendChild(mkRect(10, 65, 10, 38, 2, legColor));
+  // Right leg
+  svg.appendChild(mkRect(60, 65, 10, 38, 2, legColor));
+
+  // ── Index badge: between the two legs ──
+  var circle = document.createElementNS(ns, 'circle');
+  circle.setAttribute('cx', '40'); circle.setAttribute('cy', '84');
+  circle.setAttribute('r', '12');
+  circle.setAttribute('fill', idxBg);
+  circle.setAttribute('stroke', idxStroke);
+  circle.setAttribute('stroke-width', '1.5');
+  svg.appendChild(circle);
+
+  var idxText = document.createElementNS(ns, 'text');
+  idxText.setAttribute('x', '40'); idxText.setAttribute('y', '89');
+  idxText.setAttribute('text-anchor', 'middle');
+  idxText.setAttribute('font-size', '12'); idxText.setAttribute('font-family', 'Georgia,serif');
+  idxText.setAttribute('fill', idxFill); idxText.setAttribute('font-weight', 'bold');
+  idxText.textContent = num;
+  svg.appendChild(idxText);
+
+  // ── Label ABOVE the seat ──
+  // Show "αN" (with subscript via tspan) initially; replaced by value when filled
+  var labelG = document.createElementNS(ns, 'text');
+  labelG.setAttribute('x', '40'); labelG.setAttribute('y', '48');
+  labelG.setAttribute('text-anchor', 'middle');
+  labelG.setAttribute('font-family', 'Georgia,serif');
+  labelG.setAttribute('font-style', 'italic');
+
+  if (filled && valueStr !== undefined && valueStr !== '') {
+    // Show numeric value
+    var display = String(valueStr);
+    if (display.length > 7) display = display.slice(0, 6) + '…';
+    labelG.setAttribute('font-size', '22');
+    labelG.setAttribute('fill', '#e8f4ff');
+    labelG.setAttribute('font-weight', 'bold');
+    labelG.setAttribute('font-style', 'normal');
+    labelG.textContent = display;
+  } else {
+    // Show α with subscript n — doubled size, crisp white-blue
+    labelG.setAttribute('font-size', '22');
+    labelG.setAttribute('fill', '#e8f4ff');
+    labelG.setAttribute('font-weight', 'bold');
+    var base = document.createElementNS(ns, 'tspan');
+    base.textContent = 'α';
+    var sub = document.createElementNS(ns, 'tspan');
+    sub.setAttribute('dy', '6');
+    sub.setAttribute('font-size', '14');
+    sub.setAttribute('font-weight', 'bold');
+    sub.textContent = num;
+    labelG.appendChild(base);
+    labelG.appendChild(sub);
+  }
+  svg.appendChild(labelG);
+
+  return svg;
+}
+
+function fillChair(idx) {
+  var oldSvg = document.getElementById('chair-svg-' + idx);
+  var valStr = formatNum(terms[idx]);
+  var newSvg = createChairSVG(idx + 1, true, valStr);
+  newSvg.id = 'chair-svg-' + idx;
+  oldSvg.parentNode.replaceChild(newSvg, oldSvg);
+  adjustChairSpacing();
+}
+
+function adjustChairSpacing() {
+  // Measure the label text width inside each SVG using getBBox,
+  // then set the chairs-row gap so no label overlaps its neighbours.
+  var row = document.getElementById('chairsRow');
+  if (!row) return;
+
+  // Collect all label text nodes (last <text> in each svg — the label above seat)
+  var svgs = row.querySelectorAll('svg.chair');
+  var labelWidths = [];
+  for (var i = 0; i < svgs.length; i++) {
+    var texts = svgs[i].querySelectorAll('text');
+    // The label is the last text element appended
+    var labelEl = texts[texts.length - 1];
+    try {
+      var bb = labelEl.getBBox();
+      labelWidths.push(bb.width);
+    } catch(e) {
+      labelWidths.push(0);
+    }
+  }
+
+  // Chair SVG width is 80px. For each adjacent pair, the required gap is:
+  // max(0, (leftLabelWidth/2 + rightLabelWidth/2) - 80 + 8)  [8px breathing room]
+  // We set a single gap = max of all required gaps (simple uniform spacing)
+  var SVG_W = 80;
+  var PADDING = 10;
+  var maxRequired = 0;
+  for (var j = 0; j < labelWidths.length - 1; j++) {
+    var needed = (labelWidths[j] / 2) + (labelWidths[j+1] / 2) - SVG_W + PADDING;
+    if (needed > maxRequired) maxRequired = needed;
+  }
+
+  // Minimum gap is 8px, expand as needed
+  var gap = Math.max(8, Math.round(maxRequired));
+  row.style.gap = gap + 'px';
+}
+
+function formatNum(n) {
+  if (isNaN(n)) return '???';
+  // Show fraction if close to a simple fraction, else decimal rounded
+  var rounded = Math.round(n * 10000) / 10000;
+  // If integer
+  if (Math.abs(rounded - Math.round(rounded)) < 0.0001) return String(Math.round(rounded));
+  // Otherwise up to 4 decimals, trimmed
+  return String(rounded);
+}
+
+// ===== STEP DISPLAY =====
+function showNextStep() {
+  if (currentStep >= 6) return;
+
+  var idx = currentStep;
+  fillChair(idx);
+
+  var container = document.getElementById('stepsContainer');
+  var card = document.createElement('div');
+  card.className = 'step-card';
+
+  var html = '';
+  if (appType === 'recursive') {
+    if (idx === 0) {
+      html = '<div class="step-expr">α<sub>1</sub> = <span class="step-result">' + formatNum(terms[0]) + '</span></div>';
+    } else {
+      var prevVal = terms[idx - 1];
+      var curVal = terms[idx];
+      // Show the formula substituted
+      var exprSubstituted = renderExprHTML(recFormula, 'pr', formatNum(prevVal));
+      html = '<div class="step-expr">';
+      html += 'α<sub>' + (idx+1) + '</sub> = ';
+      html += renderExprHTML(recFormula, 'pr', 'α<sub>' + idx + '</sub>');
+      html += '<br>';
+      html += '&nbsp;&nbsp;&nbsp;= ';
+      html += exprSubstituted;
+      html += '<br>';
+      html += '&nbsp;&nbsp;&nbsp;= <span class="step-result">' + formatNum(curVal) + '</span>';
+      html += '</div>';
+    }
+  } else {
+    // n-term
+    var n = idx + 1;
+    var exprSubstituted = renderExprHTML(nFormula, 'n', String(n));
+    var curVal = terms[idx];
+    html = '<div class="step-expr">';
+    html += 'α<sub>' + n + '</sub> = ';
+    html += renderExprHTML(nFormula, 'n', '<span class="math-var">n</span>');
+    html += '<br>';
+    html += '&nbsp;&nbsp;&nbsp;= ';
+    html += exprSubstituted;
+    html += '<br>';
+    html += '&nbsp;&nbsp;&nbsp;= <span class="step-result">' + formatNum(curVal) + '</span>';
+    html += '</div>';
+  }
+
+  card.innerHTML = html;
+  container.appendChild(card);
+  // Scroll to bottom
+  card.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+
+  currentStep++;
+  if (currentStep >= 6) {
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+</script>
+
+<div class="signature">Κώστας Κούδας</div>
+</body>
+</html>

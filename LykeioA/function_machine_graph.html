@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Μηχάνημα Συνάρτησης f</title>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --panel-bg: #16213e;
+    --border: #0f3460;
+    --accent: #e94560;
+    --green: #4ade80;
+    --red: #f87171;
+    --white: #f1f5f9;
+    --gray: #64748b;
+    --machine: #6b7280;
+    --machine-dark: #4b5563;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Courier New', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+  }
+
+  /* ── TOP BAR ── */
+  #top-bar {
+    width: 100%;
+    max-width: 920px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 8px;
+  }
+  .top-btn {
+    background: transparent;
+    border: 2px solid var(--border);
+    color: var(--gray);
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    white-space: nowrap;
+  }
+  .top-btn:hover { border-color: var(--accent); color: var(--white); background: #1e1e3a; }
+
+  /* ── SIGNATURE ── */
+  #signature {
+    position: fixed;
+    bottom: 10px; right: 14px;
+    font-size: 0.72rem;
+    color: #2d3f55;
+    letter-spacing: 0.06em;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── SETUP SCREEN ── */
+  #setup-screen {
+    background: var(--panel-bg);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    max-width: 480px;
+    width: 100%;
+  }
+  #setup-screen label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--gray);
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+  }
+  .func-input-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .func-prefix {
+    font-size: 1.4rem;
+    color: var(--white);
+    white-space: nowrap;
+  }
+  #func-input {
+    flex: 1;
+    min-width: 120px;
+    background: #0f172a;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    color: var(--green);
+    font-family: 'Courier New', monospace;
+    font-size: 1.2rem;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #func-input:focus { border-color: var(--accent); }
+  #btn-set {
+    background: #1e4a8a;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 14px;
+    width: 100%;
+  }
+  #btn-set:hover { background: #2563a8; transform: translateY(-1px); }
+  #func-display {
+    margin-top: 14px;
+    font-size: 1.1rem;
+    color: var(--white);
+    min-height: 24px;
+    text-align: center;
+  }
+  #error-msg {
+    color: var(--red);
+    font-size: 0.85rem;
+    margin-top: 6px;
+    min-height: 18px;
+  }
+
+  /* ── MAIN GRID ── */
+  #main-grid {
+    display: none;
+    width: 100%;
+    max-width: 920px;
+    margin-top: 4px;
+  }
+  .func-label-top {
+    text-align: center;
+    font-size: 1rem;
+    color: var(--gray);
+    margin-bottom: 6px;
+    letter-spacing: 0.08em;
+  }
+  .func-label-top span { color: var(--white); }
+
+  .grid-2x2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 10px;
+  }
+
+  .panel {
+    background: var(--panel-bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    min-height: 240px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    cursor: pointer;
+    transition: border-color 0.25s;
+    position: relative;
+  }
+  .panel:hover { border-color: #1e4a8a; }
+  .panel:active { border-color: var(--accent); }
+
+  .click-hint {
+    position: absolute;
+    bottom: 8px; right: 10px;
+    font-size: 0.65rem;
+    color: #334155;
+    pointer-events: none;
+  }
+
+  /* ══════════════════════════════
+     PANEL (1,1) — MACHINE
+  ══════════════════════════════ */
+  #panel-machine {
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #input-box {
+    background: #0f172a;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    color: var(--green);
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    padding: 5px 10px;
+    width: 90px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #input-box:focus { border-color: var(--green); }
+  #btn-run {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--green);
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    flex-shrink: 0;
+  }
+  #btn-run:hover { background: #22c55e; transform: scale(1.1); }
+
+  .machine-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+  .machine-svg-row {
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+  #falling-num {
+    position: absolute;
+    top: -8px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--green);
+    opacity: 0;
+    transition: top 0.6s ease-in, opacity 0.2s;
+    pointer-events: none;
+    z-index: 10;
+  }
+  #output-area {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+    min-width: 44px;
+    padding-left: 4px;
+    /* spout sits ~60% down the 150-unit SVG viewBox */
+    margin-top: 30px;
+  }
+  #output-label {
+    font-size: 0.72rem;
+    color: var(--gray);
+    opacity: 0;
+    transition: opacity 0.4s;
+    white-space: nowrap;
+    line-height: 1;
+  }
+  #output-num {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--red);
+    opacity: 0;
+    transition: opacity 0.4s;
+    word-break: break-word;
+    max-width: 110px;
+    line-height: 1.25;
+  }
+  #machine-warning {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: #451a03;
+    border: 2px solid #f97316;
+    border-radius: 8px;
+    padding: 6px 12px;
+    margin-top: 6px;
+    font-size: 0.88rem;
+    color: #fed7aa;
+    width: 100%;
+  }
+  #machine-warning.show { display: flex; animation: fadeIn 0.3s forwards; }
+
+  /* ══════════════════════════════
+     PANEL (1,2) — NOTATION
+  ══════════════════════════════ */
+  #panel-notation {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 8px;
+  }
+  .notation-line {
+    font-size: 1.3rem;
+    opacity: 0;
+    animation: fadeIn 0.35s forwards;
+  }
+  .nl-f    { color: var(--white); }
+  .nl-open { color: var(--white); }
+  .nl-x    { color: var(--green); font-weight: bold; }
+  .nl-close{ color: var(--white); }
+  .nl-eq   { color: var(--white); }
+  .nl-y    { color: var(--red);   font-weight: bold; }
+  .nl-all-green .nl-f,
+  .nl-all-green .nl-open,
+  .nl-all-green .nl-close { color: var(--green); }
+  .nl-all-green .nl-y { color: var(--green); }
+
+  /* ══════════════════════════════
+     PANEL (2,1) — TABLE
+  ══════════════════════════════ */
+  #panel-table { padding-top: 4px; }
+  .ftable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+  }
+  .ftable th {
+    background: #000;
+    padding: 8px 12px;
+    font-weight: bold;
+  }
+  .ftable th:first-child { color: var(--green); }
+  .ftable th:last-child  { color: var(--red); }
+  .ftable td {
+    padding: 7px 12px;
+    text-align: center;
+    border: 1px solid #1e293b;
+    background: var(--machine-dark);
+  }
+  .ftable td:first-child { color: var(--green); }
+  .ftable td:last-child  { color: var(--red); }
+  .ftable tr.new-row { animation: fadeIn 0.4s forwards; }
+
+  /* ══════════════════════════════
+     PANEL (2,2) — GRAPH
+  ══════════════════════════════ */
+  #panel-graph {
+    padding: 8px;
+    overflow: hidden; /* canvas handles its own sizing */
+  }
+  #graph-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    border-radius: 6px;
+  }
+
+  /* ── MATH RENDERING ── */
+  .math-frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    margin: 0 2px;
+    font-size: 0.88em;
+    line-height: 1.15;
+  }
+  .math-frac .frac-num {
+    border-bottom: 1.5px solid currentColor;
+    padding: 0 4px 1px;
+    text-align: center;
+    min-width: 10px;
+  }
+  .math-frac .frac-den {
+    padding: 1px 4px 0;
+    text-align: center;
+    min-width: 10px;
+  }
+  .math-sqrt {
+    display: inline-flex;
+    align-items: stretch;
+    vertical-align: middle;
+    margin: 0 2px;
+  }
+  .math-sqrt .sqrt-radical {
+    font-size: 1.25em;
+    line-height: 1;
+    padding-right: 1px;
+    display: flex;
+    align-items: flex-end;
+  }
+  .math-sqrt .sqrt-content {
+    border-top: 1.5px solid currentColor;
+    padding: 0 3px;
+    display: inline-block;
+  }
+  #func-show { vertical-align: middle; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes gearSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .spinning { animation: gearSpin 1.2s linear infinite; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 620px) {
+    .grid-2x2 { grid-template-columns: 1fr; }
+    .panel { min-height: 200px; }
+  }
+
+  /* ── SCROLLBARS ── */
+  .panel::-webkit-scrollbar { width: 5px; }
+  .panel::-webkit-scrollbar-track { background: transparent; }
+  .panel::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="top-bar">
+  <button class="top-btn" onclick="window.location.href='index.html'">← Αρχική</button>
+  <h1 style="margin:0;font-size:1.2rem;color:var(--white);letter-spacing:.1em;">⚙ Μηχάνημα Συνάρτησης</h1>
+  <button class="top-btn" id="btn-new-func" style="display:none;" onclick="resetToSetup()">↺ Νέα Συνάρτηση</button>
+</div>
+
+<div id="signature">Κώστας Κούδας</div>
+
+<!-- SETUP -->
+<div id="setup-screen">
+  <label>Ορίστε τη συνάρτηση (χρησιμοποιήστε <strong>x</strong> ως μεταβλητή):</label>
+  <div class="func-input-row">
+    <span class="func-prefix">f(x) =</span>
+    <input id="func-input" type="text" placeholder="π.χ. x*x  ή  1/(x-1)" autocomplete="off" spellcheck="false">
+  </div>
+  <div id="error-msg"></div>
+  <button id="btn-set">Εισαγωγή ▶</button>
+  <div id="func-display"></div>
+</div>
+
+<!-- MAIN -->
+<div id="main-grid">
+  <div class="func-label-top">
+    Συνάρτηση: &nbsp;<span id="func-show"></span>
+  </div>
+
+  <div class="grid-2x2">
+
+    <!-- (1,1) MACHINE -->
+    <div class="panel" id="panel-machine">
+      <div class="input-row">
+        <input id="input-box" type="number" placeholder="input" autocomplete="off">
+        <button id="btn-run" title="Εκτέλεση"></button>
+      </div>
+      <div class="machine-wrapper">
+        <div class="machine-svg-row">
+          <div id="falling-num"></div>
+          <svg id="machine-svg" viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg"
+               style="width:100%;max-width:200px;">
+            <polygon points="70,10 150,10 130,40 90,40" fill="#6b7280"/>
+            <rect x="60" y="40" width="110" height="90" rx="8" fill="#6b7280"/>
+            <polygon points="170,85 195,75 195,105 170,95" fill="#4b5563"/>
+            <g id="gear1" transform="translate(90,90)">
+              <circle r="18" fill="#374151" stroke="#9ca3af" stroke-width="2"/>
+              <rect x="-3" y="-22" width="6" height="10" rx="2" fill="#9ca3af"/>
+              <rect x="-3" y="12"  width="6" height="10" rx="2" fill="#9ca3af"/>
+              <rect x="-22" y="-3" width="10" height="6" rx="2" fill="#9ca3af"/>
+              <rect x="12"  y="-3" width="10" height="6" rx="2" fill="#9ca3af"/>
+              <circle r="5" fill="#1f2937"/>
+            </g>
+            <g id="gear2" transform="translate(125,100)">
+              <circle r="12" fill="#374151" stroke="#9ca3af" stroke-width="1.5"/>
+              <rect x="-2" y="-15" width="4" height="7" rx="1" fill="#9ca3af"/>
+              <rect x="-2" y="8"   width="4" height="7" rx="1" fill="#9ca3af"/>
+              <rect x="-15" y="-2" width="7" height="4" rx="1" fill="#9ca3af"/>
+              <rect x="8"   y="-2" width="7" height="4" rx="1" fill="#9ca3af"/>
+              <circle r="3.5" fill="#1f2937"/>
+            </g>
+            <text x="148" y="78" font-size="28" font-family="serif" font-weight="bold"
+                  fill="#1f2937" stroke="#000" stroke-width="1" text-anchor="middle">f</text>
+          </svg>
+        </div>
+        <div id="output-area">
+          <span id="output-label">▶</span>
+          <span id="output-num"></span>
+        </div>
+      </div>
+      <div id="machine-warning">
+        <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 21h20L12 2z" fill="#f97316"/>
+          <text x="12" y="17" font-size="11" font-weight="bold" fill="#1a1a1a" text-anchor="middle">!</text>
+        </svg>
+        <span>σφάλμα εισόδου</span>
+      </div>
+    </div>
+
+    <!-- (1,2) NOTATION -->
+    <div class="panel" id="panel-notation">
+      <div class="click-hint">κλικ για εμφάνιση</div>
+      <div id="notation-ghost" style="font-size:1.3rem;color:var(--gray);opacity:0.35;margin-top:4px;">
+        f(<span style="display:inline-block;min-width:8px;">&nbsp;</span>) =
+      </div>
+    </div>
+
+    <!-- (2,1) TABLE -->
+    <div class="panel" id="panel-table">
+      <div class="click-hint">κλικ για εμφάνιση</div>
+      <table class="ftable">
+        <thead><tr><th>x</th><th>f(x)</th></tr></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+    <!-- (2,2) GRAPH -->
+    <div class="panel" id="panel-graph">
+      <div class="click-hint">κλικ για εμφάνιση σημείου</div>
+      <canvas id="graph-canvas"></canvas>
+    </div>
+
+  </div><!-- grid -->
+</div><!-- main -->
+
+<script>
+/* ════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════ */
+let funcStr = '', funcFn = null;
+let currentInput = null, currentOutput = null;
+let notationShown = false, tableShown = false, graphShown = false;
+let notationHistory = [], tableHistory = [], graphPoints = [];
+
+/* ════════════════════════════════════════════════
+   MATH HTML RENDERER
+════════════════════════════════════════════════ */
+function mathHTML(expr) {
+  expr = expr.trim()
+    .replace(/\*\*/g, '^')
+    .replace(/Math\.sqrt\s*\(/gi, 'sqrt(')
+    .replace(/Math\.abs\s*\(/gi,  'abs(')
+    .replace(/Math\.pow\s*\(([^,]+),([^)]+)\)/gi, '($1)^($2)');
+  return renderExpr(expr);
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function matchParen(s, open) {
+  let depth = 1, i = open + 1;
+  while (i < s.length && depth > 0) {
+    if (s[i] === '(') depth++;
+    else if (s[i] === ')') depth--;
+    i++;
+  }
+  return i - 1;
+}
+
+function renderExpr(s) {
+  s = s.trim();
+  if (!s) return '';
+
+  // Addition / subtraction
+  let depth = 0;
+  for (let i = s.length - 1; i > 0; i--) {
+    const c = s[i];
+    if (c === ')') depth++;
+    else if (c === '(') depth--;
+    else if (depth === 0 && (c === '+' || c === '-')) {
+      if (c === '-' && /[eE]/.test(s[i-1])) continue;
+      const op = c === '+' ? ' + ' : ' − ';
+      return renderExpr(s.slice(0,i)) +
+             `<span style="color:var(--white)">${op}</span>` +
+             renderExpr(s.slice(i+1));
+    }
+  }
+  // Unary minus
+  if (s[0] === '-') return '−' + renderExpr(s.slice(1));
+
+  // Multiplication
+  depth = 0;
+  for (let i = s.length - 1; i > 0; i--) {
+    const c = s[i];
+    if (c === ')') depth++;
+    else if (c === '(') depth--;
+    else if (depth === 0 && c === '*')
+      return renderExpr(s.slice(0,i)) +
+             '<span style="color:var(--white)"> · </span>' +
+             renderExpr(s.slice(i+1));
+  }
+
+  // Division → fraction
+  depth = 0;
+  for (let i = s.length - 1; i > 0; i--) {
+    const c = s[i];
+    if (c === ')') depth++;
+    else if (c === '(') depth--;
+    else if (depth === 0 && c === '/') {
+      const num = renderExpr(s.slice(0,i));
+      const den = renderExpr(s.slice(i+1));
+      return `<span class="math-frac"><span class="frac-num">${num}</span><span class="frac-den">${den}</span></span>`;
+    }
+  }
+
+  // Exponent
+  depth = 0;
+  for (let i = s.length - 1; i > 0; i--) {
+    const c = s[i];
+    if (c === ')') depth++;
+    else if (c === '(') depth--;
+    else if (depth === 0 && c === '^')
+      return renderExpr(s.slice(0,i)) + `<sup>${renderExpr(s.slice(i+1))}</sup>`;
+  }
+
+  // sqrt(...)
+  if (/^sqrt\s*\(/i.test(s)) {
+    const open = s.indexOf('(');
+    const close = matchParen(s, open);
+    const inner = renderExpr(s.slice(open+1, close));
+    const after = s.slice(close+1).trim();
+    const sq = `<span class="math-sqrt"><span class="sqrt-radical">√</span><span class="sqrt-content">${inner}</span></span>`;
+    return after ? sq + renderExpr(after) : sq;
+  }
+
+  // abs(...)
+  if (/^abs\s*\(/i.test(s)) {
+    const open = s.indexOf('(');
+    const close = matchParen(s, open);
+    return '|' + renderExpr(s.slice(open+1, close)) + '|';
+  }
+
+  // Parenthesised group
+  if (s[0] === '(' && matchParen(s, 0) === s.length - 1)
+    return '(' + renderExpr(s.slice(1,-1)) + ')';
+
+  if (s === 'x') return '<span style="color:var(--white);font-style:italic">x</span>';
+  if (/^-?\d+(\.\d+)?([eE][+-]?\d+)?$/.test(s)) return escHtml(s);
+  return escHtml(s);
+}
+
+function prettyFormula(s) {
+  return s.replace(/\*\*/g,'^').replace(/Math\.sqrt\(/gi,'√(')
+          .replace(/Math\.abs\(/gi,'|').replace(/\*/g,'·').replace(/\s+/g,' ');
+}
+
+/* ════════════════════════════════════════════════
+   FUNCTION COMPILER
+════════════════════════════════════════════════ */
+function compileFunc(expr) {
+  try {
+    let e = expr.trim()
+      .replace(/\^/g, '**')
+      .replace(/sqrt\s*\(/gi, 'Math.sqrt(')
+      .replace(/abs\s*\(/gi,  'Math.abs(');
+    const fn = new Function('x', '"use strict"; return (' + e + ');');
+    fn(2);
+    return fn;
+  } catch(err) { return null; }
+}
+
+/* ════════════════════════════════════════════════
+   SETUP
+════════════════════════════════════════════════ */
+document.getElementById('btn-set').addEventListener('click', setupFunction);
+document.getElementById('func-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') setupFunction();
+});
+
+function setupFunction() {
+  const raw = document.getElementById('func-input').value.trim();
+  const errEl = document.getElementById('error-msg');
+  if (!raw) { errEl.textContent = 'Γράψτε έναν τύπο!'; return; }
+  const fn = compileFunc(raw);
+  if (!fn) { errEl.textContent = 'Μη έγκυρος τύπος. Ελέγξτε τη σύνταξη.'; return; }
+  errEl.textContent = '';
+  funcStr = raw; funcFn = fn;
+  document.getElementById('func-display').innerHTML = 'f(x) = ' + mathHTML(raw);
+  setTimeout(showMain, 400);
+}
+
+function showMain() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('main-grid').style.display = 'block';
+  document.getElementById('btn-new-func').style.display = 'inline-block';
+  document.getElementById('func-show').innerHTML = 'f(x) = ' + mathHTML(funcStr);
+  // Init graph after layout is ready
+  setTimeout(initGraph, 60);
+}
+
+function resetToSetup() {
+  document.getElementById('main-grid').style.display = 'none';
+  document.getElementById('btn-new-func').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'block';
+
+  funcStr = ''; funcFn = null;
+  currentInput = null; currentOutput = null;
+  notationShown = false; tableShown = false; graphShown = false;
+  notationHistory = []; tableHistory = []; graphPoints = [];
+
+  document.getElementById('table-body').innerHTML = '';
+  const pn = document.getElementById('panel-notation');
+  pn.innerHTML = '<div class="click-hint">κλικ για εμφάνιση</div>' +
+    '<div id="notation-ghost" style="font-size:1.3rem;color:var(--gray);opacity:0.35;margin-top:4px;">' +
+    'f(<span style="display:inline-block;min-width:8px;">&nbsp;</span>) =</div>';
+
+  clearMachineOutput();
+  document.getElementById('input-box').value = '';
+  document.getElementById('func-input').value = '';
+  document.getElementById('func-display').innerHTML = '';
+  document.getElementById('error-msg').textContent = '';
+  document.querySelector('#panel-table .click-hint') &&
+    (document.querySelector('#panel-table .click-hint').style.display = '');
+}
+
+/* ════════════════════════════════════════════════
+   PANEL (1,1) — MACHINE
+════════════════════════════════════════════════ */
+document.getElementById('btn-run').addEventListener('click', runMachine);
+document.getElementById('input-box').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runMachine();
+});
+document.getElementById('input-box').addEventListener('input', function() {
+  if (this.value === '') {
+    clearMachineOutput();
+    currentInput = null; currentOutput = null;
+    notationShown = false; tableShown = false; graphShown = false;
+  }
+  // Hide all coordinate labels whenever user types anything
+  graphPoints.forEach(p => { p.showLabel = false; });
+  if (document.getElementById('main-grid').style.display !== 'none' && graphPoints.length > 0) {
+    resizeCanvas(); drawGraph();
+  }
+});
+
+function clearMachineOutput() {
+  document.getElementById('falling-num').style.opacity = '0';
+  document.getElementById('output-num').style.opacity  = '0';
+  document.getElementById('output-label').style.opacity = '0';
+  document.getElementById('machine-warning').classList.remove('show');
+}
+
+function formatNum(n) {
+  return parseFloat(n.toFixed(2)).toString();
+}
+
+function runMachine() {
+  const val = document.getElementById('input-box').value.trim();
+  if (val === '' || isNaN(Number(val))) return;
+  const x = Number(val);
+  let y, isError = false;
+  try { y = funcFn(x); } catch(e) { isError = true; }
+  if (!isError && (!isFinite(y) || isNaN(y))) isError = true;
+
+  document.getElementById('machine-warning').classList.remove('show');
+  if (isError) {
+    document.getElementById('output-num').style.opacity = '0';
+    document.getElementById('output-label').style.opacity = '0';
+    document.getElementById('machine-warning').classList.add('show');
+    currentInput = null; currentOutput = null;
+    return;
+  }
+
+  y = Math.round(y * 1e10) / 1e10;
+  const yDisp = formatNum(y);
+  currentInput = x; currentOutput = yDisp;
+  notationShown = false; tableShown = false; graphShown = false;
+  animateMachine(x, yDisp);
+}
+
+function animateMachine(x, y) {
+  const fallEl  = document.getElementById('falling-num');
+  const outEl   = document.getElementById('output-num');
+  const labelEl = document.getElementById('output-label');
+
+  fallEl.style.transition = 'none';
+  fallEl.style.top = '-8px';
+  fallEl.style.opacity = '0';
+  outEl.style.opacity = '0';
+  labelEl.style.opacity = '0';
+  fallEl.textContent = x;
+
+  document.getElementById('gear1').classList.add('spinning');
+  document.getElementById('gear2').classList.add('spinning');
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    fallEl.style.transition = 'top 0.55s ease-in, opacity 0.15s';
+    fallEl.style.opacity = '1';
+    fallEl.style.top = '32px';
+  }));
+
+  setTimeout(() => {
+    fallEl.style.opacity = '0';
+    outEl.textContent = y;
+    outEl.style.opacity = '1';
+    labelEl.style.opacity = '1';
+    document.getElementById('gear1').classList.remove('spinning');
+    document.getElementById('gear2').classList.remove('spinning');
+  }, 900);
+}
+
+/* ════════════════════════════════════════════════
+   PANEL (1,2) — NOTATION
+════════════════════════════════════════════════ */
+document.getElementById('panel-notation').addEventListener('click', () => {
+  if (currentInput === null || notationShown) return;
+  notationShown = true;
+  addNotationLine(currentInput, currentOutput);
+  notationHistory.push({ x: currentInput, y: currentOutput });
+});
+
+function addNotationLine(x, y) {
+  const panel = document.getElementById('panel-notation');
+  const hint  = panel.querySelector('.click-hint');
+  if (hint) hint.style.display = 'none';
+
+  const ghost = document.getElementById('notation-ghost');
+  if (ghost) ghost.remove();
+
+  const uid = Date.now();
+  const line = document.createElement('div');
+  line.className = 'notation-line';
+  line.innerHTML =
+    `<span class="nl-f">f</span>` +
+    `<span class="nl-open">(</span>` +
+    `<span class="nl-x" id="nx-${uid}" style="display:inline-block;min-width:8px;">&nbsp;</span>` +
+    `<span class="nl-close">)</span>` +
+    `<span class="nl-eq"> = </span>` +
+    `<span class="nl-y" id="ny-${uid}">&nbsp;</span>`;
+  panel.appendChild(line);
+
+  const newGhost = document.createElement('div');
+  newGhost.id = 'notation-ghost';
+  newGhost.style.cssText = 'font-size:1.3rem;color:var(--gray);opacity:0.35;margin-top:4px;';
+  newGhost.innerHTML = `f(<span style="display:inline-block;min-width:8px;">&nbsp;</span>) =`;
+  panel.appendChild(newGhost);
+
+  const xEl = line.querySelector(`#nx-${uid}`);
+  const yEl = line.querySelector(`#ny-${uid}`);
+
+  setTimeout(() => { xEl.textContent = x; },    300);
+  setTimeout(() => { yEl.textContent = y; },    700);
+  setTimeout(() => { line.classList.add('nl-all-green'); }, 1700);
+
+  panel.scrollTop = panel.scrollHeight;
+}
+
+/* ════════════════════════════════════════════════
+   PANEL (2,1) — TABLE
+════════════════════════════════════════════════ */
+document.getElementById('panel-table').addEventListener('click', () => {
+  if (currentInput === null || tableShown) return;
+  tableShown = true;
+  addTableRow(currentInput, currentOutput);
+  tableHistory.push({ x: currentInput, y: currentOutput });
+});
+
+function addTableRow(x, y) {
+  const hint = document.querySelector('#panel-table .click-hint');
+  if (hint) hint.style.display = 'none';
+  const tbody = document.getElementById('table-body');
+  const tr = document.createElement('tr');
+  tr.className = 'new-row';
+  tr.innerHTML = `<td>${x}</td><td>${y}</td>`;
+  tbody.appendChild(tr);
+  document.getElementById('panel-table').scrollTop = 99999;
+}
+
+/* ════════════════════════════════════════════════
+   PANEL (2,2) — GRAPH (Canvas)
+════════════════════════════════════════════════ */
+const canvas = document.getElementById('graph-canvas');
+const ctx    = canvas.getContext('2d');
+
+// Visual range shown on graph (will auto-expand as points added)
+let viewXmin = -10, viewXmax = 10;
+let viewYmin = -10, viewYmax = 10;
+
+function initGraph() {
+  resizeCanvas();
+  drawGraph();
+}
+
+function resizeCanvas() {
+  const panel = document.getElementById('panel-graph');
+  const W = panel.clientWidth  - 28; // padding
+  const H = panel.clientHeight - 28;
+  canvas.width  = Math.max(W, 80);
+  canvas.height = Math.max(H, 80);
+}
+
+// Map data coords → canvas pixels
+function toCanvasX(x) {
+  return (x - viewXmin) / (viewXmax - viewXmin) * canvas.width;
+}
+function toCanvasY(y) {
+  return canvas.height - (y - viewYmin) / (viewYmax - viewYmin) * canvas.height;
+}
+
+function drawGraph() {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid lines (light)
+  ctx.strokeStyle = '#1e293b';
+  ctx.lineWidth = 1;
+  // vertical grid
+  const xStep = niceStep(viewXmax - viewXmin, 8);
+  const xStart = Math.ceil(viewXmin / xStep) * xStep;
+  for (let x = xStart; x <= viewXmax + xStep * 0.01; x += xStep) {
+    const px = toCanvasX(x);
+    ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke();
+  }
+  // horizontal grid
+  const yStep = niceStep(viewYmax - viewYmin, 8);
+  const yStart = Math.ceil(viewYmin / yStep) * yStep;
+  for (let y = yStart; y <= viewYmax + yStep * 0.01; y += yStep) {
+    const py = toCanvasY(y);
+    ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke();
+  }
+
+  // X axis (green)
+  const y0 = toCanvasY(0);
+  ctx.strokeStyle = '#4ade80';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
+  // x label
+  ctx.fillStyle = '#4ade80';
+  ctx.font = 'bold 13px Courier New';
+  ctx.fillText('x', W - 14, y0 - 6);
+
+  // Y axis (red)
+  const x0 = toCanvasX(0);
+  ctx.strokeStyle = '#f87171';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0, H); ctx.stroke();
+  // y label
+  ctx.fillStyle = '#f87171';
+  ctx.font = 'bold 13px Courier New';
+  ctx.fillText('y', x0 + 6, 16);
+
+  // Tick labels (small)
+  ctx.fillStyle = '#475569';
+  ctx.font = '10px Courier New';
+  ctx.textAlign = 'center';
+  for (let x = xStart; x <= viewXmax + xStep * 0.01; x += xStep) {
+    if (Math.abs(x) < xStep * 0.01) continue;
+    const px = toCanvasX(x);
+    const py = Math.min(Math.max(y0 + 12, 12), H - 4);
+    ctx.fillText(formatNum(x), px, py);
+  }
+  ctx.textAlign = 'right';
+  for (let y = yStart; y <= viewYmax + yStep * 0.01; y += yStep) {
+    if (Math.abs(y) < yStep * 0.01) continue;
+    const py = toCanvasY(y);
+    const px = Math.min(Math.max(x0 - 4, 24), W - 4);
+    ctx.fillText(formatNum(y), px, py + 4);
+  }
+
+  // Points
+  graphPoints.forEach(({ x, y, showLabel }) => {
+    const px = toCanvasX(x);
+    const py = toCanvasY(y);
+
+    // glow
+    const grad = ctx.createRadialGradient(px, py, 0, px, py, 10);
+    grad.addColorStop(0,   'rgba(255,255,255,0.35)');
+    grad.addColorStop(1,   'rgba(255,255,255,0)');
+    ctx.beginPath();
+    ctx.arc(px, py, 10, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // dot
+    ctx.beginPath();
+    ctx.arc(px, py, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // coordinates label — only when flagged
+    if (showLabel) {
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = '11px Courier New';
+      ctx.textAlign = 'left';
+      const label = `(${formatNum(x)}, ${formatNum(y)})`;
+      const lx = px + 8;
+      const ly = py - 8;
+      const fw = ctx.measureText(label).width;
+      const fx = lx + fw > W - 4 ? px - fw - 8 : lx;
+      const fy = ly < 14 ? py + 18 : ly;
+      ctx.fillText(label, fx, fy);
+    }
+  });
+}
+
+function niceStep(range, targetDivisions) {
+  const rough = range / targetDivisions;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(rough)));
+  const normalized = rough / magnitude;
+  let nice;
+  if (normalized < 1.5)      nice = 1;
+  else if (normalized < 3.5) nice = 2;
+  else if (normalized < 7.5) nice = 5;
+  else                        nice = 10;
+  return nice * magnitude;
+}
+
+function ensurePointVisible(x, y) {
+  const margin = 0.15; // 15% padding
+  let changed = false;
+  const xRange = viewXmax - viewXmin;
+  const yRange = viewYmax - viewYmin;
+  if (x < viewXmin + xRange * margin) { viewXmin = x - xRange * margin * 2; changed = true; }
+  if (x > viewXmax - xRange * margin) { viewXmax = x + xRange * margin * 2; changed = true; }
+  if (y < viewYmin + yRange * margin) { viewYmin = y - yRange * margin * 2; changed = true; }
+  if (y > viewYmax - yRange * margin) { viewYmax = y + yRange * margin * 2; changed = true; }
+  return changed;
+}
+
+document.getElementById('panel-graph').addEventListener('click', () => {
+  if (currentInput === null || graphShown) return;
+  graphShown = true;
+
+  const hint = document.querySelector('#panel-graph .click-hint');
+  if (hint) hint.style.display = 'none';
+
+  const x = currentInput;
+  const y = parseFloat(currentOutput);
+  graphPoints.push({ x, y, showLabel: true });
+  ensurePointVisible(x, y);
+  resizeCanvas();
+  drawGraph();
+});
+
+// Redraw on resize
+window.addEventListener('resize', () => {
+  if (document.getElementById('main-grid').style.display !== 'none') {
+    resizeCanvas();
+    drawGraph();
+  }
+});
+</script>
+</body>
+</html>

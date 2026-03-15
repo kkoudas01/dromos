@@ -33,6 +33,14 @@
 
 [Quiz στους αρνητικούς - με ανακάτεμα επιλογών](GymnasioA/arnitikoiarithmoiSUFFLE.html)
 
+# Β Γυμνασίου <folder>GymnasioB</folder>
+
+## Άλγεβρα
+
+### Εξισώσεις
+
+[Εξισώσεις 1ου βαθμού](GymnasioB/exisoseis1batmou.html)
+
 # Γ Γυμνασίου <folder>GymnasioC</folder>
 
 ## Γεωμετρία
@@ -40,6 +48,21 @@
 ### Τριγωνομετρία
 
 [Quiz: Τριγωνομετρικοί αριθμοί κυρτών γωνιών](GymnasioC/trigonArithGgymnSel.html)
+
+
+# Α Λυκείου <folder>LykeioA</folder>
+
+## Άλγεβρα
+
+### Ακολουθίες
+
+[Εισαγωγή στις ακολουθίες](LykeioA/akoloythies.html)
+
+### Συναρτήσεις
+
+[Η έννοια της συνάρτησης](LykeioA/function_machine.html)
+
+[Η γραφική παράσταση μιας συνάρτησης](LykeioA/function_machine_graph.html)
 
 # Β Λυκείου <folder>LykeioB</folder>
 
