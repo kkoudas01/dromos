@@ -62,6 +62,8 @@
 
 [Η έννοια της συνάρτησης](LykeioA/function_machine.html)
 
+[Δίκλαδη συνάρτηση](LykeioA/tmima_sinartisi.html)
+
 [Η γραφική παράσταση μιας συνάρτησης](LykeioA/function_machine_graph.html)
 
 # Β Λυκείου <folder>LykeioB</folder>

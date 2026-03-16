@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Τμηματικά Ορισμένη Συνάρτηση</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400;1,600&display=swap');
+:root{
+  --bg:#0d0f14;--s1:#161a22;--s2:#1e2330;--s3:#252b3a;
+  --bd:#2e3650;--tx:#c8d0e8;--dm:#5a6480;--mt:#3a4060;
+  --ac:#4a9eff;--yw:#f5c842;--gn:#4ade80;--rd:#f87171;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Crimson Pro',Georgia,serif;min-height:100vh;overflow-x:hidden}
+.back{position:fixed;top:16px;left:16px;background:var(--s2);border:1px solid var(--bd);color:var(--dm);
+  padding:7px 15px;border-radius:6px;font-family:'Fira Code',monospace;font-size:12px;
+  cursor:pointer;text-decoration:none;transition:.2s;z-index:200}
+.back:hover{background:var(--s3);color:var(--tx)}
+.sig{position:fixed;bottom:13px;left:16px;color:var(--mt);font-family:'Crimson Pro',serif;
+  font-size:13px;font-style:italic;letter-spacing:.04em;z-index:200;pointer-events:none}
+
+/* ── PAGE 1 ── */
+#p1{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px 80px}
+.t1{font-size:2rem;font-weight:600;text-align:center;margin-bottom:6px}
+.t2{color:var(--dm);font-size:1rem;text-align:center;font-style:italic;margin-bottom:48px}
+.bldr{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:36px 40px;width:min(700px,95vw)}
+.bi{display:flex;align-items:center;gap:16px}
+.fxl{font-family:'Crimson Pro',serif;font-size:1.9rem;font-style:italic;white-space:nowrap}
+.cases{display:flex;flex-direction:column;gap:22px;flex:1}
+.cr{display:flex;align-items:flex-end;gap:10px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-family:'Fira Code',monospace;font-size:10px;color:var(--mt);letter-spacing:.06em;text-transform:uppercase}
+.inp{background:var(--s2);border:1px solid var(--bd);border-radius:8px;color:var(--tx);
+  font-family:'Fira Code',monospace;font-size:14px;padding:9px 13px;outline:none;transition:.2s}
+.inp:focus{border-color:var(--ac);background:var(--s3)}
+.inp::placeholder{color:var(--mt)}
+.wf{width:165px}.wc{width:130px}
+.cif{color:var(--dm);font-size:1rem;font-style:italic;padding-bottom:10px;white-space:nowrap}
+.btn-row{display:flex;gap:12px;margin-top:32px;justify-content:center}
+.gbtn{background:linear-gradient(135deg,#1e3070,#0f1e50);border:1px solid var(--ac);
+  color:var(--ac);padding:12px 40px;border-radius:8px;font-family:'Fira Code',monospace;font-size:14px;
+  cursor:pointer;letter-spacing:.05em;transition:.2s}
+.gbtn:hover{box-shadow:0 0 20px rgba(74,158,255,.25);background:linear-gradient(135deg,#2e4090,#1a2e60)}
+.errtxt{color:var(--rd);font-family:'Fira Code',monospace;font-size:12px;margin-top:10px;min-height:18px;text-align:center}
+
+/* ── PAGE 2 ── */
+#p2{display:none;flex-direction:column;align-items:center;padding:24px 20px 80px}
+.fb{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:20px 32px;
+  margin-bottom:22px;width:min(760px,95vw);display:flex;align-items:center;justify-content:center}
+.fb-inner{display:flex;align-items:center;gap:14px}
+.fb-lhs{font-family:'Crimson Pro',serif;font-size:1.5rem;font-style:italic;white-space:nowrap;color:var(--tx)}
+.fb-cases{display:grid;grid-template-columns:auto auto;row-gap:10px;column-gap:0;align-items:center}
+.fb-formula{font-family:'Crimson Pro',serif;font-size:1.15rem;color:var(--tx);white-space:nowrap;
+  display:flex;align-items:center;justify-content:flex-end;padding-right:4px}
+.fb-formula mjx-container, .fb-formula svg { font-size: 1rem !important; }
+.fb-cond{font-family:'Crimson Pro',serif;font-size:1.15rem;color:var(--dm);font-style:italic;
+  white-space:nowrap;padding-left:4px}
+.fb-case{display:contents}
+
+/* button row: input + Υπολόγισε + Σύνοψη + Επανεισαγωγή */
+.p2-btnrow{display:flex;gap:10px;margin-bottom:20px;align-items:center;flex-wrap:wrap;justify-content:center}
+.xi{background:var(--s2);border:1px solid var(--bd);border-radius:8px;color:var(--tx);
+  font-family:'Fira Code',monospace;font-size:16px;padding:10px 16px;width:110px;text-align:center;outline:none;transition:.2s}
+.xi:focus{border-color:var(--ac)}
+.rbtn{background:var(--s3);border:1px solid var(--bd);color:var(--dm);padding:10px 20px;
+  border-radius:8px;font-family:'Fira Code',monospace;font-size:13px;cursor:pointer;transition:.2s;white-space:nowrap}
+.rbtn:hover{background:var(--bd);color:var(--tx)}
+.sbtn{background:var(--s2);border:1px solid var(--bd);color:var(--dm);padding:10px 20px;
+  border-radius:8px;font-family:'Fira Code',monospace;font-size:13px;cursor:pointer;transition:.2s;white-space:nowrap}
+.sbtn:hover{background:var(--s3);color:var(--tx);border-color:#9b5de5}
+
+.mwrap{width:min(960px,97vw)}
+#msv{width:100%;height:auto;display:block;overflow:visible;filter:drop-shadow(0 4px 36px rgba(0,0,0,.6))}
+
+/* ── POPUP ── */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:300;align-items:center;justify-content:center}
+.ov.show{display:flex}
+.pb{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:28px;
+  max-width:920px;width:95vw;max-height:90vh;overflow-y:auto;position:relative}
+.ptit{font-size:1.4rem;font-weight:600;margin-bottom:8px}
+.pop-fn{font-size:1rem;font-style:italic;margin-bottom:20px;padding:12px 20px;
+  background:var(--s2);border-radius:8px;border:1px solid var(--bd);display:flex;align-items:center;gap:10px}
+.pcl{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--dm);font-size:22px;cursor:pointer;transition:.2s}
+.pcl:hover{color:var(--tx)}
+.hg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-bottom:18px}
+.hi{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px}
+.hi svg{width:100%;height:auto;display:block}
+.pac{display:flex;gap:10px;justify-content:flex-end}
+.pdfb{background:linear-gradient(135deg,#1e3070,#0f1e50);border:1px solid var(--ac);color:var(--ac);
+  padding:9px 22px;border-radius:8px;font-family:'Fira Code',monospace;font-size:12px;cursor:pointer;transition:.2s}
+.pdfb:hover{box-shadow:0 0 14px rgba(74,158,255,.3)}
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Επιστροφή</a>
+<div class="sig">Κώστας Κούδας</div>
+
+<!-- ══════════════════ PAGE 1 ══════════════════ -->
+<div id="p1">
+  <h1 class="t1">Τμηματικά Ορισμένη Συνάρτηση</h1>
+  <p class="t2">Ορίστε τους τύπους και τις συνθήκες</p>
+  <div class="bldr">
+    <div class="bi">
+      <div class="fxl">f(x)&thinsp;=</div>
+      <svg height="132" width="26" viewBox="0 0 26 132" fill="none">
+        <path d="M22 5 Q7 5 7 22 L7 56 Q7 66 2 66 Q7 66 7 76 L7 110 Q7 127 22 127"
+              stroke="#4a9eff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      </svg>
+      <div class="cases">
+        <div class="cr">
+          <div class="fg"><label>τύπος 1</label>
+            <input class="inp wf" id="f1" type="text" placeholder="π.χ. 2*x+1" autocomplete="off" spellcheck="false">
+          </div>
+          <span class="cif">,&nbsp;αν</span>
+          <div class="fg"><label>συνθήκη 1</label>
+            <input class="inp wc" id="c1" type="text" placeholder="π.χ. x&lt;4" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+        <div class="cr">
+          <div class="fg"><label>τύπος 2</label>
+            <input class="inp wf" id="f2" type="text" placeholder="π.χ. sqrt(x)" autocomplete="off" spellcheck="false">
+          </div>
+          <span class="cif">,&nbsp;αν</span>
+          <div class="fg"><label>συνθήκη 2</label>
+            <input class="inp wc" id="c2" type="text" placeholder="αυτόματη συμπλήρωση" autocomplete="off" spellcheck="false"
+                   onfocus="autoFillC2()">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="errtxt" id="etx"></div>
+  <div class="btn-row">
+    <button class="gbtn" onclick="toP2()">Επόμενο →</button>
+  </div>
+</div>
+
+<!-- ══════════════════ PAGE 2 ══════════════════ -->
+<div id="p2">
+  <!-- Full function display -->
+  <div class="fb">
+    <div class="fb-inner">
+      <div class="fb-lhs">f(x)&thinsp;=</div>
+      <svg height="80" width="22" viewBox="0 0 22 80" fill="none">
+        <path d="M19 4 Q6 4 6 18 L6 34 Q6 40 2 40 Q6 40 6 46 L6 62 Q6 76 19 76"
+              stroke="#4a9eff" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      </svg>
+      <div class="fb-cases">
+        <div class="fb-formula"><span id="fb-f1"></span><span style="color:var(--dm);font-style:italic">&thinsp;,</span></div>
+        <div class="fb-cond" id="fb-c1"></div>
+        <div class="fb-formula"><span id="fb-f2"></span><span style="color:var(--dm);font-style:italic">&thinsp;,</span></div>
+        <div class="fb-cond" id="fb-c2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls: all in one row -->
+  <div class="p2-btnrow">
+    <input class="xi" id="xv" type="number" placeholder="x =" step="any">
+    <button class="rbtn" onclick="calc()">▶ Υπολόγισε</button>
+    <button class="sbtn" onclick="openSum()">📋 Σύνοψη</button>
+    <button class="rbtn" onclick="goBack()">✎ Επανεισαγωγή</button>
+  </div>
+
+  <div class="mwrap">
+    <!--
+    ═══════════════════════════════════════════════════════
+    SVG MACHINE  —  ViewBox 0 0 960 560
+
+    KEY COORDINATES:
+    • Outer machine body: rect x=110 y=55 w=756 h=450  (sharp corners, rx=0)
+    • Input funnel (left trapezoid):  wide opening left, narrow right
+        Points: (52,210) (110,248) (110,312) (52,350)
+    • Output funnel (right trapezoid):
+        Points: (866,248) (918,210) (918,350) (866,312)
+
+    • Diamond center: (400,280)  tips: L(318,280) R(482,280) T(400,215) B(400,345)
+
+    • Sub-machine 1 (ellipse, top):
+        cx=662 cy=196 rx=104 ry=56
+        LEFT funnel: big side touches ellipse at x=558
+          points: (522,162) (558,180) (558,212) (522,230)   ← big side at x=558
+        RIGHT funnel: big side touches ellipse at x=766
+          points: (766,180) (802,162) (802,230) (766,212)
+
+    • Sub-machine 2 (rect, bottom):
+        x=558 y=308 w=208 h=96
+        LEFT funnel big side touches rect left edge x=558:
+          points: (522,318) (558,332) (558,368) (522,382)
+        RIGHT funnel big side touches rect right edge x=766:
+          points: (766,332) (802,318) (802,382) (766,368)
+
+    • Arrows start from diamond RIGHT TIP (482,280):
+        Arrow1 curves up-right to funnel narrow end (~522,196)
+        Arrow2 curves down-right to funnel narrow end (~522,356)
+
+    • Condition labels near diamond right tip, angled like arrows:
+        Label1: starts near (482,280), rotated ~-40°, placed ABOVE arrow1
+        Label2: starts near (482,280), rotated ~+40°, placed BELOW arrow2
+    ═══════════════════════════════════════════════════════
+    -->
+    <svg id="msv" viewBox="0 0 960 560" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="ay" markerWidth="11" markerHeight="8" refX="10" refY="4" orient="auto">
+        <polygon points="0 0,11 4,0 8" fill="#f5c842"/>
+      </marker>
+      <marker id="ad" markerWidth="11" markerHeight="8" refX="10" refY="4" orient="auto">
+        <polygon points="0 0,11 4,0 8" fill="#2e2408"/>
+      </marker>
+      <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#191f30"/>
+        <stop offset="100%" stop-color="#121622"/>
+      </linearGradient>
+      <linearGradient id="mg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1e253a"/>
+        <stop offset="100%" stop-color="#181d2e"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ═══ OUTER MACHINE — sharp corners (rx=0) ═══ -->
+    <rect x="110" y="55" width="756" height="450" rx="0" fill="url(#bg)" stroke="#28365a" stroke-width="2.5"/>
+
+    <!-- Input funnel: narrow tip at (110,280), wide opening at x=52 -->
+    <polygon points="52,210 110,248 110,312 52,350" fill="#1a2035" stroke="#28365a" stroke-width="2"/>
+    <!-- Output funnel: narrow tip at (866,280), wide opening at x=918 -->
+    <polygon points="866,248 918,210 918,350 866,312" fill="#1a2035" stroke="#28365a" stroke-width="2"/>
+
+    <!-- f label -->
+    <text x="140" y="482" font-family="'Crimson Pro',serif" font-size="42" font-style="italic"
+          fill="rgba(255,255,255,0.22)" font-weight="600">f</text>
+
+    <!-- ═══ DIAMOND — moved left, cx=240 ═══ -->
+    <!-- tips: L=158,280  R=322,280  T=240,198  B=240,362 -->
+    <polygon id="dmd" points="158,280 240,198 322,280 240,362" fill="#f5c842" stroke="#c8a030" stroke-width="2"/>
+    <text x="240" y="272" text-anchor="middle" font-family="'Crimson Pro',serif" font-size="14.5" fill="#3a2800" font-weight="600">Πού ανήκει</text>
+    <text x="240" y="290" text-anchor="middle" font-family="'Crimson Pro',serif" font-size="14.5" fill="#3a2800" font-weight="600">το x;</text>
+
+    <!-- ═══ SUB-MACHINE 1 (top, ellipse + funnels) ═══ -->
+    <g id="grp1">
+      <!-- left funnel: big side (4 pts) flush with ellipse at x=558 -->
+      <polygon id="m1fi" points="522,162 558,180 558,212 522,230" fill="#1e2a40" stroke="#2e3a5e" stroke-width="1.8"/>
+      <!-- ellipse body -->
+      <ellipse id="mb1" cx="662" cy="196" rx="104" ry="56" fill="url(#mg)" stroke="#2e3a5e" stroke-width="2.5"/>
+      <!-- right funnel: big side flush with ellipse at x=766 -->
+      <polygon id="m1fo" points="766,180 802,162 802,230 766,212" fill="#1e2a40" stroke="#2e3a5e" stroke-width="1.8"/>
+      <!-- formula (MathJax) -->
+      <foreignObject x="562" y="155" width="200" height="82">
+        <div xmlns="http://www.w3.org/1999/xhtml" id="m1tex"
+             style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+                    color:#7ab8ff;text-align:center;user-select:none;pointer-events:none;
+                    overflow:hidden"></div>
+      </foreignObject>
+    </g>
+
+    <!-- ═══ SUB-MACHINE 2 (bottom, rect + funnels) ═══ -->
+    <g id="grp2">
+      <!-- left funnel: big side flush with rect left edge x=558 -->
+      <polygon id="m2fi" points="522,318 558,332 558,368 522,382" fill="#1e2a40" stroke="#2e3a5e" stroke-width="1.8"/>
+      <!-- rect body -->
+      <rect id="mb2" x="558" y="308" width="208" height="96" rx="16" fill="url(#mg)" stroke="#2e3a5e" stroke-width="2.5"/>
+      <!-- right funnel: big side flush with rect right edge x=766 -->
+      <polygon id="m2fo" points="766,332 802,318 802,382 766,368" fill="#1e2a40" stroke="#2e3a5e" stroke-width="1.8"/>
+      <!-- formula (MathJax) -->
+      <foreignObject x="562" y="312" width="200" height="92">
+        <div xmlns="http://www.w3.org/1999/xhtml" id="m2tex"
+             style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+                    color:#7ab8ff;text-align:center;user-select:none;pointer-events:none"></div>
+      </foreignObject>
+    </g>
+
+    <!--
+    ═══ ARROWS from diamond right tip (322,280) ═══
+
+    Arrow1: (322,280) → curves up-right → m1 left funnel narrow tip (522,196)
+      Total dx=200, dy=-84.  Cubic bezier: control points guide upward sweep.
+      Start tangent angle: atan2(-84,200) ≈ -22.8°  (gentle upward slope at start)
+      The label goes near the START (just right of diamond), above the arrow, rotated -23°.
+      "Above" for a line going right+slightly-up = shift perpendicular upward-left.
+      unit dir ≈ (0.922,-0.387); perp-above (rotate -90°) ≈ (-0.387,-0.922).
+      Shift 16px: (-6.2,-14.8).  Anchor: (322+30, 280) = (352,280) shifted → (346,265)
+      rotate -23°
+
+    Arrow2: (322,280) → curves down-right → m2 left funnel narrow tip (522,356)
+      Total dx=200, dy=76.  Start tangent angle ≈ atan2(76,200) ≈ +20.8°
+      Label near start, below arrow, rotated +21°.
+      unit dir ≈ (0.934,0.356); perp-below (rotate +90°) ≈ (0.356,-0.934) → that's up.
+      rotate -90° = (-0.356,0.934) → downward. Shift 16px: (-5.7,14.9).
+      Anchor: (352,280) shifted → (346,295)
+      rotate +21°
+    -->
+
+    <!-- Arrow1: diamond right tip → m1 left funnel narrow tip -->
+    <path id="a1" d="M 322,280 C 390,270 460,220 520,198"
+          stroke="#f5c842" stroke-width="3" fill="none" marker-end="url(#ay)" stroke-linecap="round"/>
+    <!--
+      Label1: placed ~50px right of diamond tip along arrow, above the line.
+      Arrow start tangent dir ≈ (68,-10) (first control point - start) = right & slightly up.
+      More accurately at t=0.15 the curve is around (352,274).
+      We place label at translate(350,260) rotate(-22) — above the arrow near its start.
+    -->
+    <text id="lc1" font-family="'Fira Code',monospace" font-size="14" font-weight="700" fill="#f5c842"
+          text-anchor="middle" transform="translate(370,256) rotate(-22)"></text>
+
+    <!-- Arrow2: diamond right tip → m2 left funnel narrow tip -->
+    <path id="a2" d="M 322,280 C 390,290 460,340 520,358"
+          stroke="#f5c842" stroke-width="3" fill="none" marker-end="url(#ay)" stroke-linecap="round"/>
+    <!--
+      Label2: placed ~50px right of diamond tip along arrow, below the line.
+      Arrow start tangent dir ≈ right & slightly down.
+      Place at translate(370,302) rotate(+22) — below the arrow near its start.
+    -->
+    <text id="lc2" font-family="'Fira Code',monospace" font-size="14" font-weight="700" fill="#f5c842"
+          text-anchor="middle" transform="translate(370,316) rotate(22)"></text>
+
+    <!-- ═══ ANIMATED VALUES ═══ -->
+    <text id="vIn"  x="55"  y="284" text-anchor="middle" font-family="'Fira Code',monospace" font-size="22" font-weight="700" fill="#4ade80" opacity="0"></text>
+    <text id="vm1"  x="662" y="202" text-anchor="middle" font-family="'Fira Code',monospace" font-size="18" font-weight="700" fill="#4ade80" opacity="0"></text>
+    <text id="vm2"  x="662" y="360" text-anchor="middle" font-family="'Fira Code',monospace" font-size="18" font-weight="700" fill="#4ade80" opacity="0"></text>
+    <text id="vOut" x="916" y="284" text-anchor="middle" font-family="'Fira Code',monospace" font-size="22" font-weight="700" fill="#f87171" opacity="0"></text>
+    </svg>
+  </div>
+</div>
+
+<!-- ══════════════════ POPUP ══════════════════ -->
+<div class="ov" id="ov">
+  <div class="pb">
+    <div class="ptit">Ιστορικό Υπολογισμών</div>
+    <div class="pop-fn" id="pop-fn"></div>
+    <button class="pcl" onclick="closeOv()">✕</button>
+    <div class="hg" id="hg"></div>
+    <div class="pac">
+      <button class="pdfb" onclick="doPdf()">⬇&thinsp;Αποθήκευση PDF</button>
+      <button class="rbtn" onclick="closeOv()">Κλείσιμο</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══ GLOBALS ═══ */
+let F1='',F2='',C1='',C2='',hist=[];
+let animRunning=false;
+
+/* ═══ AUTO-COMPLEMENT ═══ */
+function autoFillC2(){
+  const c2el=document.getElementById('c2');
+  if(c2el.value.trim())return;
+  const c1val=document.getElementById('c1').value.trim();
+  if(!c1val)return;
+  const comp=complementCond(c1val);
+  if(comp)c2el.value=comp;
+}
+function complementCond(c){
+  const ops=[
+    {re:/^x\s*<=\s*(.+)$/,  res:v=>`x>${v}`},
+    {re:/^x\s*<\s*(.+)$/,   res:v=>`x>=${v}`},
+    {re:/^x\s*>=\s*(.+)$/,  res:v=>`x<${v}`},
+    {re:/^x\s*>\s*(.+)$/,   res:v=>`x<=${v}`},
+    {re:/^x\s*=\s*(.+)$/,   res:v=>`x!=${v}`},
+    {re:/^x\s*!=\s*(.+)$/,  res:v=>`x=${v}`},
+    {re:/^(.+)\s*<=\s*x$/,  res:v=>`x<${v}`},
+    {re:/^(.+)\s*<\s*x$/,   res:v=>`x<=${v}`},
+    {re:/^(.+)\s*>=\s*x$/,  res:v=>`x>${v}`},
+    {re:/^(.+)\s*>\s*x$/,   res:v=>`x>=${v}`},
+  ];
+  for(const o of ops){
+    const m=c.match(o.re);
+    if(m)return o.res(m[1].trim());
+  }
+  return '';
+}
+
+/* ═══ LATEX CONVERSION ═══ */
+function toLatex(expr){
+  // Normalize
+  let s = expr.replace(/\s/g,'').replace(/[–—]/g,'-');
+
+  // Step 1: exponents (before anything, while expression is still raw)
+  s = s.replace(/\^(\d+)/g, '^{$1}');
+  s = s.replace(/\^\(([^)]+)\)/g, '^{$1}');
+
+  // Step 2: fractions — work on RAW input so sqrt braces never confuse patterns.
+  // Handle sqrt(X)/Y → \frac{\sqrt{X}}{Y} directly (before converting sqrt).
+  let prev='', iter=0;
+  while(prev!==s && iter<10){
+    prev=s; iter++;
+    // sqrt(X)/(Y)
+    s=s.replace(/sqrt\(([^()]+)\)\/\(([^()]+)\)/g, (_,n,d)=>`\\frac{\\sqrt{${n}}}{${d}}`);
+    // sqrt(X)/number
+    s=s.replace(/sqrt\(([^()]+)\)\/([\d.]+\b)/g,   (_,n,d)=>`\\frac{\\sqrt{${n}}}{${d}}`);
+    // sqrt(X)/var
+    s=s.replace(/sqrt\(([^()]+)\)\/([a-zA-Z]\w*)/g, (_,n,d)=>`\\frac{\\sqrt{${n}}}{${d}}`);
+    // (X)/(Y)
+    s=s.replace(/\(([^()]+)\)\/\(([^()]+)\)/g, (_,n,d)=>`\\frac{${n}}{${d}}`);
+    // (X)/number  or  (X)/var
+    s=s.replace(/\(([^()]+)\)\/([\d.]+\b)/g,    (_,n,d)=>`\\frac{${n}}{${d}}`);
+    s=s.replace(/\(([^()]+)\)\/([a-zA-Z]\w*)/g, (_,n,d)=>`\\frac{${n}}{${d}}`);
+    // number/number  or  number/var  (\b ensures we don't match inside words)
+    s=s.replace(/(\b\d[\d.]*)\/([\d.]+\b)/g,    (_,n,d)=>`\\frac{${n}}{${d}}`);
+    s=s.replace(/(\b\d[\d.]*)\/([a-zA-Z]\w*)/g, (_,n,d)=>`\\frac{${n}}{${d}}`);
+    // negative number after operator: e.g. +-4/x
+    s=s.replace(/([+\-*,(])(-\d[\d.]*)\/([\d.]+\b)/g,   (_,op,n,d)=>`${op}\\frac{${n}}{${d}}`);
+    s=s.replace(/([+\-*,(])(-\d[\d.]*)\/([a-zA-Z]\w*)/g, (_,op,n,d)=>`${op}\\frac{${n}}{${d}}`);
+    // negative number at start: -4/x
+    s=s.replace(/^(-\d[\d.]*)\/([\d.]+\b)/,    (_,n,d)=>`\\frac{${n}}{${d}}`);
+    s=s.replace(/^(-\d[\d.]*)\/([a-zA-Z]\w*)/, (_,n,d)=>`\\frac{${n}}{${d}}`);
+    // var/number  or  var/var  (only simple word chars, no braces — avoids matching inside LaTeX)
+    s=s.replace(/([a-zA-Z]\w*)\/([\d.]+\b)/g,    (_,n,d)=>`\\frac{${n}}{${d}}`);
+    s=s.replace(/([a-zA-Z]\w*)\/([a-zA-Z]\w*)/g, (_,n,d)=>`\\frac{${n}}{${d}}`);
+  }
+
+  // Step 3: remaining sqrt(expr) → \sqrt{expr}
+  let prevS='', iS=0;
+  while(prevS!==s && iS<10){
+    prevS=s; iS++;
+    s=s.replace(/sqrt\(([^()]*)\)/g, (_,v)=>`\\sqrt{${v}}`);
+  }
+
+  // Step 4: multiplication dot
+  s=s.replace(/\*/g, '\\cdot ');
+
+  return s;
+}
+function cdsp(c){
+  return c.replace(/<=/g,'≤').replace(/>=/g,'≥').replace(/!=/g,'≠');
+}
+
+/* ═══ MATHJAX RENDER ═══ */
+async function renderMath(el, latexStr, displayMode){
+  el.innerHTML = '';
+  if(!window.MathJax){ el.textContent = latexStr; return; }
+  try{
+    await MathJax.startup.promise;
+    // Use display:false (no extra top/bottom spacing) but wrap in \displaystyle
+    // so fractions and roots render at full size, not cramped inline size
+    const wrapped = `\\displaystyle{${latexStr}}`;
+    const node = MathJax.tex2svg(wrapped, {display: false});
+    const svgEl = node.querySelector('svg');
+    if(svgEl){
+      svgEl.removeAttribute('width');
+      svgEl.removeAttribute('height');
+      svgEl.style.width = 'auto';
+      svgEl.style.height = 'auto';
+      svgEl.style.maxWidth = '100%';
+      svgEl.style.maxHeight = '64px';
+      svgEl.style.verticalAlign = 'middle';
+      svgEl.style.display = 'block';
+      svgEl.style.margin = '0 auto';
+    }
+    el.innerHTML = '';
+    el.appendChild(node);
+  } catch(e){ el.textContent = latexStr; }
+}
+
+/* ═══ NAVIGATION ═══ */
+function toP2(){
+  F1=document.getElementById('f1').value.trim();
+  F2=document.getElementById('f2').value.trim();
+  C1=document.getElementById('c1').value.trim();
+  C2=document.getElementById('c2').value.trim();
+  if(!F1||!F2||!C1||!C2){document.getElementById('etx').textContent='Συμπληρώστε όλα τα πεδία.';return;}
+  document.getElementById('etx').textContent='';
+  document.getElementById('p1').style.display='none';
+  document.getElementById('p2').style.display='flex';
+  setup2();
+}
+function goBack(){
+  document.getElementById('p2').style.display='none';
+  document.getElementById('p1').style.display='flex';
+  hist=[];
+}
+
+/* ═══ SETUP PAGE 2 ═══ */
+async function setup2(){
+  // Condition labels in top display
+  document.getElementById('fb-c1').textContent='αν\u2002'+cdsp(C1);
+  document.getElementById('fb-c2').textContent='αν\u2002'+cdsp(C2);
+  await renderMath(document.getElementById('fb-f1'), toLatex(F1), false);
+  await renderMath(document.getElementById('fb-f2'), toLatex(F2), false);
+
+  // Condition labels in SVG (text content only — transform already set in HTML)
+  document.getElementById('lc1').textContent=cdsp(C1);
+  document.getElementById('lc2').textContent=cdsp(C2);
+
+  // Formulas in sub-machines
+  await renderMath(document.getElementById('m1tex'), toLatex(F1), true);
+  await renderMath(document.getElementById('m2tex'), toLatex(F2), true);
+
+  rst(false); // initial state, don't show output
+}
+
+/* ═══ VISUAL STATE ═══ */
+function g(id){return document.getElementById(id);}
+
+/* rst(keepOutput): reset visual state.
+   If keepOutput=true, leave vOut visible.
+   If keepOutput=false (initial), hide everything. */
+function rst(keepOutput){
+  animRunning=false;
+  setGroupActive(1,true);
+  setGroupActive(2,true);
+  setArrow(1,true);
+  setArrow(2,true);
+  g('vIn').setAttribute('opacity','0');
+  g('vm1').setAttribute('opacity','0');
+  g('vm2').setAttribute('opacity','0');
+  if(!keepOutput) g('vOut').setAttribute('opacity','0');
+}
+
+function setGroupActive(n,on){
+  g('grp'+n).style.opacity=on?'1':'0.18';
+}
+function setArrow(n,on){
+  g('a'+n).setAttribute('stroke',on?'#f5c842':'#2e2408');
+  g('a'+n).setAttribute('marker-end',on?'url(#ay)':'url(#ad)');
+  g('lc'+n).setAttribute('fill',on?'#f5c842':'#2e2408');
+}
+
+/* ═══ EVALUATE ═══ */
+function evF(fo,xv){
+  let e=fo.replace(/[–—]/g,'-').replace(/sqrt\(/g,'Math.sqrt(').replace(/\^/g,'**')
+          .replace(/(?<![a-zA-Z\d])x(?![a-zA-Z\d])/g,`(${xv})`);
+  try{return Function('"use strict";return('+e+')')();}catch{return NaN;}
+}
+function evC(co,xv){
+  let e=co.replace(/<=/g,'<=').replace(/>=/g,'>=')
+          .replace(/(?<![a-zA-Z\d])x(?![a-zA-Z\d])/g,`(${xv})`)
+          .replace(/(?<![=!<>])=(?![=>])/g,'===');
+  try{return!!Function('"use strict";return('+e+')')();}catch{return false;}
+}
+
+/* ═══ CALCULATE ═══ */
+function calc(){
+  if(animRunning)return;
+  const xv=parseFloat(g('xv').value);
+  if(isNaN(xv))return;
+
+  // Reset visuals (hide previous output too)
+  rst(false);
+
+  const c1ok=evC(C1,xv),ch=c1ok?1:2;
+  const res=evF(c1ok?F1:F2,xv);
+  const rs=isNaN(res)?'Σφ.':(Number.isInteger(res)?String(res):parseFloat(res.toFixed(8))+'');
+
+  setArrow(c1ok?2:1,false);
+  setGroupActive(c1ok?2:1,false);
+
+  hist.push({x:xv,r:rs,ch,c1ok});
+  animate(xv,ch,rs);
+}
+
+/* ═══ ANIMATION ═══ */
+function animate(xv,ch,rs){
+  animRunning=true;
+  const mInY  =ch===1?196:356;
+  const mOutY =ch===1?196:356;
+  const vmEl  =g(ch===1?'vm1':'vm2');
+  const vin   =g('vIn');
+  const vout  =g('vOut');
+
+  vin.textContent=xv;
+  vin.setAttribute('fill','#4ade80');
+
+  // P1: show at input mouth
+  T(0,()=>{
+    vin.setAttribute('x','55');vin.setAttribute('y','284');vin.setAttribute('opacity','1');
+  });
+  // P2: travel to diamond (now at cx=240)
+  T(150,()=>{
+    animTxt(vin,55,284,230,284,700,()=>{
+      flshFill('dmd','#fffab0','#f5c842',500);
+      // P3: travel into chosen machine
+      T(250,()=>{
+        animTxt(vin,230,284,520,mInY,800,()=>{
+          vin.setAttribute('opacity','0');
+          // P4: show inside machine
+          vmEl.textContent=xv;vmEl.setAttribute('fill','#4ade80');vmEl.setAttribute('opacity','1');
+          const mbd=g('mb'+ch);
+          const os=mbd.getAttribute('stroke');
+          mbd.setAttribute('stroke','#5a8acc');
+          T(500,()=>mbd.setAttribute('stroke',os));
+          // P5: transform
+          T(800,()=>{
+            vmEl.textContent=rs;vmEl.setAttribute('fill','#f87171');
+            // P6: exit machine → output mouth, then STAY
+            T(600,()=>{
+              vmEl.setAttribute('opacity','0');
+              vout.textContent=rs;vout.setAttribute('fill','#f87171');
+              vout.setAttribute('x','802');vout.setAttribute('y',mOutY+'');
+              vout.setAttribute('opacity','1');
+              animTxt(vout,802,mOutY,916,284,800,()=>{
+                // Animation done. Restore machines/arrows but KEEP output visible.
+                T(200,()=>{
+                  animRunning=false;
+                  // Restore everything except vOut
+                  setGroupActive(1,true);setGroupActive(2,true);
+                  setArrow(1,true);setArrow(2,true);
+                  g('vIn').setAttribute('opacity','0');
+                  g('vm1').setAttribute('opacity','0');
+                  g('vm2').setAttribute('opacity','0');
+                  // vOut stays visible
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+function animTxt(el,x1,y1,x2,y2,dur,cb){
+  const t0=performance.now();
+  (function fr(now){
+    const t=Math.min((now-t0)/dur,1);
+    const k=t<.5?2*t*t:-1+(4-2*t)*t;
+    el.setAttribute('x',(x1+(x2-x1)*k)+'');
+    el.setAttribute('y',(y1+(y2-y1)*k)+'');
+    if(t<1)requestAnimationFrame(fr);else if(cb)cb();
+  })(performance.now());
+}
+function T(ms,fn){setTimeout(fn,ms);}
+function flshFill(id,on,off,dur){const el=g(id);if(!el)return;el.setAttribute('fill',on);T(dur,()=>el.setAttribute('fill',off));}
+
+/* ═══ SUMMARY ═══ */
+function openSum(){
+  if(!hist.length){alert('Δεν υπάρχουν ακόμη υπολογισμοί.');return;}
+  const pf=g('pop-fn');
+  pf.innerHTML=
+    `<span style="font-family:'Crimson Pro',serif;font-style:italic;font-size:1.2rem;white-space:nowrap">f(x)&thinsp;=</span>`+
+    `<svg height="64" width="18" viewBox="0 0 18 64" fill="none" style="flex-shrink:0">`+
+    `<path d="M15 3 Q5 3 5 14 L5 27 Q5 32 2 32 Q5 32 5 37 L5 50 Q5 61 15 61" `+
+    `stroke="#4a9eff" stroke-width="2" stroke-linecap="round" fill="none"/></svg>`+
+    `<div style="display:flex;flex-direction:column;gap:8px;font-family:'Crimson Pro',serif;font-style:italic;font-size:1.05rem">`+
+    `<div><span id="pop-f1" style="color:var(--tx)"></span><span style="color:var(--dm)">&ensp;,&ensp;αν&ensp;${cdsp(C1)}</span></div>`+
+    `<div><span id="pop-f2" style="color:var(--tx)"></span><span style="color:var(--dm)">&ensp;,&ensp;αν&ensp;${cdsp(C2)}</span></div>`+
+    `</div>`;
+  renderMath(g('pop-f1'),toLatex(F1));
+  renderMath(g('pop-f2'),toLatex(F2));
+
+  const hg=g('hg');hg.innerHTML='';
+  hist.forEach(h=>{const d=document.createElement('div');d.className='hi';d.innerHTML=mini(h);hg.appendChild(d);});
+  g('ov').classList.add('show');
+}
+function closeOv(){g('ov').classList.remove('show');}
+
+/* ═══ MINI SVG ═══
+   ViewBox 280×180
+   Outer machine: 24..256, 14..166  sharp corners
+   Input mouth: left of 24
+   Diamond center: 90, 90
+   M1 (ellipse): cx=185 cy=56  — left funnel tip at ~138,56; right funnel tip at ~232,56
+   M2 (rect):    center 185,130 rect x=148 y=112 w=74 h=36 — left tip at ~138,130
+
+   Arrows from diamond RIGHT tip (138,90):
+     Arrow1: (138,90)→(140,56) straight line, going up ~-88°... 
+     Actually from (124,78) to (138,56)  angle ≈ atan2(-22,14) = -57°
+     Arrow2: (124,102) to (138,130) angle ≈ +57°
+
+   Labels:
+     Label1: near start of arrow1, rotated -57°, placed above (upper-left side)
+     Label2: near start of arrow2, rotated +57°, placed below (lower-left side)
+*/
+function mini(h){
+  const m1a=h.ch===1,m2a=h.ch===2;
+  const a1c=m1a?'#f5c842':'#2e2408';
+  const a2c=m2a?'#f5c842':'#2e2408';
+  const m1op=m1a?'1':'0.18';
+  const m2op=m2a?'1':'0.18';
+  const lc1c=m1a?'#f5c842':'#2e2408';
+  const lc2c=m2a?'#f5c842':'#2e2408';
+  const u=Math.random().toString(36).slice(2,8);
+  const f1txt=fmtSimple(F1);
+  const f2txt=fmtSimple(F2);
+
+  // Arrow1 start: (124,78), end: (136,60)  → goes to left funnel narrow tip of M1
+  // Angle: atan2(60-78, 136-124) = atan2(-18,12) ≈ -56°
+  // Label1 above: perpendicular "above" when going up-right:
+  //   unit dir = (12,-18)/sqrt(468)=(0.485,-0.874)
+  //   left-normal (above)= rotate -90° = (-0.874,-0.485) → shift 12px: (-10.5,-5.8) from midpoint (130,69)→ (120,63)
+  //   text rotated -56°
+
+  // Arrow2 start: (124,102), end: (136,120)
+  // Angle: atan2(18,12) ≈ +56°
+  // Label2 below: perpendicular "below" = rotate +90° of (0.485,0.874) = (0.874,-0.485)→ up, so
+  //   rotate -90° = (-0.874,0.485) → but that's left. For "below" going down-right:
+  //   right-normal = rotate +90° = (0.874,-0.485) that's above. rotate -90°=(-0.874,0.485) below? 
+  //   Actually simply: "below" visually for down-right arrow = shift in +y direction.
+  //   midpoint (130,111). shift (+0, +14) → (130,125). rotate +56°.
+
+  return `<svg viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="a1${u}" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0,8 3,0 6" fill="${a1c}"/></marker>
+  <marker id="a2${u}" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0,8 3,0 6" fill="${a2c}"/></marker>
+</defs>
+
+<!-- outer machine (sharp corners) -->
+<rect x="24" y="14" width="232" height="152" rx="0" fill="#181e2c" stroke="#28365a" stroke-width="1.5"/>
+<!-- input mouth -->
+<polygon points="10,64 24,74 24,100 10,110" fill="#1a2035" stroke="#28365a" stroke-width="1"/>
+<!-- output mouth -->
+<polygon points="256,74 270,64 270,110 256,100" fill="#1a2035" stroke="#28365a" stroke-width="1"/>
+<!-- f label -->
+<text x="34" y="156" font-family="serif" font-size="20" font-style="italic" fill="rgba(255,255,255,0.2)">f</text>
+
+<!-- diamond -->
+<polygon points="52,90 90,65 128,90 90,115" fill="#f5c842" stroke="#c8a030" stroke-width="1.2"/>
+<text x="90" y="87" text-anchor="middle" font-family="serif" font-size="8" fill="#3a2800" font-weight="600">Πού</text>
+<text x="90" y="98" text-anchor="middle" font-family="serif" font-size="8" fill="#3a2800" font-weight="600">ανήκει;</text>
+
+<!-- M1 (ellipse) -->
+<g opacity="${m1op}">
+  <!-- left funnel: big side flush with ellipse -->
+  <polygon points="138,42 154,48 154,64 138,70" fill="#1e2a40" stroke="#2e3a5e" stroke-width="1"/>
+  <ellipse cx="185" cy="56" rx="31" ry="22" fill="#1e2535" stroke="#2e3a5e" stroke-width="1.5"/>
+  <!-- right funnel -->
+  <polygon points="216,48 232,42 232,70 216,64" fill="#1e2a40" stroke="#2e3a5e" stroke-width="1"/>
+  <text x="185" y="60" text-anchor="middle" font-family="'Crimson Pro',serif" font-style="italic"
+        font-size="13" font-weight="600" fill="#7ab8ff">${f1txt}</text>
+</g>
+
+<!-- M2 (rect) -->
+<g opacity="${m2op}">
+  <!-- left funnel -->
+  <polygon points="138,112 154,118 154,134 138,140" fill="#1e2a40" stroke="#2e3a5e" stroke-width="1"/>
+  <rect x="154" y="108" width="62" height="38" rx="6" fill="#1e2535" stroke="#2e3a5e" stroke-width="1.5"/>
+  <!-- right funnel -->
+  <polygon points="216,118 232,112 232,140 216,134" fill="#1e2a40" stroke="#2e3a5e" stroke-width="1"/>
+  <text x="185" y="131" text-anchor="middle" font-family="'Crimson Pro',serif" font-style="italic"
+        font-size="13" font-weight="600" fill="#7ab8ff">${f2txt}</text>
+</g>
+
+<!-- Arrow1: from diamond right-upper (124,78) → M1 left funnel tip (138,56) -->
+<line x1="124" y1="78" x2="137" y2="60" stroke="${a1c}" stroke-width="2" marker-end="url(#a1${u})"/>
+<!-- Label1 ABOVE arrow1, angled -56°, near start -->
+<text text-anchor="middle" font-family="'Fira Code',monospace" font-size="7.5" font-weight="700"
+      fill="${lc1c}" transform="translate(116,67) rotate(-56)">${cdsp(C1)}</text>
+
+<!-- Arrow2: from diamond right-lower (124,102) → M2 left funnel tip (138,120) -->
+<line x1="124" y1="102" x2="137" y2="120" stroke="${a2c}" stroke-width="2" marker-end="url(#a2${u})"/>
+<!-- Label2 BELOW arrow2, angled +56°, near start -->
+<text text-anchor="middle" font-family="'Fira Code',monospace" font-size="7.5" font-weight="700"
+      fill="${lc2c}" transform="translate(116,116) rotate(56)">${cdsp(C2)}</text>
+
+<!-- input value -->
+<text x="11" y="91" text-anchor="middle" font-family="'Fira Code',monospace"
+      font-size="11" font-weight="bold" fill="#4ade80">${h.x}</text>
+<!-- output value -->
+<text x="269" y="91" text-anchor="middle" font-family="'Fira Code',monospace"
+      font-size="11" font-weight="bold" fill="#f87171">${h.r}</text>
+</svg>`;
+}
+
+function fmtSimple(expr){
+  let s=expr.replace(/sqrt\(([^)]+)\)/g,'√($1)')
+             .replace(/\^(\d+)/g,(_, e)=>({2:'²',3:'³',4:'⁴'}[e]||'^'+e))
+             .replace(/\*/g,'·');
+  // show fraction as a/b inline
+  return s.length>16?s.substring(0,15)+'…':s;
+}
+
+/* ═══ PDF ═══ */
+function doPdf(){
+  const w=window.open('','_blank');
+  const pfHtml=g('pop-fn').innerHTML;
+  const cards=Array.from(document.querySelectorAll('.hi'))
+    .map(d=>`<div class="card">${d.innerHTML}</div>`).join('');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Σύνοψη</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Fira+Code:wght@400;700&display=swap');
+body{background:#0d0f14;color:#c8d0e8;font-family:'Crimson Pro',serif;padding:26px;
+     print-color-adjust:exact;-webkit-print-color-adjust:exact}
+h2{margin-bottom:10px;font-size:1.4rem}
+.fn{margin-bottom:20px;padding:12px 18px;background:#161a22;border:1px solid #2e3650;
+    border-radius:8px;display:inline-flex;align-items:center;gap:10px}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{background:#161a22;border:1px solid #2e3650;border-radius:8px;padding:10px}
+.card svg{width:100%;height:auto}
+@page{margin:12mm}
+</style></head><body>
+<h2>Σύνοψη Υπολογισμών</h2>
+<div class="fn">${pfHtml}</div>
+<div class="g">${cards}</div>
+<script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script>
+</body></html>`);
+  w.document.close();
+}
+
+/* ═══ KEYBOARD ═══ */
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  const p1=g('p1');
+  if(!p1.style.display||p1.style.display!=='none')toP2();
+  else calc();
+});
+</script>
+</body>
+</html>
