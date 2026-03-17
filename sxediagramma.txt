@@ -55,6 +55,12 @@
 
 # Γ Γυμνασίου <folder>GymnasioC</folder>
 
+## Άλγεβρα
+
+### Εξισώσεις
+
+[Διακρίνουσα](GymnasioC/quadratic_flowchart.html)
+
 ## Γεωμετρία
 
 ### Τριγωνομετρία

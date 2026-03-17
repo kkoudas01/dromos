@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Δευτεροβάθμια Εξίσωση</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --purple: #7c4daa;
+  --purple-light: #9b6dca;
+  --orange: #e07b2a;
+  --orange-dark: #c46820;
+  --teal: #2ab8c8;
+  --teal-dark: #1a9aaa;
+  --bg: #1e2a35;
+  --bg2: #253240;
+  --text: #f0ece4;
+  --text-dim: #8a9aaa;
+  --green: #4caf82;
+  --red: #e05050;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  font-family: 'Crimson Pro', Georgia, serif;
+  color: var(--text);
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 30px 16px 70px;
+  position: relative;
+}
+body::before {
+  content:''; position:fixed; inset:0;
+  background: radial-gradient(ellipse at 20% 20%,#7c4daa18 0%,transparent 60%),
+              radial-gradient(ellipse at 80% 80%,#2ab8c815 0%,transparent 60%);
+  pointer-events:none;
+}
+
+.back-btn {
+  position:fixed; top:14px; left:14px;
+  background:var(--bg2); border:1px solid #ffffff22; color:var(--text-dim);
+  font-family:'JetBrains Mono',monospace; font-size:12px; padding:7px 14px;
+  border-radius:6px; cursor:pointer; text-decoration:none;
+  display:flex; align-items:center; gap:6px; transition:all 0.2s; z-index:100;
+}
+.back-btn:hover { color:var(--text); border-color:#ffffff44; }
+
+.reset-btn {
+  position:fixed; top:14px; right:14px;
+  width:40px; height:40px; border-radius:50%;
+  background:var(--purple); border:none; color:white;
+  font-size:20px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.25s; z-index:100;
+  box-shadow:0 2px 14px #7c4daa55;
+}
+.reset-btn:hover { background:var(--purple-light); transform:rotate(-40deg) scale(1.12); }
+
+.signature {
+  position:fixed; bottom:12px; right:16px;
+  font-family:'Crimson Pro',serif; font-style:italic;
+  font-size:13px; color:var(--text-dim); opacity:0.55; z-index:100;
+}
+
+/* ── Flowchart ── */
+.flowchart {
+  display:flex; flex-direction:column; align-items:center;
+  width:100%; max-width:860px; margin-top:16px;
+}
+
+/* Parallelogram */
+.eq-box {
+  background:var(--purple);
+  clip-path:polygon(6% 0%,100% 0%,94% 100%,0% 100%);
+  padding:16px 54px; font-size:22px; font-weight:600;
+  cursor:pointer; transition:all 0.25s;
+  min-width:300px; text-align:center; user-select:none;
+}
+.eq-box:hover { background:var(--purple-light); transform:scale(1.03); }
+.eq-box.active { background:var(--purple-light); filter:drop-shadow(0 0 14px #9b6dca88); }
+.hint { font-family:'JetBrains Mono',monospace; font-size:10px; color:#ffffff55; margin-top:4px; }
+
+/* vertical arrow purple */
+.v-arrow { display:flex; flex-direction:column; align-items:center; }
+.v-arrow .shaft { width:3px; height:32px; }
+.v-arrow .head { width:0; height:0;
+  border-left:7px solid transparent; border-right:7px solid transparent; }
+
+.va-purple .shaft { background:var(--purple-light); }
+.va-purple .head  { border-top:9px solid var(--purple-light); }
+.va-orange .shaft { background:var(--orange); }
+.va-orange .head  { border-top:9px solid var(--orange); }
+
+/* Discriminant */
+.disc-box {
+  background:var(--orange); border-radius:8px;
+  padding:14px 36px; font-size:20px; font-weight:600;
+  cursor:pointer; transition:all 0.25s;
+  min-width:240px; text-align:center; user-select:none;
+}
+.disc-box:hover { background:var(--orange-dark); transform:scale(1.03); }
+.disc-box.active { filter:drop-shadow(0 0 12px #e07b2a88); }
+.disc-detail {
+  font-family:'JetBrains Mono',monospace; font-size:13px;
+  color:#ffe0a0; margin-top:6px; display:none;
+}
+.disc-detail.show { display:block; }
+
+/* Diamond */
+.diamond-wrap { position:relative; width:210px; height:126px; cursor:pointer; }
+.diamond-shape {
+  position:absolute; inset:0; background:var(--teal);
+  clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+  transition:all 0.25s;
+}
+.diamond-wrap:hover .diamond-shape { background:var(--teal-dark); transform:scale(1.04); }
+.diamond-wrap.active .diamond-shape { filter:drop-shadow(0 0 14px #2ab8c888); }
+.diamond-text {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-size:14px; font-weight:600; text-align:center;
+  pointer-events:none; line-height:1.35;
+}
+.delta-sign { font-size:12px; margin-top:3px; height:15px; }
+.delta-pos { color:var(--green); }
+.delta-zero { color:#ffe080; }
+.delta-neg { color:var(--red); }
+
+/* SVG arrows */
+.arrows-wrap { width:100%; }
+.arrows-wrap svg { display:block; width:100%; overflow:visible; }
+.ap { fill:none; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; transition:stroke 0.4s,opacity 0.4s; }
+.ah { transition:fill 0.4s,opacity 0.4s; }
+.faded { opacity:0.15 !important; }
+
+/* Result boxes */
+.results-row {
+  display:grid; grid-template-columns:1fr 1fr 1fr;
+  gap:12px; width:100%; margin-top:0;
+}
+.result-box {
+  background:var(--orange); border-radius:10px;
+  padding:16px 12px; text-align:center;
+  cursor:pointer; transition:all 0.3s;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:flex-start;
+  gap:6px; user-select:none; min-height:100px;
+}
+.result-box:hover:not(.faded) { background:var(--orange-dark); transform:translateY(-2px); }
+.result-box.active { filter:drop-shadow(0 0 10px #e07b2a66); }
+.result-box.faded { opacity:0.18; pointer-events:none; }
+
+.rlabel { font-size:13px; line-height:1.35; }
+
+/* Nice fraction */
+.rfrac {
+  display:inline-flex; flex-direction:column;
+  align-items:center; vertical-align:middle;
+  line-height:1.15;
+}
+.rfrac .num { border-bottom:2px solid currentColor; padding:0 4px; font-size:0.9em; }
+.rfrac .den { padding:0 4px; font-size:0.9em; }
+.rformula { font-size:20px; font-weight:600; margin-top:2px; }
+
+sup { font-size:63%; vertical-align:super; }
+
+.sol-detail {
+  background:#ffffff0a; border-radius:5px;
+  padding:10px 8px; margin-top:6px; display:none;
+  width:100%; text-align:center;
+}
+.sol-detail.show { display:block; }
+
+/* Inline math: fractions, sqrt */
+.mf {  /* math fraction */
+  display:inline-flex; flex-direction:column; align-items:center;
+  vertical-align:middle; margin:0 2px; line-height:1.1;
+}
+.mf .mn { border-bottom:1.5px solid currentColor; padding:0 4px; font-size:0.88em; white-space:nowrap; }
+.mf .md { padding:0 4px; font-size:0.88em; white-space:nowrap; }
+.msqrt { display:inline-flex; align-items:center; vertical-align:middle; }
+.msqrt .radicand {
+  border-top:1.8px solid currentColor;
+  border-left:none;
+  padding:0 3px 0 2px;
+  font-size:0.9em;
+}
+.msqrt .radical-sign { font-size:1.15em; margin-right:0px; line-height:1; }
+.math-line {
+  display:flex; align-items:center; justify-content:center;
+  flex-wrap:wrap; gap:4px; font-size:15px; font-weight:600;
+  color:#f0ece4; margin:4px 0;
+}
+.math-step { color:#ffe0a0; font-size:13px; font-family:'JetBrains Mono',monospace; }
+
+/* Two-solution branch layout */
+.sol-branch {
+  display:flex; align-items:center; justify-content:center;
+  gap:6px; margin-top:4px;
+}
+.sol-branch-xlabel {
+  font-size:15px; font-weight:600; color:#f0ece4;
+}
+.sol-branch-lines {
+  height:60px; width:14px; position:relative;
+}
+.sol-branch-line {
+  position:absolute; left:0;
+  width:12px; border-left:2px solid #f0ece4aa;
+}
+.sol-branch-line.top {
+  top:8px; height:22px;
+  border-top:2px solid #f0ece4aa;
+}
+.sol-branch-line.bot {
+  bottom:8px; height:22px;
+  border-bottom:2px solid #f0ece4aa;
+}
+.sol-branch-vals {
+  display:flex; flex-direction:column; gap:6px;
+}
+
+/* Input overlay */
+.input-overlay {
+  display:none; position:fixed; inset:0;
+  background:#00000088; z-index:200;
+  align-items:center; justify-content:center;
+}
+.input-overlay.show { display:flex; }
+.input-panel {
+  background:var(--bg2); border:1px solid #ffffff22;
+  border-radius:14px; padding:30px 34px;
+  width:420px; max-width:95vw; position:relative;
+  animation:popIn 0.22s ease;
+}
+@keyframes popIn { from{transform:scale(0.9);opacity:0} to{transform:scale(1);opacity:1} }
+.input-panel h3 { font-size:18px; margin-bottom:5px; color:var(--teal); font-family:'JetBrains Mono',monospace; }
+.input-panel p { font-size:14px; color:var(--text-dim); margin-bottom:16px; }
+.input-panel input {
+  width:100%; background:var(--bg); border:2px solid #ffffff22;
+  border-radius:8px; color:var(--text);
+  font-family:'JetBrains Mono',monospace; font-size:18px;
+  padding:11px 15px; outline:none; transition:border-color 0.2s;
+}
+.input-panel input:focus { border-color:var(--purple-light); }
+.ibtns { display:flex; gap:10px; margin-top:14px; }
+.btn-ok {
+  flex:1; background:var(--purple); border:none; color:white;
+  font-family:'Crimson Pro',serif; font-size:16px; padding:11px;
+  border-radius:8px; cursor:pointer; transition:background 0.2s;
+}
+.btn-ok:hover { background:var(--purple-light); }
+.btn-cancel {
+  background:transparent; border:1px solid #ffffff30; color:var(--text-dim);
+  font-family:'Crimson Pro',serif; font-size:16px; padding:11px 16px;
+  border-radius:8px; cursor:pointer; transition:all 0.2s;
+}
+.btn-cancel:hover { border-color:#ffffff55; color:var(--text); }
+.close-x {
+  position:absolute; top:12px; right:14px; background:none;
+  border:none; color:var(--text-dim); font-size:19px; cursor:pointer;
+}
+.ierr { color:#e05050; font-size:13px; margin-top:8px; display:none; }
+
+@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)} 40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)} 80%{transform:translateX(4px)}
+}
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back-btn">← Αρχική</a>
+<button class="reset-btn" onclick="openInput()" title="Νέα εξίσωση">↺</button>
+
+<div class="flowchart">
+
+  <!-- 1. Equation parallelogram -->
+  <div class="eq-box" id="eqBox" onclick="openInput()">
+    <div id="eqDisplay">αx<sup>2</sup> + βx + γ = 0</div>
+    <div class="hint">↑ κλικ για εισαγωγή εξίσωσης</div>
+  </div>
+
+  <div class="v-arrow va-purple"><div class="shaft"></div><div class="head"></div></div>
+
+  <!-- 2. Discriminant rectangle -->
+  <div class="disc-box" id="discBox" onclick="calcDisc()">
+    <div>Δ = β² − 4αγ</div>
+    <div class="disc-detail" id="discDetail"></div>
+  </div>
+
+  <div class="v-arrow va-orange"><div class="shaft"></div><div class="head"></div></div>
+
+  <!-- 3. Diamond -->
+  <div class="diamond-wrap" id="diamondWrap" onclick="revealBranch()">
+    <div class="diamond-shape"></div>
+    <div class="diamond-text">
+      Ποιο το<br>πρόσημο<br>της Δ;
+      <div class="delta-sign" id="deltaSign"></div>
+    </div>
+  </div>
+
+  <!-- SVG: angled arrows from diamond to 3 branches -->
+  <div class="arrows-wrap" id="svgWrap">
+    <svg id="arrowSvg" viewBox="0 0 860 130" style="height:130px;">
+      <!-- Left arm: horizontal then down -->
+      <path id="pathLeft"   class="ap" stroke="#2ab8c8" d="M 430,10 L 130,10 L 130,110"/>
+      <polygon id="headLeft"  class="ah" fill="#2ab8c8" points="123,108 137,108 130,122"/>
+      <!-- Center: straight down -->
+      <path id="pathCenter" class="ap" stroke="#2ab8c8" d="M 430,10 L 430,110"/>
+      <polygon id="headCenter" class="ah" fill="#2ab8c8" points="423,108 437,108 430,122"/>
+      <!-- Right arm: horizontal then down -->
+      <path id="pathRight"  class="ap" stroke="#2ab8c8" d="M 430,10 L 730,10 L 730,110"/>
+      <polygon id="headRight" class="ah" fill="#2ab8c8" points="723,108 737,108 730,122"/>
+      <!-- Labels -->
+      <rect id="lblBgLeft"   x="105" y="-2" width="50" height="20" rx="4" fill="#2ab8c8"/>
+      <text id="lblLeft"     x="130" y="12" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" font-weight="600" fill="white">Δ&gt;0</text>
+      <rect id="lblBgCenter" x="405" y="-2" width="50" height="20" rx="4" fill="#2ab8c8"/>
+      <text id="lblCenter"   x="430" y="12" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" font-weight="600" fill="white">Δ=0</text>
+      <rect id="lblBgRight"  x="705" y="-2" width="50" height="20" rx="4" fill="#2ab8c8"/>
+      <text id="lblRight"    x="730" y="12" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" font-weight="600" fill="white">Δ&lt;0</text>
+    </svg>
+  </div>
+
+  <!-- Result boxes -->
+  <div class="results-row">
+
+    <div class="result-box" id="resLeft" onclick="showSolution('left')">
+      <div class="rlabel">Η εξίσωση έχει<br><strong>δύο λύσεις</strong>, τις</div>
+      <div class="rformula">x = <span class="mf"><span class="mn">−β ± <span class="msqrt"><span class="radical-sign">√</span><span class="radicand">Δ</span></span></span><span class="md">2α</span></span></div>
+      <div class="sol-detail" id="solLeft"></div>
+    </div>
+
+    <div class="result-box" id="resCenter" onclick="showSolution('center')">
+      <div class="rlabel">Η εξίσωση έχει<br><strong>μία λύση</strong>, την</div>
+      <div class="rformula">x = <span class="mf"><span class="mn">−β</span><span class="md">2α</span></span></div>
+      <div class="sol-detail" id="solCenter"></div>
+    </div>
+
+    <div class="result-box" id="resRight" onclick="showSolution('right')">
+      <div class="rlabel" style="font-size:15px; font-weight:600; margin-top:10px;">Η εξίσωση<br>είναι <strong>αδύνατη</strong></div>
+      <div class="sol-detail" id="solRight"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Input overlay -->
+<div class="input-overlay" id="inputOverlay">
+  <div class="input-panel">
+    <button class="close-x" onclick="closeInput()">✕</button>
+    <h3>Εισαγωγή Εξίσωσης</h3>
+    <p>Γράψε στη μορφή:<br><code style="color:var(--teal)">5x^2-16x+7=0</code></p>
+    <input type="text" id="eqInput" placeholder="π.χ. 5x^2-16x+7=0" spellcheck="false"/>
+    <div class="ibtns">
+      <button class="btn-ok" onclick="submitEq()">Εφαρμογή</button>
+      <button class="btn-cancel" onclick="closeInput()">Άκυρο</button>
+    </div>
+    <div class="ierr" id="inputErr"></div>
+  </div>
+</div>
+
+<div class="signature">Κώστας Κούδας</div>
+
+<script>
+let eqData = null;
+
+/* ── Parse ── */
+function parseEq(str) {
+  let s = str.trim().replace(/\s+/g,'');
+  if (s.endsWith('=0')) s = s.slice(0,-2);
+  const tries = [
+    [/^([+-]?\d*\.?\d*)x\^2([+-]\d*\.?\d*)x([+-]\d*\.?\d*)$/i, m=>[m[1],m[2],m[3]]],
+    [/^([+-]?\d*\.?\d*)x\^2([+-]\d*\.?\d*)x$/i,                 m=>[m[1],m[2],'0']],
+    [/^([+-]?\d*\.?\d*)x\^2([+-]\d*\.?\d*)$/i,                  m=>[m[1],'0',m[2]]],
+    [/^([+-]?\d*\.?\d*)x\^2$/i,                                  m=>[m[1],'0','0']],
+  ];
+  for (const [re,ext] of tries) {
+    const m = s.match(re);
+    if (m) {
+      let [a,b,c] = ext(m);
+      if (a===''||a==='+') a='1'; if (a==='-') a='-1';
+      if (b===''||b==='+') b='1'; if (b==='-') b='-1';
+      if (c===''||c==='+') c='1'; if (c==='-') c='-1';
+      a=parseFloat(a); b=parseFloat(b); c=parseFloat(c);
+      if (!isNaN(a)&&!isNaN(b)&&!isNaN(c)&&a!==0) return {a,b,c};
+    }
+  }
+  return null;
+}
+
+function renderEq(a,b,c) {
+  const aS = a===1?'': a===-1?'−': a<0?'−'+Math.abs(a): a;
+  let h = `${aS}x<sup>2</sup>`;
+  if (b!==0) { const s=b>0?'+':'−'; h+=` ${s} ${Math.abs(b)===1?'':Math.abs(b)}x`; }
+  if (c!==0) { const s=c>0?'+':'−'; h+=` ${s} ${Math.abs(c)}`; }
+  return h+' = 0';
+}
+
+/* ── UI ── */
+function openInput() {
+  document.getElementById('inputOverlay').classList.add('show');
+  setTimeout(()=>document.getElementById('eqInput').focus(),80);
+}
+function closeInput() {
+  document.getElementById('inputOverlay').classList.remove('show');
+  document.getElementById('inputErr').style.display='none';
+}
+function submitEq() {
+  const raw=document.getElementById('eqInput').value;
+  const p=parseEq(raw);
+  if (!p) {
+    const e=document.getElementById('inputErr');
+    e.textContent='Μη έγκυρη μορφή. Δοκίμασε π.χ. 5x^2-16x+7=0';
+    e.style.display='block'; return;
+  }
+  eqData=p; fullReset();
+  document.getElementById('eqDisplay').innerHTML=renderEq(p.a,p.b,p.c);
+  document.getElementById('eqBox').classList.add('active');
+  closeInput();
+}
+
+function fullReset() {
+  ['discDetail'].forEach(id=>{const e=document.getElementById(id);e.textContent='';e.classList.remove('show');});
+  document.getElementById('discBox').classList.remove('active');
+  document.getElementById('deltaSign').textContent='';
+  document.getElementById('diamondWrap').classList.remove('active');
+  unfadeArrow('Left'); unfadeArrow('Center'); unfadeArrow('Right');
+  ['resLeft','resCenter','resRight'].forEach(id=>document.getElementById(id).classList.remove('active','faded'));
+  ['solLeft','solCenter','solRight'].forEach(id=>{const e=document.getElementById(id);e.innerHTML='';e.classList.remove('show');});
+}
+
+function calcDisc() {
+  if (!eqData) { shake('discBox'); return; }
+  const {a,b,c}=eqData;
+  const D=b*b-4*a*c; eqData.D=D;
+  const bD=b<0?`(${b})`:`${b}`;
+  document.getElementById('discDetail').innerHTML=
+    `Δ = ${bD}² − 4·${a}·${c} = ${b*b} − ${4*a*c} = <strong>${r4(D)}</strong>`;
+  document.getElementById('discDetail').classList.add('show');
+  document.getElementById('discBox').classList.add('active');
+  // reset downstream
+  document.getElementById('deltaSign').textContent='';
+  document.getElementById('diamondWrap').classList.remove('active');
+  unfadeArrow('Left'); unfadeArrow('Center'); unfadeArrow('Right');
+  ['resLeft','resCenter','resRight'].forEach(id=>document.getElementById(id).classList.remove('active','faded'));
+  ['solLeft','solCenter','solRight'].forEach(id=>{const e=document.getElementById(id);e.innerHTML='';e.classList.remove('show');});
+}
+
+function revealBranch() {
+  if (!eqData||eqData.D===undefined) { shake('diamondWrap'); return; }
+  const D=eqData.D;
+  document.getElementById('diamondWrap').classList.add('active');
+  const sig=document.getElementById('deltaSign');
+  if (D>0)       sig.innerHTML='<span class="delta-pos">Δ &gt; 0 ✓</span>';
+  else if (D===0) sig.innerHTML='<span class="delta-zero">Δ = 0 ✓</span>';
+  else           sig.innerHTML='<span class="delta-neg">Δ &lt; 0 ✓</span>';
+
+  ['solLeft','solCenter','solRight'].forEach(id=>{const e=document.getElementById(id);e.innerHTML='';e.classList.remove('show');});
+  ['resLeft','resCenter','resRight'].forEach(id=>document.getElementById(id).classList.remove('active'));
+
+  if (D>0) {
+    unfadeArrow('Left'); fadeArrow('Center'); fadeArrow('Right');
+    document.getElementById('resLeft').classList.remove('faded');
+    document.getElementById('resCenter').classList.add('faded');
+    document.getElementById('resRight').classList.add('faded');
+  } else if (D===0) {
+    fadeArrow('Left'); unfadeArrow('Center'); fadeArrow('Right');
+    document.getElementById('resLeft').classList.add('faded');
+    document.getElementById('resCenter').classList.remove('faded');
+    document.getElementById('resRight').classList.add('faded');
+  } else {
+    fadeArrow('Left'); fadeArrow('Center'); unfadeArrow('Right');
+    document.getElementById('resLeft').classList.add('faded');
+    document.getElementById('resCenter').classList.add('faded');
+    document.getElementById('resRight').classList.remove('faded');
+  }
+}
+
+function fadeArrow(cap) {
+  ['path','head','lbl','lblBg'].forEach(p=>{
+    const el=document.getElementById(p+cap); if(el) el.classList.add('faded');
+  });
+}
+function unfadeArrow(cap) {
+  ['path','head','lbl','lblBg'].forEach(p=>{
+    const el=document.getElementById(p+cap); if(el) el.classList.remove('faded');
+  });
+}
+
+/* ── Math rendering helpers ── */
+function frac(num, den) {
+  return `<span class="mf"><span class="mn">${num}</span><span class="md">${den}</span></span>`;
+}
+function sqrt(val) {
+  return `<span class="msqrt"><span class="radical-sign">√</span><span class="radicand">${val}</span></span>`;
+}
+function mathLine(content) {
+  return `<div class="math-line">${content}</div>`;
+}
+function coef(n) {
+  return n<0 ? `(${n})` : `${n}`;
+}
+
+function showSolution(branch) {
+  if (!eqData||eqData.D===undefined) return;
+  const {a,b,c,D}=eqData;
+
+  if (branch==='left'&&D>0) {
+    const sqD=Math.sqrt(D), x1=r4((-b+sqD)/(2*a)), x2=r4((-b-sqD)/(2*a));
+    const negB = -b, twoA = 2*a;
+    const formulaNum = `${negB} ± ${sqrt(r4(D))}`;
+    const num1 = `${negB} + ${sqrt(r4(D))}`;
+    const num2 = `${negB} − ${sqrt(r4(D))}`;
+    // Branching layout: "x =" on left, two fractions stacked on right connected by a brace-like structure
+    document.getElementById('solLeft').innerHTML =
+      mathLine(`x = ${frac(formulaNum, twoA)}`) +
+      `<div class="sol-branch">` +
+        `<span class="sol-branch-xlabel">x =</span>` +
+        `<div class="sol-branch-lines">` +
+          `<div class="sol-branch-line top"></div>` +
+          `<div class="sol-branch-line bot"></div>` +
+        `</div>` +
+        `<div class="sol-branch-vals">` +
+          `<div class="math-line">${frac(num1, twoA)} = <strong>${x1}</strong></div>` +
+          `<div class="math-line">${frac(num2, twoA)} = <strong>${x2}</strong></div>` +
+        `</div>` +
+      `</div>`;
+    document.getElementById('solLeft').classList.add('show');
+    document.getElementById('resLeft').classList.add('active');
+
+  } else if (branch==='center'&&D===0) {
+    const x0 = r4(-b/(2*a)), twoA = 2*a;
+    document.getElementById('solCenter').innerHTML =
+      mathLine(`x = ${frac(`−${coef(b)}`, twoA)}`) +
+      mathLine(`x = ${frac(`${-b}`, twoA)} = <strong>${x0}</strong>`);
+    document.getElementById('solCenter').classList.add('show');
+    document.getElementById('resCenter').classList.add('active');
+
+  } else if (branch==='right'&&D<0) {
+    document.getElementById('solRight').innerHTML =
+      `<div class="math-line" style="color:#f0ece4; flex-direction:column; gap:2px;">` +
+      `<span>Δ = ${r4(D)} &lt; 0</span>`+
+      `<span style="font-size:13px; font-weight:400;">Δεν υπάρχουν πραγματικές λύσεις</span></div>`;
+    document.getElementById('solRight').classList.add('show');
+    document.getElementById('resRight').classList.add('active');
+  }
+}
+
+function r4(v) { return Math.round(v*10000)/10000; }
+
+function shake(id) {
+  const el=document.getElementById(id);
+  el.style.animation='none'; el.offsetHeight;
+  el.style.animation='shake 0.35s ease';
+}
+
+/* ── Responsive SVG ── */
+function resizeSvg() {
+  const W = document.getElementById('svgWrap').offsetWidth || 860;
+  const svg = document.getElementById('arrowSvg');
+  svg.setAttribute('viewBox',`0 0 ${W} 130`);
+  const cx=W/2, lx=Math.round(W*0.145), rx=Math.round(W*0.855);
+  const top=10, bot=110, arrowBot=122;
+
+  function setPath(id,d){ document.getElementById(id).setAttribute('d',d); }
+  function setHead(id,x){ document.getElementById(id).setAttribute('points',`${x-7},${bot-2} ${x+7},${bot-2} ${x},${arrowBot}`); }
+  function setLbl(cap,x){
+    const bg=document.getElementById('lblBg'+cap), tx=document.getElementById('lbl'+cap);
+    const lw=50;
+    bg.setAttribute('x',x-lw/2); bg.setAttribute('y','-2'); bg.setAttribute('width',lw); bg.setAttribute('height','20');
+    tx.setAttribute('x',x); tx.setAttribute('y','12');
+  }
+
+  setPath('pathLeft',  `M ${cx},${top} L ${lx},${top} L ${lx},${bot}`);
+  setHead('headLeft', lx);
+  setLbl('Left', lx);
+
+  setPath('pathCenter',`M ${cx},${top} L ${cx},${bot}`);
+  setHead('headCenter',cx);
+  setLbl('Center',cx);
+
+  setPath('pathRight', `M ${cx},${top} L ${rx},${top} L ${rx},${bot}`);
+  setHead('headRight', rx);
+  setLbl('Right', rx);
+}
+
+resizeSvg();
+window.addEventListener('resize', resizeSvg);
+
+document.getElementById('eqInput').addEventListener('keydown',e=>{ if(e.key==='Enter') submitEq(); });
+document.getElementById('inputOverlay').addEventListener('click',function(e){ if(e.target===this) closeInput(); });
+</script>
+</body>
+</html>
