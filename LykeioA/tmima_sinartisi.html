@@ -122,7 +122,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Crimson Pro',Georgia,seri
           </div>
           <span class="cif">,&nbsp;αν</span>
           <div class="fg"><label>συνθήκη 1</label>
-            <input class="inp wc" id="c1" type="text" placeholder="π.χ. x&lt;4" autocomplete="off" spellcheck="false">
+            <input class="inp wc" id="c1" type="text" inputmode="text" placeholder="π.χ. x&lt;4" autocomplete="off" spellcheck="false">
           </div>
         </div>
         <div class="cr">
@@ -131,7 +131,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Crimson Pro',Georgia,seri
           </div>
           <span class="cif">,&nbsp;αν</span>
           <div class="fg"><label>συνθήκη 2</label>
-            <input class="inp wc" id="c2" type="text" placeholder="αυτόματη συμπλήρωση" autocomplete="off" spellcheck="false"
+            <input class="inp wc" id="c2" type="text" inputmode="text" placeholder="αυτόματη συμπλήρωση" autocomplete="off" spellcheck="false"
                    onfocus="autoFillC2()">
           </div>
         </div>
@@ -165,7 +165,14 @@ body{background:var(--bg);color:var(--tx);font-family:'Crimson Pro',Georgia,seri
 
   <!-- Controls: all in one row -->
   <div class="p2-btnrow">
-    <input class="xi" id="xv" type="number" placeholder="x =" step="any">
+    <div style="display:flex;align-items:center;gap:4px">
+      <button class="rbtn" onclick="toggleMinus()" id="minus-btn"
+              title="Εναλλαγή πρόσημου"
+              style="padding:10px 16px;font-size:18px;font-family:monospace;min-width:42px;
+                     border-color:#4a9eff;color:#4a9eff">±</button>
+      <input class="xi" id="xv" type="text" inputmode="decimal" pattern="-?[0-9]*\.?[0-9]*"
+             placeholder="x =" autocomplete="off">
+    </div>
     <button class="rbtn" onclick="calc()">▶ Υπολόγισε</button>
     <button class="sbtn" onclick="openSum()">📋 Σύνοψη</button>
     <button class="rbtn" onclick="goBack()">✎ Επανεισαγωγή</button>
@@ -524,7 +531,15 @@ function setArrow(n,on){
   g('lc'+n).setAttribute('fill',on?'#f5c842':'#2e2408');
 }
 
-/* ═══ EVALUATE ═══ */
+/* ═══ MINUS TOGGLE (mobile helper) ═══ */
+function toggleMinus(){
+  const el = g('xv');
+  if(el.value.startsWith('-')) el.value = el.value.slice(1);
+  else el.value = '-' + el.value;
+  el.focus();
+}
+
+
 function evF(fo,xv){
   let e=fo.replace(/[–—]/g,'-').replace(/sqrt\(/g,'Math.sqrt(').replace(/\^/g,'**')
           .replace(/(?<![a-zA-Z\d])x(?![a-zA-Z\d])/g,`(${xv})`);
@@ -540,8 +555,9 @@ function evC(co,xv){
 /* ═══ CALCULATE ═══ */
 function calc(){
   if(animRunning)return;
-  const xv=parseFloat(g('xv').value);
-  if(isNaN(xv))return;
+  const raw = g('xv').value.trim().replace(',','.');  // allow comma as decimal separator
+  const xv = parseFloat(raw);
+  if(isNaN(xv) || raw==='') return;
 
   // Reset visuals (hide previous output too)
   rst(false);

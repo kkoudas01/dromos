@@ -195,6 +195,20 @@
     align-items: center;
     gap: 8px;
   }
+  #btn-sign {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    background: #1e293b;
+    border: 2px solid var(--border);
+    color: var(--white);
+    font-size: 1rem;
+    font-family: 'Courier New', monospace;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s, border-color 0.2s;
+    line-height: 1;
+  }
+  #btn-sign:hover { background: #334155; border-color: var(--green); }
   #input-box {
     background: #0f172a;
     border: 2px solid var(--border);
@@ -310,9 +324,8 @@
   .nl-y    { color: var(--red);   font-weight: bold; }
   .nl-all-green .nl-f,
   .nl-all-green .nl-open,
-  .nl-all-green .nl-x,
-  .nl-all-green .nl-close { color: var(--red); }
-  .nl-all-green .nl-y { color: var(--red); }
+  .nl-all-green .nl-close { color: var(--green); }
+  .nl-all-green .nl-y { color: var(--green); }
 
   /* ══════════════════════════════
      PANEL (2,1) — TABLE
@@ -453,7 +466,8 @@
     <!-- (1,1) MACHINE -->
     <div class="panel" id="panel-machine">
       <div class="input-row">
-        <input id="input-box" type="number" placeholder="input" autocomplete="off">
+        <input id="input-box" type="text" inputmode="text" placeholder="input" autocomplete="off">
+        <button id="btn-sign" title="Αλλαγή προσήμου">±</button>
         <button id="btn-run" title="Εκτέλεση"></button>
       </div>
       <div class="machine-wrapper">
@@ -719,6 +733,13 @@ function resetToSetup() {
    PANEL (1,1) — MACHINE
 ════════════════════════════════════════════════ */
 document.getElementById('btn-run').addEventListener('click', runMachine);
+document.getElementById('btn-sign').addEventListener('click', () => {
+  const box = document.getElementById('input-box');
+  const v = box.value.trim();
+  if (v === '' || v === '-') { box.value = v === '-' ? '' : '-'; return; }
+  box.value = v.startsWith('-') ? v.slice(1) : '-' + v;
+  box.dispatchEvent(new Event('input'));
+});
 document.getElementById('input-box').addEventListener('keydown', e => {
   if (e.key === 'Enter') runMachine();
 });
