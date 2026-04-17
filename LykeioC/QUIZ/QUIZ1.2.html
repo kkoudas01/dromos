@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Μαθηματικών: Συνάρτηση και Πράξεις | Γ' Λυκείου</title>
+    <!-- MathJax (CDN - για offline κατέβασε το MathJax τοπικά) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .options-area {
+            padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .option-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4662;
+            font-family: inherit;
+            flex: 1 0 auto;
+            text-align: center;
+        }
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+        }
+
+        /* ===== ΠΡΟΣΘΗΚΕΣ ===== */
+        /* Κουμπί επιστροφής πάνω αριστερά */
+        .back-home {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            background: #ffffffcc;
+            backdrop-filter: blur(4px);
+            color: #0b2b44;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid #cbdde6;
+            transition: 0.2s;
+            z-index: 1000;
+            font-family: inherit;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .back-home:hover {
+            background: #ffffff;
+            border-color: #1e6f9f;
+            transform: translateY(-1px);
+        }
+        /* Υπογραφή κάτω δεξιά */
+        .signature {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            font-size: 0.75rem;
+            color: #5d7f9e;
+            background: #f8fafcd9;
+            backdrop-filter: blur(4px);
+            padding: 0.25rem 0.8rem;
+            border-radius: 30px;
+            font-family: 'Segoe UI', 'Roboto', monospace;
+            letter-spacing: 0.5px;
+            z-index: 1000;
+            pointer-events: none; /* διακριτικό, δεν παρεμβαίνει σε κλικ */
+            border: 1px solid #dce5ec;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: center;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+            .back-home {
+                top: 0.7rem;
+                left: 0.7rem;
+                padding: 0.3rem 0.8rem;
+                font-size: 0.8rem;
+            }
+            .signature {
+                bottom: 0.7rem;
+                right: 0.7rem;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Κουμπί επιστροφής στην αρχική σελίδα (index.html) -->
+<a href="index.html" class="back-home" title="Επιστροφή στην αρχική σελίδα">← Αρχική</a>
+
+<!-- Διακριτική υπογραφή κάτω δεξιά -->
+<div class="signature">Κώστας Κούδας</div>
+
+<div class="quiz-container">
+    <div class="quiz-header">
+        <h1>📐 Quiz Μαθηματικών: Η Έννοια της Συνάρτησης και Πράξεις <br><small>Προετοιμασία για την ενότητα 1.2</small></h1>
+        <div class="instructions">
+            📌 Επιλέξτε μία απάντηση για κάθε ερώτηση. <br>
+            ✅ Αμέσως θα δείτε αναλυτική αιτιολόγηση γιατί η επιλογή σας είναι σωστή ή λανθασμένη.
+        </div>
+    </div>
+    <div id="quiz-root"></div>
+    <footer>📖 Κάθε απάντηση συνοδεύεται από πλήρη επεξήγηση – μελέτησε την ανατροφοδότηση για βαθύτερη κατανόηση.</footer>
+</div>
+
+<script>
+    // Δεδομένα quiz – πλήρης LaTeX σύνταξη (ίδια με πριν, 22 ερωτήσεις)
+    const quizData = [
+        { // 1
+            text: "Ποια είναι η βασική προϋπόθεση για να ονομάζεται μια διαδικασία $f$ πραγματική συνάρτηση με πεδίο ορισμού ένα σύνολο $A$;",
+            options: [
+                { letter: "Α", text: "Κάθε $x \\in A$ να αντιστοιχίζεται σε τουλάχιστον έναν πραγματικό αριθμό $y$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η λέξη 'τουλάχιστον' επιτρέπει σε ένα $x$ να έχει πολλές εικόνες, κάτι που αντιτίθεται στον ορισμό της συνάρτησης." },
+                { letter: "Β", text: "Κάθε $x \\in A$ να αντιστοιχίζεται σε έναν μόνο πραγματικό αριθμό $y$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτός είναι ο πυρήνας του ορισμού: η μοναδικότητα της τιμής $f(x)$ για κάθε στοιχείο του πεδίου ορισμού." },
+                { letter: "Γ", text: "Κάθε $y \\in \\mathbb{R}$ να προέρχεται από ένα τουλάχιστον $x \\in A$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό περιγράφει μια 'επί' συνάρτηση, όχι τον γενικό ορισμό της συνάρτησης. Δεν απαιτείται κάθε πραγματικός αριθμός να είναι τιμή της συνάρτησης." }
+            ]
+        },
+        { // 2
+            text: "Αν δίνεται μόνο ο τύπος μιας συνάρτησης $f(x)$ χωρίς το πεδίο ορισμού της, ποιο σύνολο θεωρούμε ως πεδίο ορισμού;",
+            options: [
+                { letter: "Α", text: "Το σύνολο όλων των πραγματικών αριθμών $\\mathbb{R}$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Συχνά ο τύπος θέτει περιορισμούς (π.χ. παρονομαστές, ρίζες), οπότε το $\\mathbb{R}$ μπορεί να μην είναι αποδεκτό." },
+                { letter: "Β", text: "Το σύνολο των $x \\in \\mathbb{R}$ για τους οποίους το $f(x)$ είναι θετικός αριθμός.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $f(x)$ μπορεί να είναι αρνητικό ή μηδέν· σημασία έχει να ορίζεται η πράξη, όχι το αποτέλεσμα." },
+                { letter: "Γ", text: "Το σύνολο όλων των $x \\in \\mathbb{R}$ για τους οποίους το $f(x)$ έχει νόημα.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτή είναι η συμβατική παραδοχή που ακολουθούμε όταν το πεδίο ορισμού δεν δίνεται ρητά." }
+            ]
+        },
+        { // 3
+            text: "Τι συμπεραίνουμε από το γεγονός ότι κάθε $x \\in A$ αντιστοιχίζεται σε ένα μόνο $y = f(x)$ όσον αφορά τη γραφική παράσταση $C_f$;",
+            options: [
+                { letter: "Α", text: "Κάθε οριζόντια ευθεία τέμνει τη $C_f$ σε ένα μόνο σημείο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Πολλά $x$ μπορούν να έχουν το ίδιο $y$ (π.χ. σταθερή συνάρτηση). Αυτό το κριτήριο αφορά τις συναρτήσεις '1-1'." },
+                { letter: "Β", text: "Κάθε κατακόρυφη ευθεία έχει με τη $C_f$ το πολύ ένα κοινό σημείο.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή κάθε $x$ έχει μόνο μία εικόνα, η ευθεία $x = x_0$ δεν μπορεί να συναντήσει τη γραφική παράσταση σε περισσότερα από ένα σημεία." },
+                { letter: "Γ", text: "Η $C_f$ πρέπει να τέμνει υποχρεωτικά τον άξονα $x'x$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μια συνάρτηση μπορεί να μην μηδενίζεται ποτέ (π.χ. $f(x) = e^x + 1$), άρα να μην τέμνει τον $x'x$." }
+            ]
+        },
+        { // 4
+            text: "Ποιο είναι το πεδίο ορισμού της συνάρτησης $f(x) = \\sqrt{x-2} + \\frac{1}{x-5}$;",
+            options: [
+                { letter: "Α", text: "$[2, 5) \\cup (5, +\\infty)$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Πρέπει $x-2 \\geq 0 \\implies x \\geq 2$ ΚΑΙ $x-5 \\neq 0 \\implies x \\neq 5$. Ο συνδυασμός δίνει το $[2, 5) \\cup (5, +\\infty)$." },
+                { letter: "Β", text: "$[2, +\\infty)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή η επιλογή αγνοεί τον περιορισμό του παρονομαστή στο $x = 5$." },
+                { letter: "Γ", text: "$(-\\infty, 5) \\cup (5, +\\infty)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή η επιλογή αγνοεί τον περιορισμό της ρίζας που απαιτεί $x \\geq 2$." }
+            ]
+        },
+        { // 5
+            text: "Δύο συναρτήσεις $f$ και $g$ είναι ίσες όταν:",
+            options: [
+                { letter: "Α", text: "Έχουν τον ίδιο τύπο $f(x) = g(x)$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο τύπος δεν αρκεί. Μπορεί οι συναρτήσεις να έχουν ίδιο τύπο αλλά διαφορετικά πεδία ορισμού (π.χ. η μία ορισμένη στο $\\mathbb{R}$ και η άλλη στο $(0, +\\infty)$)." },
+                { letter: "Β", text: "Έχουν το ίδιο πεδίο ορισμού $A$ και για κάθε $x \\in A$ ισχύει $f(x) = g(x)$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτός είναι ο πλήρης ορισμός της ισότητας. Απαιτείται ταύτιση τόσο στα πεδία ορισμού όσο και στις τιμές." },
+                { letter: "Γ", text: "Έχουν το ίδιο σύνολο τιμών.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Διαφορετικές συναρτήσεις μπορεί να παίρνουν το ίδιο εύρος τιμών (π.χ. $\\sin x$ και $\\cos x$)." }
+            ]
+        },
+        { // 6
+            text: "Έστω οι συναρτήσεις $f(x) = \\frac{x^2}{x}$ και $g(x) = x$. Ισχύει ότι $f = g$;",
+            options: [
+                { letter: "Α", text: "Ναι, γιατί $x^2/x = x$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η απλοποίηση ισχύει μόνο για $x \\neq 0$. Η $f$ δεν ορίζεται στο $0$, ενώ η $g$ ορίζεται." },
+                { letter: "Β", text: "Όχι, γιατί έχουν διαφορετικό πεδίο ορισμού.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το πεδίο ορισμού της $f$ είναι το $\\mathbb{R} \\setminus \\{0\\}$, ενώ της $g$ το $\\mathbb{R}$. Εφόσον $D_f \\neq D_g$, οι συναρτήσεις δεν είναι ίσες." },
+                { letter: "Γ", text: "Ναι, στο σύνολο $\\mathbb{R}$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν μπορούν να είναι ίσες στο $\\mathbb{R}$, αφού η $f(0)$ δεν υπάρχει. Είναι ίσες μόνο στο $\\mathbb{R} \\setminus \\{0\\}$." }
+            ]
+        },
+        { // 7
+            text: "Αν $f$ και $g$ είναι δύο συναρτήσεις με πεδία ορισμού $A$ και $B$ αντίστοιχα, ποιο είναι το πεδίο ορισμού της συνάρτησης $f + g$;",
+            options: [
+                { letter: "Α", text: "$A \\cup B$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Για να υπολογίσουμε το $f(x) + g(x)$, το $x$ πρέπει να ανήκει και στα δύο πεδία ορισμού ταυτόχρονα." },
+                { letter: "Β", text: "$A \\cap B$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το άθροισμα ορίζεται μόνο εκεί που ορίζονται και οι δύο συναρτήσεις, δηλαδή στην τομή των πεδίων ορισμού τους." },
+                { letter: "Γ", text: "$A$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν το $x \\in A$ αλλά $x \\notin B$, τότε η τιμή $g(x)$ δεν υπάρχει, άρα ούτε το άθροισμα." }
+            ]
+        },
+        { // 8
+            text: "Ποιο είναι το πεδίο ορισμού του πηλίκου $\\frac{f}{g}$;",
+            options: [
+                { letter: "Α", text: "$A \\cap B$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν αρκεί το $x$ να είναι στην τομή· πρέπει επιπλέον να μην μηδενίζεται ο παρονομαστής." },
+                { letter: "Β", text: "$A \\cap B \\setminus \\{x \\mid f(x) = 0\\}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο αριθμητής $f(x)$ επιτρέπεται να είναι μηδέν." },
+                { letter: "Γ", text: "$A \\cap B \\setminus \\{x \\mid g(x) = 0\\}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Πρέπει $x \\in A \\cap B$ ώστε να ορίζονται οι $f, g$ και επιπλέον $g(x) \\neq 0$ για να ορίζεται η διαίρεση." }
+            ]
+        },
+        { // 9
+            text: "Αν $x_1 = x_2$, τότε για κάθε συνάρτηση $f$ ισχύει $f(x_1) = f(x_2)$. Ισχύει το αντίστροφο;",
+            options: [
+                { letter: "Α", text: "Ναι, πάντα.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Πολλές συναρτήσεις δίνουν την ίδια τιμή για διαφορετικά $x$ (π.χ. $f(x)=x^2$, όπου $f(-1)=f(1)$)." },
+                { letter: "Β", text: "Όχι, το αντίστροφο ισχύει μόνο αν η συνάρτηση είναι '1-1'.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτή είναι μια κρίσιμη παρατήρηση. Η συνεπαγωγή $f(x_1) = f(x_2) \\implies x_1 = x_2$ απαιτεί την ιδιότητα της αμφιμονοσήμαντης αντιστοίχισης." },
+                { letter: "Γ", text: "Ναι, αρκεί η συνάρτηση να είναι ορισμένη στο $\\mathbb{R}$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το πεδίο ορισμού δεν σχετίζεται με τη δυνατότητα της συνάρτησης να παίρνει την ίδια τιμή σε διαφορετικά σημεία." }
+            ]
+        },
+        { // 10
+            text: "Μπορεί το γινόμενο $f \\cdot g$ δύο συναρτήσεων να είναι η μηδενική συνάρτηση, χωρίς καμία από τις $f, g$ να είναι η μηδενική συνάρτηση;",
+            options: [
+                { letter: "Α", text: "Όχι, όπως και στους αριθμούς, ένας από τους δύο πρέπει να είναι μηδέν.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Στις συναρτήσεις το μηδέν μπορεί να προκύπτει 'τμηματικά'." },
+                { letter: "Β", text: "Ναι, αν οι συναρτήσεις μηδενίζονται σε συμπληρωματικά σύνολα.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Παράδειγμα: η $f$ μηδενίζεται για $x \\leq 0$ και η $g$ για $x > 0$. Τότε $f(x)g(x) = 0$ για κάθε $x$, ενώ καμία δεν είναι παντού μηδέν." },
+                { letter: "Γ", text: "Μόνο αν οι συναρτήσεις είναι σταθερές.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μια σταθερή μη μηδενική συνάρτηση επί μια άλλη θα μηδενιζόταν μόνο αν η δεύτερη ήταν η μηδενική." }
+            ]
+        },
+        { // 11
+            text: "Για να ορίζεται η σύνθεση $g \\circ f$, ποια συνθήκη πρέπει να ικανοποιείται;",
+            options: [
+                { letter: "Α", text: "Το σύνολο τιμών της $f$ πρέπει να έχει κοινά στοιχεία με το πεδίο ορισμού της $g$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Πρέπει να υπάρχουν $x$ τέτοια ώστε η τιμή $f(x)$ να είναι 'αποδεκτή' είσοδος για τη $g$. Δηλαδή $f(A) \\cap D_g \\neq \\emptyset$." },
+                { letter: "Β", text: "Οι συναρτήσεις πρέπει να έχουν το ίδιο πεδίο ορισμού.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η σύνθεση αφορά τη διαδοχική εφαρμογή κανόνων, όχι την παράλληλη. Τα πεδία ορισμού μπορεί να είναι τελείως διαφορετικά." },
+                { letter: "Γ", text: "Η $f$ πρέπει να είναι ίση με τη $g$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μπορούμε να συνθέσουμε οποιεσδήποτε συναρτήσεις, αρκεί οι τιμές της πρώτης να ανήκουν στο πεδίο της δεύτερης." }
+            ]
+        },
+        { // 12
+            text: "Ποιο είναι το πεδίο ορισμού της $g \\circ f$;",
+            options: [
+                { letter: "Α", text: "$D_{g \\circ f} = \\{x \\in D_g \\mid g(x) \\in D_f\\}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα ήταν το πεδίο ορισμού της $f \\circ g$." },
+                { letter: "Β", text: "$D_{g \\circ f} = \\{x \\in D_f \\mid f(x) \\in D_g\\}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Πρώτα εφαρμόζουμε την $f$, οπότε το $x$ πρέπει να ανήκει στο $D_f$. Στη συνέχεια, το αποτέλεσμα $f(x)$ πρέπει να μπορεί να μπει στη $g$, άρα $f(x) \\in D_g$." },
+                { letter: "Γ", text: "$D_{g \\circ f} = D_f \\cap D_g$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η τομή αφορά το άθροισμα ή το γινόμενο, όχι τη σύνθεση." }
+            ]
+        },
+        { // 13
+            text: "Ισχύει γενικά η μεταθετική ιδιότητα στη σύνθεση συναρτήσεων ($g \\circ f = f \\circ g$);",
+            options: [
+                { letter: "Α", text: "Ναι, όπως και στον πολλαπλασιασμό.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η σύνθεση δεν είναι πολλαπλασιασμός· είναι διαδοχή διαδικασιών." },
+                { letter: "Β", text: "Όχι, η σειρά των συναρτήσεων παίζει ρόλο.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Γενικά $g(f(x)) \\neq f(g(x))$. Για παράδειγμα, αν $f(x)=x^2$ και $g(x)=x+1$, τότε $g(f(x))=x^2+1$ ενώ $f(g(x))=(x+1)^2$." },
+                { letter: "Γ", text: "Μόνο αν οι συναρτήσεις είναι πολυωνυμικές.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ακόμα και στα πολυώνυμα η σειρά αλλάζει το αποτέλεσμα (βλ. προηγούμενο παράδειγμα)." }
+            ]
+        },
+        { // 14
+            text: "Η γραφική παράσταση της συνάρτησης $-f$ είναι:",
+            options: [
+                { letter: "Α", text: "Συμμετρική της $C_f$ ως προς τον άξονα $y'y$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συμμετρία ως προς τον $y'y$ αντιστοιχεί στη συνάρτηση $f(-x)$." },
+                { letter: "Β", text: "Συμμετρική της $C_f$ ως προς τον άξονα $x'x$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η συνάρτηση $-f$ αλλάζει το πρόσημο όλων των τεταγμένων ($y$), άρα κάθε σημείο $(x, y)$ γίνεται $(x, -y)$." },
+                { letter: "Γ", text: "Συμμετρική της $C_f$ ως προς την αρχή των αξόνων.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συμμετρία ως προς το $(0,0)$ αντιστοιχεί στη συνάρτηση $-f(-x)$." }
+            ]
+        },
+        { // 15
+            text: "Πώς προκύπτει η γραφική παράσταση της συνάρτησης $h(x) = f(x-1)$;",
+            options: [
+                { letter: "Α", text: "Με οριζόντια μετατόπιση της $C_f$ κατά 1 μονάδα προς τα αριστερά.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $-1$ μέσα στην παρένθεση απαιτεί μεγαλύτερα $x$ για να πάρουμε τις ίδιες τιμές $y$." },
+                { letter: "Β", text: "Με οριζόντια μετατόπιση της $C_f$ κατά 1 μονάδα προς τα δεξιά.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η αντικατάσταση του $x$ από το $x-c$ (όπου $c>0$) μετατοπίζει τη γραφική παράσταση προς τα δεξιά." },
+                { letter: "Γ", text: "Με κατακόρυφη μετατόπιση κατά 1 μονάδα προς τα κάτω.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η κατακόρυφη μετατόπιση θα απαιτούσε τον τύπο $f(x) - 1$." }
+            ]
+        },
+        { // 16
+            text: "Η γραφική παράσταση της $|f|$ αποτελείται από:",
+            options: [
+                { letter: "Α", text: "Μόνο τα τμήματα της $C_f$ που είναι πάνω από τον $x'x$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα τμήματα κάτω από τον $x'x$ δεν εξαφανίζονται, αλλά 'ανακλώνται' προς τα πάνω." },
+                { letter: "Β", text: "Τα τμήματα της $C_f$ πάνω από τον $x'x$ και τα συμμετρικά των κάτω τμημάτων ως προς τον $x'x$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η απόλυτη τιμή καθιστά όλες τις αρνητικές τιμές θετικές, διατηρώντας τις ήδη θετικές." },
+                { letter: "Γ", text: "Μια ευθεία γραμμή.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το σχήμα εξαρτάται από τη συνάρτηση $f$· η απόλυτη τιμή απλώς αλλάζει τη θέση των αρνητικών τμημάτων." }
+            ]
+        },
+        { // 17
+            text: "Ποιο είναι το πεδίο ορισμού της συνάρτησης $f(x) = \\ln(1 - e^x)$;",
+            options: [
+                { letter: "Α", text: "$(-\\infty, 0)$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Πρέπει $1 - e^x > 0 \\implies e^x < 1 \\implies e^x < e^0 \\implies x < 0$." },
+                { letter: "Β", text: "$(0, +\\infty)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν $x > 0$, τότε $e^x > 1$, οπότε $1 - e^x < 0$ και ο λογάριθμος δεν ορίζεται." },
+                { letter: "Γ", text: "$\\mathbb{R}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνάρτηση δεν ορίζεται για $x \\geq 0$." }
+            ]
+        },
+        { // 18
+            text: "Σε ένα πρόβλημα κόστους $C(x)$, όπου $x$ είναι ο αριθμός των προϊόντων, τι εκφράζει το πεδίο ορισμού;",
+            options: [
+                { letter: "Α", text: "Τις δυνατές τιμές του κόστους σε ευρώ.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι τιμές του κόστους είναι το σύνολο τιμών, όχι το πεδίο ορισμού." },
+                { letter: "Β", text: "Τον αριθμό των προϊόντων που μπορούν να παραχθούν (συνήθως $x \\geq 0$).", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το πεδίο ορισμού αφορά την ανεξάρτητη μεταβλητή, που εδώ είναι η ποσότητα παραγωγής." },
+                { letter: "Γ", text: "Την κλίση της καμπύλης.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η κλίση σχετίζεται με την παράγωγο της συνάρτησης." }
+            ]
+        },
+        { // 19
+            text: "Έστω $f(x) = \\frac{1}{x}$. Ποια είναι η συνάρτηση $f \\circ f$;",
+            options: [
+                { letter: "Α", text: "$h(x) = 1$ για κάθε $x \\in \\mathbb{R}$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το πεδίο ορισμού πρέπει να εξαιρεί το μηδέν, και η σύνθεση $\\frac{1}{1/x}$ δίνει $x$, όχι 1." },
+                { letter: "Β", text: "$h(x) = x$ για κάθε $x \\neq 0$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> $f(f(x)) = \\frac{1}{1/x} = x$. Πρέπει όμως $x \\neq 0$ (για την πρώτη $f$) και $f(x) \\neq 0$ (για τη δεύτερη $f$). Επειδή $1/x$ ποτέ δεν είναι 0, μένει μόνο ο περιορισμός $x \\neq 0$." },
+                { letter: "Γ", text: "$h(x) = \\frac{1}{x^2}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα ήταν το $f(x)^2$ ή το $f(x^2)$, όχι η σύνθεση $f(f(x))$." }
+            ]
+        },
+        { // 20
+            text: "Αν το σύνολο τιμών μιας συνάρτησης είναι το $f(A) = [0, +\\infty)$, τι σημαίνει αυτό για την εξίσωση $f(x) = -1$;",
+            options: [
+                { letter: "Α", text: "Έχει τουλάχιστον μία λύση.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $-1$ δεν ανήκει στο σύνολο τιμών, άρα δεν υπάρχει $x$ που να το παράγει." },
+                { letter: "Β", text: "Είναι αδύνατη στο $\\mathbb{R}$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Εφόσον όλες οι τιμές της $f$ είναι $\\geq 0$, η συνάρτηση δεν μπορεί ποτέ να γίνει ίση με $-1$." },
+                { letter: "Γ", text: "Έχει άπειρες λύσεις.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η εξίσωση δεν έχει καμία λύση." }
+            ]
+        },
+        { // 21
+            text: "Για τις συναρτήσεις $f(x) = x^2$ και $g(x) = \\sqrt{x}$, ποιο είναι το πεδίο ορισμού της $f \\circ g$;",
+            options: [
+                { letter: "Α", text: "$\\mathbb{R}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Παρόλο που $(\\sqrt{x})^2 = x$, η σύνθεση 'περνάει' πρώτα από τη ρίζα, η οποία απαιτεί $x \\geq 0$." },
+                { letter: "Β", text: "$[0, +\\infty)$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Πρέπει $x \\in D_g \\implies x \\geq 0$ και $g(x) \\in D_f \\implies \\sqrt{x} \\in \\mathbb{R}$ (που ισχύει πάντα για $x \\geq 0$)." },
+                { letter: "Γ", text: "$(0, +\\infty)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το μηδέν επιτρέπεται καθώς η ρίζα του μηδενός ορίζεται." }
+            ]
+        },
+        { // 22
+            text: "Πότε η συνάρτηση $f \\cdot g$ έχει πεδίο ορισμού το κενό σύνολο $\\emptyset$;",
+            options: [
+                { letter: "Α", text: "Όταν μία από τις δύο συναρτήσεις είναι η μηδενική.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν $f=0$, το γινόμενο είναι 0 με πεδίο ορισμού την τομή $A \\cap B$, που δεν είναι αναγκαστικά κενή." },
+                { letter: "Β", text: "Όταν τα πεδία ορισμού $A$ και $B$ είναι ξένα μεταξύ τους ($A \\cap B = \\emptyset$).", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το γινόμενο ορίζεται στην τομή των πεδίων ορισμού. Αν δεν υπάρχουν κοινά στοιχεία, η συνάρτηση γινόμενο δεν μπορεί να οριστεί πουθενά." },
+                { letter: "Γ", text: "Όταν οι συναρτήσεις έχουν διαφορετικούς τύπους.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο τύπος δεν επηρεάζει την ύπαρξη του πεδίου ορισμού, αρκεί να υπάρχουν κοινά $x$." }
+            ]
+        }
+    ];
+
+    // Render quiz
+    const root = document.getElementById('quiz-root');
+
+    async function renderMath(element) {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise([element]);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function buildQuiz() {
+        root.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    await renderMath(feedbackDiv);
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        renderMath(root);
+    }
+    
+    window.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+</body>
+</html>

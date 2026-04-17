@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Μαθηματικών: Το Όριο Συνάρτησης | Γ' Λυκείου</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* --- ΝΕΑ ΣΤΟΙΧΕΙΑ: Κουμπί Επιστροφής & Υπογραφή --- */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            color: #1e6f9f;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #0b2b44;
+            transform: translateX(-5px);
+        }
+
+        .signature {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            color: #4a627a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1000;
+            font-style: italic;
+        }
+        /* ------------------------------------------------ */
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .options-area {
+            padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .option-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4662;
+            font-family: inherit;
+            flex: 1 0 auto;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        .feedback-content ul {
+            margin: 0.5rem 0 0 1.5rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: center;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+            /* Σε μικρές οθόνες, η υπογραφή πάει στο τέλος */
+            .signature {
+                position: static;
+                text-align: right;
+                display: block;
+                padding-right: 1rem;
+                margin-top: -1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    
+    <a href="index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Αρχική Σελίδα
+    </a>
+
+    <div class="quiz-header">
+        <h1>📐 Quiz Μαθηματικών: Το Όριο Συνάρτησης στο $x_0 \in \mathbb{R}$ <br><small>Ενότητα 1.4 – Όριο Συνάρτησης</small></h1>
+        <div class="instructions">
+            📌 Επιλέξτε μία απάντηση για κάθε ερώτηση. <br>
+            ✅ Αμέσως θα δείτε αναλυτική αιτιολόγηση γιατί η επιλογή σας είναι σωστή ή λανθασμένη.
+        </div>
+    </div>
+    
+    <div id="quiz-root"></div>
+    
+    <footer>📖 Κάθε απάντηση συνοδεύεται από πλήρη επεξήγηση – μελέτησε την ανατροφοδότηση για βαθύτερη κατανόηση.</footer>
+</div>
+
+<div class="signature">✍️ Κώστας Κούδας</div>
+
+<script>
+    // Δεδομένα quiz – πλήρης LaTeX σύνταξη
+    const quizData = [
+        { // 1
+            text: "Για να αναζητήσουμε το όριο μιας συνάρτησης $f$ στο $x_0$, ποια από τις παρακάτω συνθήκες είναι απαραίτητη;",
+            options: [
+                { letter: "Α", text: "Η $f$ πρέπει να ορίζεται υποχρεωτικά στο σημείο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο μιας συνάρτησης στο $x_0$ δεν εξαρτάται από το αν η συνάρτηση ορίζεται στο $x_0$. Μπορούμε να αναζητήσουμε το όριο ακόμα και αν το $x_0$ δεν ανήκει στο πεδίο ορισμού." },
+                { letter: "Β", text: "Η $f$ πρέπει να είναι ορισμένη σε ένα σύνολο της μορφής $(\\alpha, x_0) \\cup (x_0, \\beta)$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για να έχει νόημα η έννοια του ορίου, η συνάρτηση πρέπει να είναι ορισμένη όσο θέλουμε 'κοντά στο $x_0$', δηλαδή σε ένα σύνολο που περιλαμβάνει διαστήματα αριστερά ή δεξιά του $x_0$." },
+                { letter: "Γ", text: "Η $f$ πρέπει να είναι γνησίως μονότονη κοντά στο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ύπαρξη του ορίου δεν συνεπάγεται μονοτονία, ούτε η μονοτονία είναι προϋπόθεση για την ύπαρξη του ορίου." }
+            ]
+        },
+        { // 2
+            text: "Αν $\\lim_{x \\to x_0} f(x) = \\ell$, τότε η τιμή $f(x_0)$:",
+            options: [
+                { letter: "Α", text: "Είναι πάντα ίση με $\\ell$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι μια συνηθισμένη παρανόηση. Η τιμή της συνάρτησης στο $x_0$ μπορεί να διαφέρει από το όριο ή η συνάρτηση να μην ορίζεται καν στο σημείο αυτό." },
+                { letter: "Β", text: "Μπορεί να είναι διαφορετική από το $\\ell$ ή και να μην ορίζεται.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η συμπεριφορά της συνάρτησης στο σημείο $x_0$ δεν επηρεάζει το όριό της. Το όριο καθορίζεται αποκλειστικά από τις τιμές της συνάρτησης <em>κοντά</em> στο $x_0$." },
+                { letter: "Γ", text: "Είναι πάντα μηδέν.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν υπάρχει κανένας περιορισμός που να επιβάλλει η τιμή $f(x_0)$ να είναι μηδέν." }
+            ]
+        },
+        { // 3
+            text: "Πότε λέμε ότι η συνάρτηση $f$ έχει όριο $\\ell$ στο $x_0$;",
+            options: [
+                { letter: "Α", text: "$\\lim_{x \\to x_0^-} f(x) = \\lim_{x \\to x_0^+} f(x) = \\ell$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αν μια συνάρτηση είναι ορισμένη σε ένα σύνολο $(\\alpha, x_0) \\cup (x_0, \\beta)$, τότε το όριο στο $x_0$ υπάρχει αν και μόνο αν υπάρχουν τα πλευρικά όρια και είναι ίσα." },
+                { letter: "Β", text: "Όταν η $f$ είναι ορισμένη στο $[x_0, \\beta)$ και $\\lim_{x \\to x_0^+} f(x) = \\ell$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό ισχύει μόνο αν η συνάρτηση ορίζεται <em>μόνο</em> δεξιά του $x_0$. Αν ορίζεται και στις δύο πλευρές, απαιτείται η ταύτιση των πλευρικών ορίων." },
+                { letter: "Γ", text: "Όταν η τιμή $f(x)$ είναι πολύ μεγάλη για $x$ κοντά στο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό περιγράφει μια ειδική περίπτωση (άπειρο όριο) και όχι τον γενικό ορισμό του ορίου σε πραγματικό αριθμό $\\ell$." }
+            ]
+        },
+        { // 4
+            text: "Έστω δύο συναρτήσεις $f, g$ οι οποίες ταυτίζονται σε ένα διάστημα γύρω από το $x_0$, αλλά διαφέρουν στο σημείο $x_0$. Τότε:",
+            options: [
+                { letter: "Α", text: "Έχουν υποχρεωτικά διαφορετικά όρια στο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η τιμή στο $x_0$ δεν επηρεάζει το όριο. Εφόσον οι τιμές τους <em>κοντά</em> στο $x_0$ είναι ίδιες, το όριο θα είναι το ίδιο." },
+                { letter: "Β", text: "Έχουν το ίδιο όριο στο $x_0$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Δύο συναρτήσεις που έχουν τις ίδιες τιμές κοντά στο $x_0$ έχουν το ίδιο όριο, ανεξάρτητα από το τι συμβαίνει στο ίδιο το $x_0$." },
+                { letter: "Γ", text: "Καμία από τις δύο δεν έχει όριο στο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το αν έχουν όριο εξαρτάται από τις τιμές τους κοντά στο $x_0$, όχι από τη διαφορά τους στο $x_0$." }
+            ]
+        },
+        { // 5
+            text: "Αν γνωρίζουμε ότι υπάρχει το $\\lim_{x \\to x_0} f(x)$, τότε μπορούμε να συμπεράνουμε ότι:",
+            options: [
+                { letter: "Α", text: "Η $f$ είναι γνησίως αύξουσα κοντά στο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ύπαρξη ορίου δεν επιβάλλει καμία συγκεκριμένη μονοτονία στη συνάρτηση." },
+                { letter: "Β", text: "Η $f$ είναι σταθερή κοντά στο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνάρτηση μπορεί να μεταβάλλεται με οποιονδήποτε τρόπο κοντά στο $x_0$, αρκεί οι τιμές της να προσεγγίζουν το $\\ell$." },
+                { letter: "Γ", text: "Δεν συνεπάγεται απαραίτητα κανένα είδος μονοτονίας για την $f$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η ύπαρξη του ορίου δεν συνεπάγεται ούτε ολική ούτε τοπική μονοτονία δεξιά ή αριστερά του $x_0$." }
+            ]
+        },
+        { // 6
+            text: "Ποιο είναι το όριο της σταθερής συνάρτησης $g(x) = c$ στο $x_0$;",
+            options: [
+                { letter: "Α", text: "$x_0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $x_0$ είναι το όριο της ταυτοτικής συνάρτησης $f(x)=x$." },
+                { letter: "Β", text: "$c$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το όριο της σταθερής συνάρτησης $g(x)=c$ σε οποιοδήποτε $x_0$ είναι ίσο με τη σταθερά $c$." },
+                { letter: "Γ", text: "Δεν υπάρχει.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι σταθερές συναρτήσεις έχουν πάντα όριο σε κάθε σημείο του πεδίου ορισμού τους." }
+            ]
+        },
+        { // 7
+            text: "Αν το όριο μιας συνάρτησης $f$ στο $x_0$ υπάρχει, τότε αυτό:",
+            options: [
+                { letter: "Α", text: "Μπορεί να πάρει δύο διαφορετικές τιμές.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η μοναδικότητα του ορίου είναι βασική ιδιότητα." },
+                { letter: "Β", text: "Είναι μοναδικό.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αποδεικνύεται ότι αν μια συνάρτηση έχει όριο στο $x_0$, αυτό είναι μοναδικό." },
+                { letter: "Γ", text: "Εξαρτάται από τον τρόπο με τον οποίο το $x$ προσεγγίζει το $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Στον ορισμό του ορίου αναφέρεται ότι το $x$ προσεγγίζει το $x_0$ 'με οποιονδήποτε τρόπο'." }
+            ]
+        },
+        { // 8
+            text: "Τι συμβαίνει αν $\\lim_{x \\to x_0^-} f(x) \\neq \\lim_{x \\to x_0^+} f(x)$;",
+            options: [
+                { letter: "Α", text: "Το όριο $\\lim_{x \\to x_0} f(x)$ δεν υπάρχει.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για να υπάρχει το όριο, πρέπει τα πλευρικά όρια να είναι ίσα. Αν είναι διαφορετικά, το όριο δεν υπάρχει." },
+                { letter: "Β", text: "Το όριο $\\lim_{x \\to x_0} f(x)$ είναι ίσο με το μεγαλύτερο από τα δύο πλευρικά.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν υπάρχει τέτοιος κανόνας στα μαθηματικά." },
+                { letter: "Γ", text: "Η συνάρτηση δεν ορίζεται στο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ύπαρξη ή μη του ορίου δεν μας δίνει πληροφορίες για το αν η συνάρτηση ορίζεται στο συγκεκριμένο σημείο $x_0$." }
+            ]
+        },
+        { // 9
+            text: "Ποιο είναι το όριο της ταυτοτικής συνάρτησης $f(x) = x$ στο $x_0$;",
+            options: [
+                { letter: "Α", text: "$0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα ίσχυε μόνο αν το $x_0 = 0$." },
+                { letter: "Β", text: "$x_0$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το όριο της ταυτοτικής συνάρτησης $f(x)=x$ στο $x_0$ είναι ίσο με $x_0$." },
+                { letter: "Γ", text: "$1$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο της $x$ στο $x_0$ είναι $x_0$, όχι 1 (εκτός αν $x_0 = 1$)." }
+            ]
+        },
+        { // 10
+            text: "Έστω η συνάρτηση $f(x) = \\sqrt{x}$. Ποιο είναι το $\\lim_{x \\to 0} f(x)$;",
+            options: [
+                { letter: "Α", text: "Δεν υπάρχει, γιατί η $f$ δεν ορίζεται για $x < 0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Όταν μια συνάρτηση ορίζεται μόνο από τη μία πλευρά του $x_0$, τότε το όριο ταυτίζεται με το πλευρικό όριο από την πλευρά που ορίζεται." },
+                { letter: "Β", text: "Είναι ίσο με $0$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή η $\\sqrt{x}$ ορίζεται μόνο στο $[0, +\\infty)$, το όριο στο $0$ ταυτίζεται με το δεξιό όριο $\\lim_{x \\to 0^+} \\sqrt{x} = 0$." },
+                { letter: "Γ", text: "Είναι ίσο με το $\\lim_{x \\to 0^-} \\sqrt{x}$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το αριστερό όριο δεν ορίζεται καν, αφού η συνάρτηση δεν υπάρχει για αρνητικούς αριθμούς." }
+            ]
+        },
+        { // 11
+            text: "Όταν γράφουμε $x \\to x_0$, εννοούμε ότι:",
+            options: [
+                { letter: "Α", text: "Το $x$ παίρνει τελικά την τιμή $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Στην έννοια του ορίου μας ενδιαφέρει τι συμβαίνει 'κοντά' στο $x_0$, όχι 'πάνω' στο $x_0$." },
+                { letter: "Β", text: "Το $x$ πλησιάζει το $x_0$ αλλά παραμένει πάντα $x \\neq x_0$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η ανισότητα $0 < |x - x_0|$ στον ορισμό δηλώνει ρητά ότι $x \\neq x_0$." },
+                { letter: "Γ", text: "Το $x$ είναι πάντα μεγαλύτερο από το $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα ίσχυε μόνο αν εξετάζαμε το δεξιό όριο ($x \\to x_0^+$)." }
+            ]
+        },
+        { // 12
+            text: "Αν το όριο $\\lim_{x \\to x_0} f(x)$ δεν υπάρχει, τότε:",
+            options: [
+                { letter: "Α", text: "Τα πλευρικά όρια υπάρχουν υποχρεωτικά και είναι διαφορετικά.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι μια συνηθισμένη παρανόηση. Το όριο μπορεί να μην υπάρχει επειδή κάποιο ή κανένα από τα πλευρικά όρια δεν υπάρχει." },
+                { letter: "Β", text: "Μπορεί να μην υπάρχουν ούτε τα πλευρικά όρια.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Υπάρχουν περιπτώσεις συναρτήσεων (όπως η $\\sin(\\frac{1}{x})$ κοντά στο $0$) όπου τα πλευρικά όρια δεν υπάρχουν καν." },
+                { letter: "Γ", text: "Η συνάρτηση δεν είναι ορισμένη κοντά στο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνάρτηση μπορεί να είναι ορισμένη, αλλά οι τιμές της να μην προσεγγίζουν κανέναν συγκεκριμένο αριθμό." }
+            ]
+        },
+        { // 13
+            text: "Στον ορισμό του ορίου, ο θετικός αριθμός $\\varepsilon$:",
+            options: [
+                { letter: "Α", text: "Είναι ένας συγκεκριμένος αριθμός που δίνεται από την άσκηση.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $\\varepsilon$ είναι ένας 'οποιοσδήποτε' θετικός αριθμός που χρησιμοποιούμε για να εκφράσουμε την προσέγγιση." },
+                { letter: "Β", text: "Αντιπροσωπεύει την απόσταση $|f(x) - \\ell|$ και μπορεί να είναι οσοδήποτε μικρός.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η ανισότητα $|f(x) - \\ell| < \\varepsilon$ δηλώνει ότι οι τιμές της συνάρτησης βρίσκονται όσο κοντά θέλουμε στον αριθμό $\\ell$." },
+                { letter: "Γ", text: "Είναι πάντα μεγαλύτερος από το $\\delta$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν υπάρχει προκαθορισμένη σχέση μεγέθους μεταξύ $\\varepsilon$ και $\\delta$." }
+            ]
+        },
+        { // 14
+            text: "Η συνάρτηση $f(x) = \\frac{x^2 - 1}{x - 1}$ έχει πεδίο ορισμού το $\\mathbb{R} \\setminus \\{1\\}$. Το όριό της στο $x_0 = 1$:",
+            options: [
+                { letter: "Α", text: "Δεν υπάρχει, γιατί η συνάρτηση δεν ορίζεται στο $1$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Όπως είδαμε, η συνάρτηση δεν χρειάζεται να ορίζεται στο σημείο για να έχει όριο σε αυτό." },
+                { letter: "Β", text: "Είναι ίσο με $2$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για $x \\neq 1$, η συνάρτηση απλοποιείται σε $f(x) = x + 1$. Καθώς το $x$ πλησιάζει το $1$, το $f(x)$ πλησιάζει το $2$." },
+                { letter: "Γ", text: "Είναι ίσο με $1$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η τιμή που προσεγγίζει η $x+1$ όταν $x \\to 1$ είναι $2$." }
+            ]
+        },
+        { // 15
+            text: "Αν μια συνάρτηση $f$ είναι ορισμένη στο $(\\alpha, x_0)$, τότε ορίζουμε ως όριο στο $x_0$ το:",
+            options: [
+                { letter: "Α", text: "$\\lim_{x \\to x_0^+} f(x)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το δεξιό όριο απαιτεί η συνάρτηση να ορίζεται δεξιά του $x_0$." },
+                { letter: "Β", text: "$\\lim_{x \\to x_0^-} f(x)$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αν η συνάρτηση ορίζεται μόνο αριστερά του $x_0$, τότε το όριο στο $x_0$ ταυτίζεται εξ ορισμού με το αριστερό όριο." },
+                { letter: "Γ", text: "Δεν μπορούμε να ορίσουμε όριο στο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μπορούμε να ορίσουμε όριο χρησιμοποιώντας τη μία πλευρά στην οποία ορίζεται η συνάρτηση." }
+            ]
+        },
+        { // 16
+            text: "Ποιο από τα παρακάτω ερωτήματα οδήγησε τους μαθηματικούς στην έννοια του ορίου;",
+            options: [
+                { letter: "Α", text: "Ο υπολογισμός της στιγμιαίας ταχύτητας ενός κινητού.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η έννοια του ορίου γεννήθηκε από την ανάγκη ορισμού της στιγμιαίας ταχύτητας, της εφαπτομένης καμπύλης και του εμβαδού μικτόγραμμων χωρίων." },
+                { letter: "Β", text: "Η επίλυση δευτεροβάθμιων εξισώσεων.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η επίλυση εξισώσεων είναι παλαιότερος κλάδος και δεν απαιτεί την έννοια του ορίου." },
+                { letter: "Γ", text: "Ο υπολογισμός του όγκου ενός κύβου.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο όγκος απλών στερεών υπολογίζεται με στοιχειώδη γεωμετρία." }
+            ]
+        },
+        { // 17
+            text: "Αν $\\lim_{x \\to x_0} f(x) = \\ell$, τότε κοντά στο $x_0$ οι τιμές της $f$:",
+            options: [
+                { letter: "Α", text: "Είναι όλες ίσες με $\\ell$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι τιμές προσεγγίζουν το $\\ell$, δεν ταυτίζονται απαραίτητα με αυτό." },
+                { letter: "Β", text: "Βρίσκονται οσοδήποτε κοντά στο $\\ell$ θέλουμε.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτή είναι η διαισθητική έννοια του ορίου: οι τιμές $f(x)$ είναι τόσο κοντά στο $\\ell$ όσο θέλουμε για όλα τα $x$ αρκούντως κοντά στο $x_0$." },
+                { letter: "Γ", text: "Είναι όλες θετικές.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι τιμές μπορεί να είναι οποιουδήποτε προσήμου, ανάλογα με το $\\ell$." }
+            ]
+        },
+        { // 18
+            text: "Η έκφραση 'η $f$ έχει κοντά στο $x_0$ την ιδιότητα $P$' σημαίνει ότι:",
+            options: [
+                { letter: "Α", text: "Η ιδιότητα $P$ ισχύει για όλα τα $x$ του πεδίου ορισμού.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η φράση 'κοντά στο $x_0$' περιορίζει την ισχύ της ιδιότητας μόνο σε μια περιοχή του σημείου αυτού." },
+                { letter: "Β", text: "Η $P$ ισχύει σε ένα σύνολο της μορφής $(\\alpha, x_0) \\cup (x_0, \\beta)$ (ή $(\\alpha, x_0)$ ή $(x_0, \\beta)$).", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με τη σύμβαση, μια ιδιότητα ισχύει κοντά στο $x_0$ αν ισχύει σε διαστήματα εκατέρωθεν ή από τη μία πλευρά (αν η συνάρτηση ορίζεται μόνο εκεί) του $x_0$." },
+                { letter: "Γ", text: "Η ιδιότητα $P$ ισχύει μόνο στο σημείο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αντίθετα, η ιδιότητα $P$ συνήθως εξετάζεται για $x \\neq x_0$." }
+            ]
+        },
+        { // 19
+            text: "Στο σχήμα μιας συνάρτησης, αν στο $x_0$ υπάρχει μια 'τρύπα' στη γραφική παράσταση (κενός κύκλος) και η τιμή $f(x_0)$ βρίσκεται σε άλλο ύψος (γεμάτος κύκλος), τότε το όριο:",
+            options: [
+                { letter: "Α", text: "Είναι το ύψος της 'τρύπας'.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το όριο καθορίζεται από το πού κατευθύνεται η γραμμή της συνάρτησης καθώς πλησιάζουμε το $x_0$, όχι από τη μεμονωμένη τιμή στο ίδιο το $x_0$." },
+                { letter: "Β", text: "Είναι το ύψος του γεμάτου κύκλου.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα ήταν η τιμή της συνάρτησης $f(x_0)$, η οποία στην περίπτωση αυτή διαφέρει από το όριο." },
+                { letter: "Γ", text: "Δεν υπάρχει.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο υπάρχει κανονικά, αρκεί οι δύο κλάδοι της συνάρτησης να συγκλίνουν στο ίδιο ύψος." }
+            ]
+        },
+        { // 20
+            text: "Ποια από τις παρακάτω προτάσεις είναι αληθής;",
+            options: [
+                { letter: "Α", text: "Αν υπάρχει το $\\lim_{x \\to x_0} f(x)$, τότε η $f$ είναι ορισμένη στο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνάρτηση $f(x) = \\frac{x^2-1}{x-1}$ έχει όριο στο $1$, αλλά δεν ορίζεται στο $1$." },
+                { letter: "Β", text: "Αν η $f$ είναι ορισμένη στο $x_0$, τότε υπάρχει το $\\lim_{x \\to x_0} f(x)$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μια συνάρτηση μπορεί να ορίζεται στο $x_0$ αλλά να έχει διαφορετικά πλευρικά όρια (άλμα) ή να μην έχει καθόλου πλευρικά όρια." },
+                { letter: "Γ", text: "Τίποτα από τα παραπάνω.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η ύπαρξη του ορίου και ο ορισμός της συνάρτησης στο $x_0$ είναι δύο εντελώς ανεξάρτητα γεγονότα." }
+            ]
+        }
+    ];
+
+    // Render quiz
+    const root = document.getElementById('quiz-root');
+
+    async function renderMath(element) {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise([element]);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function buildQuiz() {
+        root.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    await renderMath(feedbackDiv);
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        renderMath(root);
+    }
+    
+    window.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+</body>
+</html>

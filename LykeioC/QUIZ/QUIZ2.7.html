@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Μαθηματικών: Τοπικά Ακρότατα Συνάρτησης (Ενότητα 2.7)</title>
+    <!-- MathJax (CDN) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Κουμπί Επιστροφής & Υπογραφή */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            color: #1e6f9f;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #0b2b44;
+            transform: translateX(-5px);
+        }
+        .signature {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            color: #4a627a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1000;
+            font-style: italic;
+        }
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .options-area {
+            padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .option-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4662;
+            font-family: inherit;
+            flex: 1 0 auto;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: left;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+            .signature {
+                position: static;
+                text-align: right;
+                display: block;
+                padding-right: 1rem;
+                margin-top: -1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    
+    <!-- Κουμπί Επιστροφής Πάνω Αριστερά -->
+    <a href="index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Αρχική Σελίδα
+    </a>
+
+    <div class="quiz-header">
+        <h1>📐 Quiz Μαθηματικών: Τοπικά Ακρότατα Συνάρτησης <br><small>Ενότητα 2.7 – Εφαρμογές των Παραγώγων</small></h1>
+        <div class="instructions">
+            📌 Επιλέξτε μία απάντηση για κάθε ερώτηση. <br>
+            ✅ Αμέσως θα δείτε αναλυτική αιτιολόγηση για όλες τις επιλογές (σωστές και λανθασμένες).
+        </div>
+    </div>
+    
+    <div id="quiz-root"></div>
+    
+    <footer>📖 Κάθε απάντηση συνοδεύεται από μαθηματική επεξήγηση — μελέτησε τις ανατροφοδοτήσεις για βαθύτερη κατανόηση.</footer>
+</div>
+
+<!-- Υπογραφή Κάτω Δεξιά -->
+<div class="signature">✍️ Κώστας Κούδας</div>
+
+<script>
+    // Δεδομένα quiz – πλήρης LaTeX σύνταξη με ελληνικές τριγωνομετρικές συναρτήσεις
+    const quizData = [
+        { // 1
+            text: "Πότε λέμε ότι μια συνάρτηση $f$ παρουσιάζει στο $x_0$ του πεδίου ορισμού της $A$ ένα <strong>τοπικό μέγιστο</strong>;",
+            options: [
+                { letter: "Α", text: "Όταν για κάθε $x \\in A$ ισχύει $f(x) \\leq f(x_0)$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτός είναι ο ορισμός του <strong>ολικού</strong> μεγίστου. Το τοπικό μέγιστο αφορά μόνο μια «γειτονιά» του $x_0$." },
+                { letter: "Β", text: "Όταν υπάρχει $\\delta > 0$, τέτοιο ώστε $f(x) \\leq f(x_0)$ για κάθε $x \\in A \\cap (x_0 - \\delta, x_0 + \\delta)$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το τοπικό μέγιστο απαιτεί η τιμή $f(x_0)$ να είναι η μεγαλύτερη σε ένα μικρό διάστημα γύρω από το $x_0$." },
+                { letter: "Γ", text: "Όταν η συνάρτηση είναι γνησίως αύξουσα παντού.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μια γνησίως αύξουσα συνάρτηση δεν παρουσιάζει τοπικό μέγιστο σε εσωτερικό σημείο, καθώς οι τιμές δεξιά του σημείου θα είναι μεγαλύτερες." }
+            ]
+        },
+        { // 2
+            text: "Ισχύει πάντα ότι το μεγαλύτερο από τα τοπικά μέγιστα μιας συνάρτησης είναι το ολικό της μέγιστο;",
+            options: [
+                { letter: "Α", text: "Ναι, εξ ορισμού.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Πρόκειται για συνηθισμένη παρανόηση. Το μεγαλύτερο από τα τοπικά μέγιστα δεν είναι υποχρεωτικά το ολικό μέγιστο." },
+                { letter: "Β", text: "Όχι, μπορεί μια συνάρτηση να παίρνει ακόμα μεγαλύτερες τιμές χωρίς αυτές να είναι τοπικά μέγιστα.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Μια συνάρτηση μπορεί να τείνει στο $+\\infty$ ή να έχει μεγαλύτερη τιμή σε ένα άκρο του διαστήματος που δεν αποτελεί θέση τοπικού μεγίστου." },
+                { letter: "Γ", text: "Μόνο αν η συνάρτηση είναι συνεχής σε κλειστό διάστημα.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν και στο κλειστό διάστημα υπάρχει πάντα ολικό μέγιστο, αυτό μπορεί να βρίσκεται σε άκρο του διαστήματος και να μην ταυτίζεται με κανένα από τα εσωτερικά τοπικά μέγιστα." }
+            ]
+        },
+        { // 3
+            text: "Σύμφωνα με το <strong>Θεώρημα Fermat</strong>, αν η $f$ παρουσιάζει τοπικό ακρότατο στο $x_0$, ποιες προϋποθέσεις πρέπει να ισχύουν για να συμπεράνουμε ότι $f'(x_0) = 0$;",
+            options: [
+                { letter: "Α", text: "Το $x_0$ να είναι εσωτερικό σημείο και η $f$ να είναι παραγωγίσιμη στο $x_0$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το θεώρημα απαιτεί <strong>εσωτερικό</strong> σημείο και <strong>παραγωγισιμότητα</strong> στο σημείο αυτό." },
+                { letter: "Β", text: "Η $f$ να είναι συνεχής στο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνέχεια είναι απαραίτητη αλλά όχι επαρκής· απαιτείται παραγωγισιμότητα." },
+                { letter: "Γ", text: "Το $x_0$ να είναι άκρο του διαστήματος ορισμού.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Στα άκρα του διαστήματος η παράγωγος δεν είναι υποχρεωτικά μηδέν, ακόμα και αν υπάρχει τοπικό ακρότατο." }
+            ]
+        },
+        { // 4
+            text: "Ποιες είναι οι <strong>πιθανές θέσεις</strong> τοπικών ακροτάτων μιας συνάρτησης $f$ σε ένα διάστημα $\\Delta$;",
+            options: [
+                { letter: "Α", text: "Μόνο οι ρίζες της παραγώγου $f'(x) = 0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ξεχνάτε τα σημεία μη παραγωγισιμότητας (π.χ. γωνιακά σημεία) και τα άκρα." },
+                { letter: "Β", text: "Τα εσωτερικά σημεία όπου $f'(x)=0$, τα σημεία όπου η $f$ δεν παραγωγίζεται και τα άκρα του $\\Delta$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτές οι τρεις κατηγορίες αποτελούν το σύνολο των υποψηφίων σημείων για ακρότατα." },
+                { letter: "Γ", text: "Όλα τα σημεία του πεδίου ορισμού.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν και θεωρητικά θα μπορούσε, η ανάλυση μας επιτρέπει να περιορίσουμε την έρευνα σε συγκεκριμένα «ύποπτα» σημεία." }
+            ]
+        },
+        { // 5
+            text: "Τι ονομάζουμε <strong>κρίσιμα σημεία</strong> μιας συνάρτησης $f$ στο διάστημα $\\Delta$;",
+            options: [
+                { letter: "Α", text: "Τα σημεία όπου η συνάρτηση μηδενίζεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτά είναι οι ρίζες της συνάρτησης, όχι τα κρίσιμα σημεία." },
+                { letter: "Β", text: "Τα εσωτερικά σημεία του $\\Delta$ στα οποία η $f$ δεν παραγωγίζεται ή η παράγωγός της είναι μηδέν.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με τον ορισμό, κρίσιμα είναι τα εσωτερικά σημεία όπου η παράγωγος μηδενίζεται ή δεν υπάρχει." },
+                { letter: "Γ", text: "Τα άκρα του διαστήματος $\\Delta$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα άκρα είναι πιθανές θέσεις ακροτάτων, αλλά δεν ονομάζονται «κρίσιμα σημεία» σύμφωνα με τον ορισμό του βιβλίου." }
+            ]
+        },
+        { // 6
+            text: "Είναι κάθε κρίσιμο σημείο οπωσδήποτε θέση τοπικού ακροτάτου;",
+            options: [
+                { letter: "Α", text: "Ναι, γι' αυτό ονομάζονται κρίσιμα.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Πρόκειται για κλασική παρανόηση. Το $x^3$ στο $x=0$ έχει κρίσιμο σημείο ($f'(0)=0$) αλλά δεν έχει ακρότατο." },
+                { letter: "Β", text: "Όχι, μπορεί η παράγωγος να διατηρεί πρόσημο εκατέρωθεν του σημείου.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για να υπάρχει ακρότατο πρέπει η παράγωγος να αλλάζει πρόσημο. Αν διατηρεί πρόσημο, η συνάρτηση είναι γνησίως μονότονη." },
+                { letter: "Γ", text: "Μόνο αν η συνάρτηση είναι πολυωνυμική.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ιδιότητα αυτή ισχύει για όλες τις συναρτήσεις· ακόμα και σε πολυωνυμικές μπορεί ένα κρίσιμο σημείο να μην είναι ακρότατο (π.χ. $x^3, x^5$)." }
+            ]
+        },
+        { // 7
+            text: "Έστω $f$ παραγωγίσιμη στο $(\\alpha, x_0)$ και στο $(x_0, \\beta)$ και συνεχής στο $x_0$. Αν $f'(x) > 0$ στο $(\\alpha, x_0)$ και $f'(x) < 0$ στο $(x_0, \\beta)$, τότε το $f(x_0)$ είναι:",
+            options: [
+                { letter: "Α", text: "Τοπικό ελάχιστο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν η συνάρτηση ανεβαίνει ($f'>0$) και μετά κατεβαίνει ($f'<0$), η κορυφή είναι μέγιστο." },
+                { letter: "Β", text: "Τοπικό μέγιστο.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η αλλαγή από θετική σε αρνητική κλίση υποδηλώνει τοπικό μέγιστο." },
+                { letter: "Γ", text: "Σημείο καμπής.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το σημείο καμπής αφορά τη δεύτερη παράγωγο και την κυρτότητα, όχι απευθείας τα ακρότατα." }
+            ]
+        },
+        { // 8
+            text: "Για τη συνάρτηση $f(x) = x^4 - 4x^3$, η παράγωγος $f'(x) = 4x^2(x - 3)$ μηδενίζεται στα $x=0$ και $x=3$. Ποιο είναι το είδος του ακροτάτου στο $x=0$;",
+            options: [
+                { letter: "Α", text: "Τοπικό μέγιστο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παράγωγος εκατέρωθεν του 0 παραμένει αρνητική (για $x<3, x \\neq 0$), άρα η $f$ είναι γνησίως φθίνουσα." },
+                { letter: "Β", text: "Τοπικό ελάχιστο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν υπάρχει αλλαγή προσήμου της παραγώγου στο 0." },
+                { letter: "Γ", text: "Δεν παρουσιάζει ακρότατο στο $x=0$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή η $f'(x)$ διατηρεί το ίδιο πρόσημο (αρνητικό) κοντά στο 0, η συνάρτηση συνεχίζει να φθίνει και δεν έχει ακρότατο εκεί." }
+            ]
+        },
+        { // 9
+            text: "Πώς βρίσκουμε το ολικό μέγιστο και ελάχιστο μιας συνεχούς συνάρτησης $f$ σε ένα <strong>κλειστό διάστημα</strong> $[\\alpha, \\beta]$;",
+            options: [
+                { letter: "Α", text: "Μόνο λύνοντας την εξίσωση $f'(x) = 0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Πρέπει να ελεγχθούν και τα σημεία μη παραγωγισιμότητας καθώς και τα άκρα του διαστήματος." },
+                { letter: "Β", text: "Συγκρίνοντας τις τιμές της $f$ στα κρίσιμα σημεία και στα άκρα $\\alpha, \\beta$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η μέγιστη από αυτές τις τιμές είναι το ολικό μέγιστο και η μικρότερη το ολικό ελάχιστο." },
+                { letter: "Γ", text: "Βρίσκοντας τα όρια στο $+\\infty$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Σε κλειστό διάστημα δεν εξετάζουμε το άπειρο, καθώς το πεδίο ορισμού είναι φραγμένο." }
+            ]
+        },
+        { // 10
+            text: "Αν σε ένα σημείο $x_0$ ισχύει $f'(x_0) = 0$ και $f''(x_0) > 0$, τότε η $f$ παρουσιάζει στο $x_0$:",
+            options: [
+                { letter: "Α", text: "Τοπικό μέγιστο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η θετική δεύτερη παράγωγος σημαίνει ότι η συνάρτηση «στρέφει τα κοίλα άνω», άρα έχουμε ελάχιστο." },
+                { letter: "Β", text: "Τοπικό ελάχιστο.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Πρόκειται για το κριτήριο της δεύτερης παραγώγου για τον προσδιορισμό του είδους του ακροτάτου." },
+                { letter: "Γ", text: "Κατακόρυφη εφαπτομένη.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αφού $f'(x_0)=0$, η εφαπτομένη είναι οριζόντια, όχι κατακόρυφη." }
+            ]
+        },
+        { // 11
+            text: "Για τη συνάρτηση $f(x) = x - 1 - \\ln x$ στο $(0, +\\infty)$, η παράγωγος είναι $f'(x) = 1 - \\frac{1}{x}$. Τι είδους ακρότατο παρουσιάζει στο $x=1$;",
+            options: [
+                { letter: "Α", text: "Τοπικό μέγιστο το $f(1) = 0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Για $x > 1$ η $f'>0$ και για $x < 1$ η $f'<0$, άρα είναι ελάχιστο." },
+                { letter: "Β", text: "Ολικό ελάχιστο το $f(1) = 0$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η συνάρτηση φθίνει πριν το 1 και αυξάνεται μετά, άρα στο 1 έχει ολικό ελάχιστο την τιμή 0." },
+                { letter: "Γ", text: "Δεν έχει ακρότατο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η αλλαγή προσήμου της παραγώγου εγγυάται την ύπαρξη ακροτάτου." }
+            ]
+        },
+        { // 12
+            text: "Από το ολικό ελάχιστο της συνάρτησης $f(x) = x - 1 - \\ln x$ στο $x=1$, προκύπτει η ανισότητα:",
+            options: [
+                { letter: "Α", text: "$\\ln x \\geq x - 1$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα σήμαινε ότι η συνάρτηση $x - 1 - \\ln x$ είναι πάντα αρνητική." },
+                { letter: "Β", text: "$\\ln x \\leq x - 1$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αφού το ελάχιστο είναι 0, ισχύει $x - 1 - \\ln x \\geq 0 \\implies \\ln x \\leq x - 1$ για κάθε $x > 0$." },
+                { letter: "Γ", text: "$\\ln x = x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ισότητα ισχύει μόνο στο σημείο $x=1$." }
+            ]
+        },
+        { // 13
+            text: "Σε ένα πρόβλημα κέρδους $P(x)$, το μέγιστο κέρδος επιτυγχάνεται σε μια θέση $x_0$ όταν:",
+            options: [
+                { letter: "Α", text: "$P(x_0) = 0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό είναι το σημείο μηδενικού κέρδους, όχι μέγιστου." },
+                { letter: "Β", text: "Ο ρυθμός μεταβολής του κέρδους $P'(x)$ αλλάζει από θετικός σε αρνητικός στο $x_0$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η εφαρμογή του κριτηρίου της πρώτης παραγώγου μας δίνει τη θέση μέγιστου κέρδους." },
+                { letter: "Γ", text: "Το κόστος παραγωγής είναι μηδέν.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το κόστος παραγωγής είναι πάντα θετικό σε πραγματικά προβλήματα." }
+            ]
+        },
+        { // 14
+            text: "Στο πρόβλημα του ορθογωνίου με σταθερό εμβαδό $400 \\text{ m}^2$, ποιο σχήμα έχει τη μικρότερη περίμετρο;",
+            options: [
+                { letter: "Α", text: "Το ορθογώνιο με πλευρές $10 \\text{ m}$ και $40 \\text{ m}$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η περίμετρος εδώ είναι $2(10+40)=100 \\text{ m}$." },
+                { letter: "Β", text: "Το τετράγωνο πλευράς $20 \\text{ m}$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Από όλα τα ορθογώνια με σταθερό εμβαδό, το τετράγωνο ελαχιστοποιεί την περίμετρο." },
+                { letter: "Γ", text: "Ένα πολύ μακρύ και στενό ορθογώνιο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Όσο πιο πολύ διαφέρουν οι πλευρές, τόσο αυξάνεται η περίμετρος για το ίδιο εμβαδό." }
+            ]
+        },
+        { // 15
+            text: "Αν μια συνάρτηση $f$ είναι παραγωγίσιμη στο $\\mathbb{R}$ και ισχύει $2f^3(x) + 6f(x) = 2x^3 + 6x + 1$, γιατί η $f$ δεν έχει ακρότατα;",
+            options: [
+                { letter: "Α", text: "Επειδή η παράγωγός της $f'(x)$ είναι πάντα θετική.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Παραγωγίζοντας τη σχέση βρίσκουμε $6f^2(x)f'(x) + 6f'(x) = 6x^2 + 6 \\implies f'(x)(f^2(x)+1) = x^2+1$. Άρα $f'(x) = \\frac{x^2+1}{f^2(x)+1} > 0$, οπότε η $f$ είναι γνησίως αύξουσα." },
+                { letter: "Β", text: "Επειδή είναι περιττή συνάρτηση.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συμμετρία δεν αποκλείει τα ακρότατα." },
+                { letter: "Γ", text: "Επειδή δεν έχει ρίζες.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ύπαρξη ριζών δεν σχετίζεται άμεσα με την ύπαρξη ακροτάτων." }
+            ]
+        },
+        { // 16
+            text: "Στη συνάρτηση $f(x) = 2\\text{ημ} x - x + 3$ στο $[0, \\pi]$, οι ρίζες της $f'(x)=0$ είναι:",
+            options: [
+                { letter: "Α", text: "$x = \\frac{\\pi}{2}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> $f'(\\frac{\\pi}{2}) = 2\\text{συν}(\\frac{\\pi}{2}) - 1 = 2(0) - 1 = -1 \\neq 0$." },
+                { letter: "Β", text: "$x = \\frac{\\pi}{3}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> $f'(x) = 2\\text{συν} x - 1$. Η εξίσωση $2\\text{συν} x = 1 \\implies \\text{συν} x = \\frac{1}{2}$ δίνει $x = \\frac{\\pi}{3}$ στο διάστημα $[0, \\pi]$." },
+                { letter: "Γ", text: "$x = \\frac{\\pi}{6}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> $\\text{συν}(\\frac{\\pi}{6}) = \\frac{\\sqrt{3}}{2} \\neq \\frac{1}{2}$." }
+            ]
+        },
+        { // 17
+            text: "Αν $x + y = 40$ (σταθερό άθροισμα), πότε το γινόμενο $xy$ γίνεται μέγιστο;",
+            options: [
+                { letter: "Α", text: "Όταν $x=10, y=30$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> $10 \\cdot 30 = 300$." },
+                { letter: "Β", text: "Όταν $x=20, y=20$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Όταν το άθροισμα δύο θετικών αριθμών είναι σταθερό, το γινόμενό τους μεγιστοποιείται όταν οι αριθμοί είναι ίσιοι (τετράγωνο)." },
+                { letter: "Γ", text: "Όταν $x=1, y=39$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> $1 \\cdot 39 = 39$." }
+            ]
+        },
+        { // 18
+            text: "Η συνάρτηση $f(x) = |x|$ στο $x=0$ παρουσιάζει:",
+            options: [
+                { letter: "Α", text: "Τοπικό ελάχιστο, αν και δεν είναι παραγωγίσιμη εκεί.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η $f(0)=0$ είναι η ελάχιστη τιμή στη γειτονιά του 0. Η μη παραγωγισιμότητα δεν εμποδίζει την ύπαρξη ακροτάτου." },
+                { letter: "Β", text: "Τοπικό μέγιστο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι τιμές γύρω από το 0 είναι θετικές, άρα μεγαλύτερες από το $f(0)=0$." },
+                { letter: "Γ", text: "Τίποτα, γιατί δεν ισχύει το θεώρημα Fermat.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το Fermat λέει ότι αν υπάρχει παράγωγος <strong>τότε</strong> είναι 0. Αν δεν υπάρχει παράγωγος, το σημείο παραμένει υποψήφιο για ακρότατο." }
+            ]
+        },
+        { // 19
+            text: "Σε μια βιομηχανία, το μέγιστο έσοδο $E(x) = x \\cdot \\Pi(x)$ επιτυγχάνεται όταν:",
+            options: [
+                { letter: "Α", text: "Η τιμή πώλησης $\\Pi(x)$ είναι η μέγιστη δυνατή.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Υψηλή τιμή μπορεί να οδηγήσει σε πολύ χαμηλές πωλήσεις, μειώνοντας το συνολικό έσοδο." },
+                { letter: "Β", text: "Ο ρυθμός μεταβολής του εσόδου $E'(x)$ μηδενίζεται (και αλλάζει πρόσημο).", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Πρόκειται για την τυπική διαδικασία εύρεσης ακροτάτου για τη συνάρτηση εσόδων." },
+                { letter: "Γ", text: "Η παραγωγή $x$ είναι η μέγιστη δυνατή.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η υπερπαραγωγή συχνά ρίχνει την τιμή τόσο πολύ που τα έσοδα μειώνονται." }
+            ]
+        },
+        { // 20
+            text: "Ποια από τις παρακάτω συναρτήσεις <strong>δεν</strong> παρουσιάζει τοπικό ακρότατο στο εσωτερικό του πεδίου ορισμού της;",
+            options: [
+                { letter: "Α", text: "$f(x) = x^2$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Παρουσιάζει ελάχιστο στο $x=0$." },
+                { letter: "Β", text: "$f(x) = x^3$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η $f'(x) = 3x^2 \\geq 0$ δεν αλλάζει πρόσημο στο κρίσιμο σημείο $x=0$, άρα η $f$ είναι γνησίως αύξουσα." },
+                { letter: "Γ", text: "$f(x) = \\text{ημ} x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Παρουσιάζει μέγιστα και ελάχιστα περιοδικά (π.χ. στο $\\frac{\\pi}{2}$)." }
+            ]
+        },
+        { // 21
+            text: "Στο πρόβλημα του στίβου με περίμετρο $400 \\text{ m}$, για να μεγιστοποιηθεί το εμβαδόν του ορθογωνίου μέρους, οι διαστάσεις πρέπει να είναι τέτοιες ώστε:",
+            options: [
+                { letter: "Α", text: "Τα ημικύκλια να έχουν ακτίνα $0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα εξαφάνιζε τον στίβο." },
+                { letter: "Β", text: "Το ορθογώνιο να είναι τετράγωνο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Στο συγκεκριμένο πρόβλημα με τα ημικύκλια στα άκρα, η βέλτιστη λύση προκύπτει από τη μελέτη της παραγώγου του εμβαδού ως προς μια μεταβλητή (π.χ. την ακτίνα)." },
+                { letter: "Γ", text: "Η περίμετρος να αποτελείται μόνο από τα ημικύκλια.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Πρέπει να υπάρχει ισορροπία μεταξύ των ευθύγραμμων τμημάτων και των καμπύλων." }
+            ]
+        },
+        { // 22
+            text: "Η συνάρτηση $f(x) = \\sqrt{x}$ στο διάστημα $[0, +\\infty)$ παρουσιάζει ολικό ελάχιστο στο $x=0$. Είναι το $x=0$ κρίσιμο σημείο;",
+            options: [
+                { letter: "Α", text: "Ναι, γιατί η παράγωγος δεν ορίζεται εκεί.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν και η παράγωγος δεν ορίζεται, ο ορισμός του κρίσιμου σημείου απαιτεί το σημείο να είναι <strong>εσωτερικό</strong>." },
+                { letter: "Β", text: "Όχι, γιατί το $x=0$ δεν είναι εσωτερικό σημείο του διαστήματος.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Τα κρίσιμα σημεία είναι μόνο εσωτερικά. Τα άκρα είναι πιθανές θέσεις ακροτάτων αλλά δεν ονομάζονται κρίσιμα σημεία." },
+                { letter: "Γ", text: "Ναι, γιατί $f(0)=0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η τιμή της συνάρτησης δεν καθορίζει αν ένα σημείο είναι κρίσιμο." }
+            ]
+        }
+    ];
+
+    // Render quiz
+    const root = document.getElementById('quiz-root');
+
+    async function renderMath(element) {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise([element]);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function buildQuiz() {
+        root.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    await renderMath(feedbackDiv);
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        renderMath(root);
+    }
+    
+    window.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+</body>
+</html>

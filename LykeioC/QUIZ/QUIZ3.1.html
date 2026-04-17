@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Μαθηματικών: Αρχική Συνάρτηση (Ενότητα 3.1)</title>
+    <!-- MathJax (CDN) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Κουμπί Επιστροφής & Υπογραφή */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            color: #1e6f9f;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #0b2b44;
+            transform: translateX(-5px);
+        }
+        .signature {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            color: #4a627a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1000;
+            font-style: italic;
+        }
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .options-area {
+            padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .option-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4662;
+            font-family: inherit;
+            flex: 1 0 auto;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: left;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+            .signature {
+                position: static;
+                text-align: right;
+                display: block;
+                padding-right: 1rem;
+                margin-top: -1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    
+    <!-- Κουμπί Επιστροφής Πάνω Αριστερά -->
+    <a href="index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Αρχική Σελίδα
+    </a>
+
+    <div class="quiz-header">
+        <h1>📐 Quiz Μαθηματικών: Αρχική Συνάρτηση <br><small>Ενότητα 3.1 – Παράγουσες Συναρτήσεις</small></h1>
+        <div class="instructions">
+            📌 Επιλέξτε μία απάντηση για κάθε ερώτηση. <br>
+            ✅ Αμέσως θα δείτε αναλυτική αιτιολόγηση για όλες τις επιλογές (σωστές και λανθασμένες).
+        </div>
+    </div>
+    
+    <div id="quiz-root"></div>
+    
+    <footer>📖 Κάθε απάντηση συνοδεύεται από μαθηματική επεξήγηση — μελέτησε τις ανατροφοδοτήσεις για βαθύτερη κατανόηση.</footer>
+</div>
+
+<!-- Υπογραφή Κάτω Δεξιά -->
+<div class="signature">✍️ Κώστας Κούδας</div>
+
+<script>
+    // Δεδομένα quiz – πλήρης LaTeX σύνταξη με ελληνικές τριγωνομετρικές συναρτήσεις
+    const quizData = [
+        { // 1
+            text: "Τι ονομάζουμε <strong>αρχική συνάρτηση</strong> (ή παράγουσα) της $f$ σε ένα διάστημα $Δ$;",
+            options: [
+                { letter: "Α", text: "Μια συνάρτηση $F$ για την οποία ισχύει $F(x) = f'(x)$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή η σχέση ορίζει την παράγωγο της $f$, όχι την αρχική της. Η αρχική συνάρτηση είναι εκείνη που, αν παραγωγιστεί, μας δίνει την $f$." },
+                { letter: "Β", text: "Μια συνάρτηση $F$ που είναι παραγωγίσιμη στο $Δ$ και ισχύει $F'(x) = f(x)$ για κάθε $x \\in Δ$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτός είναι ο ακριβής ορισμός της αρχικής συνάρτησης. Η διαδικασία αυτή είναι η αντίστροφη της παραγώγισης." },
+                { letter: "Γ", text: "Το πηλίκο της συνάρτησης $f(x)$ με την παράγωγό της.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν υπάρχει τέτοιος ορισμός στην Ανάλυση. Η σχέση αρχικής και συνάρτησης ορίζεται αποκλειστικά μέσω της παραγώγισης." }
+            ]
+        },
+        { // 2
+            text: "Αν $F$ είναι μια παράγουσα της $f$ στο διάστημα $Δ$, ποια είναι η γενική μορφή όλων των παραγουσών της $f$;",
+            options: [
+                { letter: "Α", text: "$G(x) = F(x)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι μόνο μία παράγουσα. Υπάρχουν άπειρες τέτοιες συναρτήσεις που διαφέρουν μεταξύ τους κατά μια σταθερά." },
+                { letter: "Β", text: "$G(x) = F(x) + c$, όπου $c \\in \\mathbb{R}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με το θεώρημα, κάθε άλλη παράγουσα $G$ της $f$ παίρνει τη μορφή $F(x) + c$." },
+                { letter: "Γ", text: "$G(x) = c \\cdot F(x)$, όπου $c \\in \\mathbb{R}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο πολλαπλασιασμός με σταθερά αλλάζει την παράγωγο της συνάρτησης, εκτός αν η σταθερά είναι 1. Η διαφορά των παραγουσών πρέπει να είναι σταθερή ποσότητα." }
+            ]
+        },
+        { // 3
+            text: "Κάθε συνεχής συνάρτηση σε ένα διάστημα $Δ$:",
+            options: [
+                { letter: "Α", text: "Έχει πάντα παράγουσα στο διάστημα αυτό.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αποδεικνύεται ότι η συνέχεια σε ένα διάστημα είναι ικανή συνθήκη για την ύπαρξη παράγουσας." },
+                { letter: "Β", text: "Έχει παράγουσα μόνο αν είναι πολυωνυμική.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ύπαρξη παράγουσας δεν περιορίζεται στα πολυώνυμα· ισχύει για κάθε συνεχή συνάρτηση, όπως οι εκθετικές ή οι τριγωνομετρικές." },
+                { letter: "Γ", text: "Δεν έχει ποτέ παράγουσα αν περιέχει τριγωνομετρικούς όρους.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι τριγωνομετρικές συναρτήσεις είναι συνεχείς και έχουν κανονικά παράγουσες (π.χ. η παράγουσα του $\\text{ημ} x$ είναι η $-\\text{συν} x + c$)." }
+            ]
+        },
+        { // 4
+            text: "Ποια είναι η παράγουσα της συνάρτησης $f(x) = 0$ σε ένα διάστημα $Δ$;",
+            options: [
+                { letter: "Α", text: "$F(x) = x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παράγωγος της $x$ είναι 1, όχι 0." },
+                { letter: "Β", text: "$F(x) = c$, όπου $c \\in \\mathbb{R}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η παράγωγος κάθε σταθερής συνάρτησης είναι 0, άρα οι σταθερές είναι οι αρχικές της μηδενικής συνάρτησης." },
+                { letter: "Γ", text: "$F(x) = 1$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το 1 είναι μια ειδική περίπτωση σταθεράς, αλλά η γενική μορφή απαιτεί την αυθαίρετη σταθερά $c$." }
+            ]
+        },
+        { // 5
+            text: "Για τη συνάρτηση $f(x) = x^{\\alpha}$ με $\\alpha \\neq -1$, οι παράγουσες είναι της μορφής:",
+            options: [
+                { letter: "Α", text: "$\\alpha x^{\\alpha-1} + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτός είναι ο τύπος της παραγώγου, όχι της αρχικής συνάρτησης." },
+                { letter: "Β", text: "$\\frac{x^{\\alpha+1}}{\\alpha+1} + c$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτός είναι ο βασικός τύπος για την εύρεση αρχικής δύναμης. Ο εκθέτης αυξάνεται κατά 1 και διαιρούμε με τον νέο εκθέτη." },
+                { letter: "Γ", text: "$x^{\\alpha+1} + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ξεχάσατε τη διαίρεση με τον νέο εκθέτη $\\alpha+1$, η οποία είναι απαραίτητη ώστε κατά την παραγώγιση να επανέλθει ο συντελεστής 1." }
+            ]
+        },
+        { // 6
+            text: "Ποια είναι η αρχική συνάρτηση της $f(x) = \\frac{1}{x}$ στο διάστημα $(0, +\\infty)$;",
+            options: [
+                { letter: "Α", text: "$\\ln x + c$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η παράγωγος της $\\ln x$ είναι η $\\frac{1}{x}$ στο διάστημα των θετικών αριθμών." },
+                { letter: "Β", text: "$-\\frac{1}{x^2} + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι η παράγωγος της $\\frac{1}{x}$, όχι η αρχική της." },
+                { letter: "Γ", text: "$e^x + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $e^x$ είναι η αρχική του εαυτού της ($e^x$), όχι της $\\frac{1}{x}$." }
+            ]
+        },
+        { // 7
+            text: "Η παράγουσα της συνάρτησης $f(x) = \\text{ημ} x$ είναι:",
+            options: [
+                { letter: "Α", text: "$\\text{συν} x + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Πρόκειται για συχνό λάθος προσήμου. Η παράγωγος του $\\text{συν} x$ είναι $-\\text{ημ} x$, άρα δεν μας δίνει την $f$." },
+                { letter: "Β", text: "$-\\text{συν} x + c$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή $(-\\text{συν} x)' = -(-\\text{ημ} x) = \\text{ημ} x$, η $-\\text{συν} x$ είναι η ζητούμενη παράγουσα." },
+                { letter: "Γ", text: "$\\text{ημ} x + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το ημίτονο δεν είναι αρχική του εαυτού του." }
+            ]
+        },
+        { // 8
+            text: "Ποια συνάρτηση έχει ως αρχική την $F(x) = \\text{εφ} x + c$;",
+            options: [
+                { letter: "Α", text: "$f(x) = \\frac{1}{\\text{ημ}^2 x}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παράγωγος της $-\\text{σφ} x$ είναι η $\\frac{1}{\\text{ημ}^2 x}$." },
+                { letter: "Β", text: "$f(x) = \\frac{1}{\\text{συν}^2 x}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Είναι γνωστό από τον πίνακα παραγώγων ότι $(\\text{εφ} x)' = \\frac{1}{\\text{συν}^2 x}$." },
+                { letter: "Γ", text: "$f(x) = \\text{σφ} x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνεφαπτομένη είναι τριγωνομετρική συνάρτηση, όχι η παράγωγος της εφαπτομένης." }
+            ]
+        },
+        { // 9
+            text: "Αν $F$ και $G$ είναι παράγουσες των $f$ και $g$ αντίστοιχα, τότε η συνάρτηση $F + G$ είναι παράγουσα της:",
+            options: [
+                { letter: "Α", text: "$f \\cdot g$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παράγωγος του αθροίσματος είναι το άθροισμα των παραγώγων, όχι το γινόμενο." },
+                { letter: "Β", text: "$f + g$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτή είναι μια βασική ιδιότητα: η αρχική του αθροίσματος ισούται με το άθροισμα των αρχικών συναρτήσεων." },
+                { letter: "Γ", text: "$f'$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η αρχική της $f'$ είναι η ίδια η $f$ (συν μια σταθερά)." }
+            ]
+        },
+        { // 10
+            text: "Για να βρούμε μια <strong>συγκεκριμένη</strong> αρχική συνάρτηση που διέρχεται από ένα σημείο $A(x_0, y_0)$, πρέπει:",
+            options: [
+                { letter: "Α", text: "Να θέσουμε $c = 0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η σταθερά $c$ καθορίζεται από τις συνθήκες του προβλήματος και σπάνια είναι μηδέν 'από τύχη'." },
+                { letter: "Β", text: "Να λύσουμε την εξίσωση $F(x_0) = y_0$ ως προς τη σταθερά $c$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Χρησιμοποιούμε την τιμή της συνάρτησης στο συγκεκριμένο σημείο για να προσδιορίσουμε τη μοναδική τιμή της σταθεράς $c$." },
+                { letter: "Γ", text: "Να παραγωγίσουμε τη συνάρτηση στο σημείο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παραγώγιση θα μας δώσει την κλίση, όχι τη σταθερά ολοκλήρωσης." }
+            ]
+        },
+        { // 11
+            text: "Αν γνωρίζουμε την ταχύτητα $υ(t)$ ενός κινητού, η συνάρτηση θέσης $S(t)$ είναι:",
+            options: [
+                { letter: "Α", text: "Η παράγωγος της ταχύτητας $υ'(t)$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παράγωγος της ταχύτητας είναι η επιτάχυνση, όχι η θέση." },
+                { letter: "Β", text: "Μια αρχική συνάρτηση της ταχύτητας $υ(t)$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή $S'(t) = υ(t)$, η θέση είναι η παράγουσα της ταχύτητας." },
+                { letter: "Γ", text: "Το γινόμενο ταχύτητας επί τον χρόνο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό ισχύει μόνο στην ευθύγραμμη ομαλή κίνηση (σταθερή ταχύτητα). Γενικά, απαιτείται η εύρεση αρχικής συνάρτησης." }
+            ]
+        },
+        { // 12
+            text: "Ο ρυθμός αύξησης ενός πληθυσμού βακτηριδίων είναι $N'(t)$. Για να βρούμε τον πληθυσμό $N(t)$ τη στιγμή $t$, χρειαζόμαστε:",
+            options: [
+                { letter: "Α", text: "Μια παράγουσα της $N'(t)$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ο πληθυσμός είναι η συνάρτηση της οποίας ο ρυθμός μεταβολής μας δίνεται, άρα αναζητούμε την αρχική της." },
+                { letter: "Β", text: "Τη δεύτερη παράγωγο $N''(t)$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $N''(t)$ εκφράζει τον ρυθμό μεταβολής του ρυθμού αύξησης, όχι τον πληθυσμό." },
+                { letter: "Γ", text: "Την τιμή του πληθυσμού στο άπειρο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό δεν βοηθά στην εύρεση του τύπου της συνάρτησης $N(t)$." }
+            ]
+        },
+        { // 13
+            text: "Στην οικονομία, αν γνωρίζουμε τον ρυθμό μεταβολής του κέρδους $P'(x)$, το συνολικό κέρδος $P(x)$ βρίσκεται:",
+            options: [
+                { letter: "Α", text: "Από την παράγουσα της $P'(x)$, λαμβάνοντας υπόψη την αρχική κατάσταση (π.χ. $P(0)=0$).", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το κέρδος είναι η αρχική συνάρτηση του ρυθμού μεταβολής του κέρδους. Η σταθερά $c$ προσδιορίζεται από το κέρδος για μηδενική παραγωγή." },
+                { letter: "Β", text: "Διαιρώντας το κέρδος με την ποσότητα $x$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα μας έδινε το μέσο κέρδος, όχι το συνολικό." },
+                { letter: "Γ", text: "Πολλαπλασιάζοντας την τιμή με την ποσότητα.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό αφορά την είσπραξη, όχι απαραίτητα το κέρδος." }
+            ]
+        },
+        { // 14
+            text: "Ποια είναι η παράγουσα της $f(x) = e^x$;",
+            options: [
+                { letter: "Α", text: "$x e^{x-1} + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτός ο τύπος θυμίζει τον κανόνα των δυνάμεων, ο οποίος δεν ισχύει για εκθετικές συναρτήσεις." },
+                { letter: "Β", text: "$e^x + c$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η εκθετική συνάρτηση $e^x$ είναι η μόνη (μη μηδενική) που ταυτίζεται με την παράγωγό της, άρα και με την αρχική της." },
+                { letter: "Γ", text: "$\\frac{e^{x+1}}{x+1} + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Λανθασμένη εφαρμογή κανόνα ολοκλήρωσης· οι εκθετικές συναρτήσεις δεν παραγωγίζονται ως δυνάμεις." }
+            ]
+        },
+        { // 15
+            text: "Αν $f''(x) = 6x$, ποια είναι η γενική μορφή της $f(x)$;",
+            options: [
+                { letter: "Α", text: "$f(x) = x^3 + c_1 x + c_2$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Χρειάζονται δύο διαδοχικές ευρέσεις αρχικών: πρώτα $f'(x) = 3x^2 + c_1$ και μετά $f(x) = x^3 + c_1 x + c_2$." },
+                { letter: "Β", text: "$f(x) = 3x^2 + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι η $f'(x)$. Χρειάζεται μία ακόμα 'ολοκλήρωση' για να φτάσουμε στην $f(x)$." },
+                { letter: "Γ", text: "$f(x) = 6$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι η τρίτη παράγωγος $f'''(x)$." }
+            ]
+        },
+        { // 16
+            text: "Η συνάρτηση $F(x) = \\ln(-x) + c$ είναι παράγουσα της $f(x) = \\frac{1}{x}$ στο διάστημα:",
+            options: [
+                { letter: "Α", text: "$(0, +\\infty)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Στο διάστημα αυτό ο λογάριθμος $\\ln(-x)$ δεν ορίζεται." },
+                { letter: "Β", text: "$(-\\infty, 0)$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για αρνητικά $x$, η παράγωγος της $\\ln(-x)$ είναι $\\frac{1}{-x} \\cdot (-1) = \\frac{1}{x}$. Έτσι, η γενική αρχική της $\\frac{1}{x}$ γράφεται $\\ln|x| + c$." },
+                { letter: "Γ", text: "Σε όλο το $\\mathbb{R}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνάρτηση $\\frac{1}{x}$ δεν ορίζεται στο 0, άρα δεν μπορεί να έχει αρχική σε διάστημα που περιέχει το 0." }
+            ]
+        },
+        { // 17
+            text: "Ποια είναι η αρχική της $f(x) = \\alpha^x$ με $0 < \\alpha \\neq 1$;",
+            options: [
+                { letter: "Α", text: "$\\frac{\\alpha^x}{\\ln \\alpha} + c$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή $(\\alpha^x)' = \\alpha^x \\ln \\alpha$, πρέπει να διαιρέσουμε με το $\\ln \\alpha$ ώστε η παράγωγος της αρχικής να συμπίπτει με την $f(x)$." },
+                { letter: "Β", text: "$\\alpha^x \\cdot \\ln \\alpha + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι η παράγωγος της $\\alpha^x$, όχι η αρχική της." },
+                { letter: "Γ", text: "$\\alpha^x + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό ισχύει μόνο αν η βάση είναι ο αριθμός $e$." }
+            ]
+        },
+        { // 18
+            text: "Αν $f'(x) = g'(x)$ για κάθε $x \\in Δ$, τότε η διαφορά $f(x) - g(x)$ είναι:",
+            options: [
+                { letter: "Α", text: "Πάντα μηδέν.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι συναρτήσεις δεν είναι υποχρεωτικά ίσες, μπορούν να απέχουν μεταξύ τους κατά μια σταθερή απόσταση." },
+                { letter: "Β", text: "Μια σταθερά $c$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτό αποτελεί τη βάση του θεωρήματος για τις παράγουσες: αν έχουν την ίδια παράγωγο, διαφέρουν κατά σταθερά." },
+                { letter: "Γ", text: "Η συνάρτηση $x$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν υπάρχει λόγος η διαφορά τους να είναι η $x$· θα μπορούσε να είναι οποιοσδήποτε αριθμός $c$." }
+            ]
+        },
+        { // 19
+            text: "Η αρχική της $f(x) = \\frac{1}{\\sqrt{x}}$ στο $(0, +\\infty)$ είναι:",
+            options: [
+                { letter: "Α", text: "$\\sqrt{x} + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παράγωγος της $\\sqrt{x}$ είναι $\\frac{1}{2\\sqrt{x}}$, οπότε λείπει ένας συντελεστής 2." },
+                { letter: "Β", text: "$2\\sqrt{x} + c$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή $(2\\sqrt{x})' = 2 \\cdot \\frac{1}{2\\sqrt{x}} = \\frac{1}{\\sqrt{x}}$, αυτή είναι η σωστή παράγουσα." },
+                { letter: "Γ", text: "$\\frac{1}{2\\sqrt{x}} + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι η παράγωγος της $\\sqrt{x}$." }
+            ]
+        },
+        { // 20
+            text: "Ποια συνάρτηση έχει ως αρχική την $F(x) = -\\text{σφ} x + c$;",
+            options: [
+                { letter: "Α", text: "$f(x) = \\frac{1}{\\text{ημ}^2 x}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ισχύει $(\\text{σφ} x)' = -\\frac{1}{\\text{ημ}^2 x}$, οπότε $(-\\text{σφ} x)' = \\frac{1}{\\text{ημ}^2 x}$." },
+                { letter: "Β", text: "$f(x) = \\frac{1}{\\text{συν}^2 x}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι η παράγωγος της εφαπτομένης." },
+                { letter: "Γ", text: "$f(x) = \\text{εφ} x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η εφαπτομένη δεν προκύπτει από την παραγώγιση της συνεφαπτομένης." }
+            ]
+        },
+        { // 21
+            text: "Στο πρόβλημα της άντλησης πετρελαίου, αν $R'(t)$ είναι ο ρυθμός άντλησης, η συνολική ποσότητα που αντλήθηκε τους πρώτους 8 μήνες είναι:",
+            options: [
+                { letter: "Α", text: "$R'(8)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτός είναι ο ρυθμός άντλησης τη συγκεκριμένη στιγμή, όχι η συνολική ποσότητα." },
+                { letter: "Β", text: "$R(8) - R(0)$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η μεταβολή της αρχικής συνάρτησης $R$ από το 0 έως το 8 μας δίνει τη συνολική ποσότητα που συσσωρεύτηκε." },
+                { letter: "Γ", text: "$R(8) + R(0)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόσθεση των τιμών της αρχικής δεν έχει φυσική σημασία για τη συνολική αύξηση." }
+            ]
+        },
+        { // 22
+            text: "Αν $f(x) = x$, τότε οι παράγουσες της $f$ είναι:",
+            options: [
+                { letter: "Α", text: "$F(x) = \\frac{x^2}{2} + c$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με τον κανόνα των δυνάμεων για $\\alpha = 1$, έχουμε $\\frac{x^{1+1}}{1+1} = \\frac{x^2}{2}$." },
+                { letter: "Β", text: "$F(x) = x^2 + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παράγωγος της $x^2$ είναι $2x$, άρα θα έπρεπε η αρχική να έχει συντελεστή $\\frac{1}{2}$." },
+                { letter: "Γ", text: "$F(x) = 1 + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι η παράγωγος της $f(x) = x$." }
+            ]
+        }
+    ];
+
+    // Render quiz
+    const root = document.getElementById('quiz-root');
+
+    async function renderMath(element) {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise([element]);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function buildQuiz() {
+        root.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    await renderMath(feedbackDiv);
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        renderMath(root);
+    }
+    
+    window.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+</body>
+</html>

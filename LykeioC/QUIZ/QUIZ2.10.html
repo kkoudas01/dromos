@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Μαθηματικών: Μελέτη και Χάραξη Συνάρτησης (Ενότητα 2.10)</title>
+    <!-- MathJax (CDN) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Κουμπί Επιστροφής & Υπογραφή */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            color: #1e6f9f;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #0b2b44;
+            transform: translateX(-5px);
+        }
+        .signature {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            color: #4a627a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1000;
+            font-style: italic;
+        }
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .options-area {
+            padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .option-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4662;
+            font-family: inherit;
+            flex: 1 0 auto;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: left;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+            .signature {
+                position: static;
+                text-align: right;
+                display: block;
+                padding-right: 1rem;
+                margin-top: -1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    
+    <!-- Κουμπί Επιστροφής Πάνω Αριστερά -->
+    <a href="index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Αρχική Σελίδα
+    </a>
+
+    <div class="quiz-header">
+        <h1>📐 Quiz Μαθηματικών: Μελέτη και Χάραξη Συνάρτησης <br><small>Ενότητα 2.10 – Ολοκληρωμένη Μελέτη Συνάρτησης</small></h1>
+        <div class="instructions">
+            📌 Επιλέξτε μία απάντηση για κάθε ερώτηση. <br>
+            ✅ Αμέσως θα δείτε αναλυτική αιτιολόγηση για όλες τις επιλογές (σωστές και λανθασμένες).
+        </div>
+    </div>
+    
+    <div id="quiz-root"></div>
+    
+    <footer>📖 Κάθε απάντηση συνοδεύεται από μαθηματική επεξήγηση — μελέτησε τις ανατροφοδοτήσεις για βαθύτερη κατανόηση.</footer>
+</div>
+
+<!-- Υπογραφή Κάτω Δεξιά -->
+<div class="signature">✍️ Κώστας Κούδας</div>
+
+<script>
+    // Δεδομένα quiz – πλήρης LaTeX σύνταξη με ελληνικές τριγωνομετρικές συναρτήσεις
+    const quizData = [
+        { // 1
+            text: "Ποιο είναι το <strong>πρώτο</strong> βήμα που ακολουθούμε υποχρεωτικά στη διαδικασία μελέτης μιας συνάρτησης $f$;",
+            options: [
+                { letter: "Α", text: "Η εύρεση των σημείων τομής με τους άξονες.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα σημεία τομής είναι βοηθητικά για τη σχεδίαση, αλλά δεν αποτελούν το πρώτο βήμα της μελέτης." },
+                { letter: "Β", text: "Η εύρεση του πεδίου ορισμού της $f$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Χωρίς το πεδίο ορισμού δεν μπορούμε να ορίσουμε πού είναι συνεχής η συνάρτηση ή πού αναζητούμε ασύμπτωτες και ακρότατα." },
+                { letter: "Γ", text: "Ο υπολογισμός της πρώτης παραγώγου.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παραγώγιση προϋποθέτει ότι γνωρίζουμε το σύνολο στο οποίο ορίζεται η συνάρτηση." }
+            ]
+        },
+        { // 2
+            text: "Αν μια συνάρτηση $f$ είναι <strong>άρτια</strong>, ποια ιδιότητα συμμετρίας παρουσιάζει η γραφική της παράσταση $C_f$;",
+            options: [
+                { letter: "Α", text: "Έχει κέντρο συμμετρίας την αρχή των αξόνων $O$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή η ιδιότητα (συμμετρία ως προς το $O$) ανήκει στις περιττές συναρτήσεις." },
+                { letter: "Β", text: "Έχει άξονα συμμετρίας τον άξονα $y'y$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για τις άρτιες συναρτήσεις ισχύει $f(-x) = f(x)$, άρα η καμπύλη είναι 'καθρέφτης' ως προς τον κατακόρυφο άξονα." },
+                { letter: "Γ", text: "Είναι συμμετρική ως προς την ευθεία $y = x$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συμμετρία ως προς την $y=x$ αφορά τις αντίστροφες συναρτήσεις." }
+            ]
+        },
+        { // 3
+            text: "Σε μια <strong>περιττή</strong> συνάρτηση, για να τη μελετήσουμε πλήρως, αρκεί να την εξετάσουμε στο διάστημα:",
+            options: [
+                { letter: "Α", text: "$[0, +\\infty) \\cap A$ (όπου $A$ το πεδίο ορισμού).", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Λόγω της συμμετρίας ως προς την αρχή των αξόνων, η συμπεριφορά στα αρνητικά $x$ προκύπτει άμεσα από τα θετικά $x$." },
+                { letter: "Β", text: "$(-\\infty, 0] \\cap A$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν και είναι μαθηματικά εφικτό, η σύμβαση είναι να μελετάμε το θετικό τμήμα για ευκολία." },
+                { letter: "Γ", text: "Σε ολόκληρο το $A$ χωρίς εξαιρέσεις.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συμμετρία μας επιτρέπει να συντομεύσουμε τη μελέτη και να την περιορίσουμε στο μισό πεδίο ορισμού." }
+            ]
+        },
+        { // 4
+            text: "Αν μια συνάρτηση είναι <strong>περιοδική</strong> με περίοδο $T$, σε τι εύρος διαστήματος περιορίζουμε τη μελέτη της;",
+            options: [
+                { letter: "Α", text: "Σε διάστημα πλάτους $T$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή η γραφική παράσταση επαναλαμβάνεται αυτούσια κάθε $T$ μονάδες, η μελέτη ενός μόνο διαστήματος πλάτους $T$ αρκεί." },
+                { letter: "Β", text: "Σε ολόκληρο το $\\mathbb{R}$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Θα ήταν περιττός κόπος να μελετάμε επαναλαμβανόμενα τμήματα." },
+                { letter: "Γ", text: "Μόνο στο διάστημα $[0,1]$ ανεξαρτήτως $T$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το πλάτος του διαστήματος πρέπει να ισούται με την περίοδο της συγκεκριμένης συνάρτησης." }
+            ]
+        },
+        { // 5
+            text: "Ποια πληροφορία αντλούμε από το πρόσημο της <strong>πρώτης παραγώγου</strong> $f'$ κατά τη μελέτη μιας συνάρτησης;",
+            options: [
+                { letter: "Α", text: "Τα διαστήματα κυρτότητας και τα σημεία καμπής.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτά προκύπτουν από τη δεύτερη παράγωγο $f''$." },
+                { letter: "Β", text: "Τα διαστήματα μονοτονίας και τα τοπικά ακρότατα.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το πρόσημο της $f'$ καθορίζει αν η συνάρτηση ανεβαίνει ή κατεβαίνει και πού παρουσιάζει 'κορυφές' ή 'πυθμένες'." },
+                { letter: "Γ", text: "Τις κατακόρυφες ασύμπτωτες.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι ασύμπτωτες προκύπτουν από τα όρια της συνάρτησης στα άκρα του πεδίου ορισμού." }
+            ]
+        },
+        { // 6
+            text: "Έστω μια πολυωνυμική συνάρτηση $f(x) = x^4 - 4x^3 + 11$. Ποιες ασύμπτωτες έχει η $C_f$ στο $+\\infty$ και στο $-\\infty$;",
+            options: [
+                { letter: "Α", text: "Μία οριζόντια και μία κατακόρυφη.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι πολυωνυμικές συναρτήσεις βαθμού $\\geq 2$ δεν έχουν ποτέ οριζόντιες ή κατακόρυφες ασύμπτωτες." },
+                { letter: "Β", text: "Καμία ασύμπτωτη.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Όπως φαίνεται στην εφαρμογή, οι πολυωνυμικές συναρτήσεις δεν έχουν ασύμπτωτες στο άπειρο." },
+                { letter: "Γ", text: "Μία πλάγια της μορφής $y = \\lambda x + \\beta$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ούτε πλάγιες ασύμπτωτες έχουν οι πολυωνυμικές συναρτήσεις." }
+            ]
+        },
+        { // 7
+            text: "Στον <strong>πίνακα μεταβολών</strong>, τι περιλαμβάνει η τελευταία γραμμή;",
+            options: [
+                { letter: "Α", text: "Μόνο το πρόσημο της $f'$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό είναι μόνο ένα μέρος των δεδομένων του πίνακα." },
+                { letter: "Β", text: "Τις ρίζες της $f(x)=0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι ρίζες της $f$ δεν είναι πάντα απαραίτητες για τον πίνακα μεταβολών, αν και βοηθούν στη σχεδίαση." },
+                { letter: "Γ", text: "Τα συμπεράσματα για τη μονοτονία, τα ακρότατα, την κυρτότητα και τις τιμές της $f$ στα κρίσιμα σημεία.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ο πίνακας μεταβολών συγκεντρώνει όλα τα αποτελέσματα της μελέτης για να καθοδηγήσει τη χάραξη της καμπύλης." }
+            ]
+        },
+        { // 8
+            text: "Για τη συνάρτηση $f(x) = \\frac{x^2+x+1}{x-1}$, η ευθεία $x=1$ είναι:",
+            options: [
+                { letter: "Α", text: "Οριζόντια ασύμπτωτη.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι οριζόντιες ασύμπτωτες είναι της μορφής $y=c$." },
+                { letter: "Β", text: "Κατακόρυφη ασύμπτωτη.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή το όριο της συνάρτησης στο 1 είναι άπειρο, η ευθεία $x=1$ αποτελεί κατακόρυφη ασύμπτωτη." },
+                { letter: "Γ", text: "Πλάγια ασύμπτωτη.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι πλάγιες ασύμπτωτες δεν είναι κατακόρυφες ευθείες." }
+            ]
+        },
+        { // 9
+            text: "Αν σε ένα σημείο $x_0$ η πρώτη παράγωγος είναι $f'(x_0) = 0$ και η $f'$ αλλάζει πρόσημο από θετικό σε αρνητικό, τότε η $f$ έχει:",
+            options: [
+                { letter: "Α", text: "Τοπικό ελάχιστο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Από θετική κλίση σε αρνητική σημαίνει ότι η συνάρτηση ανέβηκε και μετά κατέβηκε." },
+                { letter: "Β", text: "Τοπικό μέγιστο.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτή είναι η κλασική περίπτωση τοπικού μεγίστου (κορυφή)." },
+                { letter: "Γ", text: "Σημείο καμπής.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το σημείο καμπής αφορά την αλλαγή προσήμου της δεύτερης παραγώγου." }
+            ]
+        },
+        { // 10
+            text: "Ποια είναι η χρησιμότητα της δεύτερης παραγώγου $f''$ στη χάραξη της γραφικής παράστασης;",
+            options: [
+                { letter: "Α", text: "Μας δείχνει αν η καμπύλη 'στρίβει' προς τα πάνω ή προς τα κάτω.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η $f''$ καθορίζει την κυρτότητα (κοίλα άνω ή κάτω) και τα σημεία καμπής." },
+                { letter: "Β", text: "Μας δίνει τα σημεία τομής με τον άξονα $x'x$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα σημεία τομής βρίσκονται από την εξίσωση $f(x)=0$." },
+                { letter: "Γ", text: "Μας βοηθά να βρούμε το πεδίο ορισμού.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το πεδίο ορισμού βρίσκεται πριν από οποιαδήποτε παραγώγιση." }
+            ]
+        },
+        { // 11
+            text: "Για τη συνάρτηση $f(x) = x + \\text{ημ} x$ στο $[-\\pi, \\pi]$, πόσα σημεία καμπής θα αναζητήσουμε;",
+            options: [
+                { letter: "Α", text: "Κανένα, γιατί είναι τριγωνομετρική.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι τριγωνομετρικές συναρτήσεις έχουν συχνά σημεία καμπής." },
+                { letter: "Β", text: "Εκεί που η $f''(x) = -\\text{ημ} x$ μηδενίζεται και αλλάζει πρόσημο.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Παραγωγίζοντας δύο φορές βρίσκουμε $f'(x)=1+\\text{συν} x$ και $f''(x)=-\\text{ημ} x$, οπότε εξετάζουμε το πρόσημο του ημιτόνου." },
+                { letter: "Γ", text: "Μόνο στα άκρα $-\\pi$ και $\\pi$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα σημεία καμπής είναι εσωτερικά σημεία του διαστήματος." }
+            ]
+        },
+        { // 12
+            text: "Κατά τη μελέτη της 'συμπεριφοράς' της συνάρτησης στα άκρα του πεδίου ορισμού, τι υπολογίζουμε;",
+            options: [
+                { letter: "Α", text: "Τις τιμές $f(0)$ και $f(1)$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτά είναι συγκεκριμένες τιμές, όχι μελέτη συμπεριφοράς στα άκρα." },
+                { letter: "Β", text: "Τα όρια της $f$ στα άκρα (πεπερασμένα ή άπειρα) και την ύπαρξη ασυμπτώτων.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτό είναι το 4ο βήμα της μελέτης που μας δείχνει πώς 'καταλήγει' η καμπύλη στο άπειρο ή κοντά σε απαγορευμένες τιμές." },
+                { letter: "Γ", text: "Την παράγωγο στα άκρα του διαστήματος.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παράγωγος στα άκρα δεν μας δίνει την πληροφορία για την ασύμπτωτη συμπεριφορά." }
+            ]
+        },
+        { // 13
+            text: "Στον πίνακα μεταβολών της $f(x) = x^4 - 4x^3 + 11$, στο σημείο $x=0$ η $f'$ μηδενίζεται αλλά δεν αλλάζει πρόσημο. Τι συμπεραίνουμε;",
+            options: [
+                { letter: "Α", text: "Η $f$ έχει τοπικό ακρότατο στο 0.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Για να υπάρχει ακρότατο πρέπει η παράγωγος να αλλάζει πρόσημο εκατέρωθεν του σημείου." },
+                { letter: "Β", text: "Η $f$ δεν έχει τοπικό ακρότατο στο 0 (είναι σημείο με οριζόντια εφαπτομένη).", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Στο σημείο αυτό η συνάρτηση συνεχίζει να φθίνει, παρόλο που η εφαπτομένη στιγμιαία οριζοντιώνεται." },
+                { letter: "Γ", text: "Η $f$ είναι ασυνεχής στο 0.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνάρτηση είναι πολυωνυμική, άρα συνεχής παντού." }
+            ]
+        },
+        { // 14
+            text: "Τι εκφράζει η φράση 'πίνακας τιμών' στο 5ο βήμα της μελέτης;",
+            options: [
+                { letter: "Α", text: "Έναν κατάλογο με όλες τις ρίζες της παραγώγου.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτά υπάρχουν ήδη στον πίνακα μεταβολών." },
+                { letter: "Β", text: "Επιπλέον σημεία $(x, f(x))$ που βοηθούν στην ακριβέστερη σχεδίαση της καμπύλης.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επιλέγουμε μερικά 'στρατηγικά' σημεία για να ενώσουμε σωστά τα τμήματα της καμπύλης." },
+                { letter: "Γ", text: "Τις τιμές των ασυμπτώτων.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι ασύμπτωτες είναι ευθείες, όχι μεμονωμένες τιμές του πίνακα." }
+            ]
+        },
+        { // 15
+            text: "Στη ρητή συνάρτηση $f(x) = \\frac{x^2+x+1}{x-1}$, βρέθηκε ότι $\\lim_{x \\to +\\infty} \\frac{f(x)}{x} = 1$ και $\\lim_{x \\to +\\infty} (f(x) - x) = 2$. Ποια είναι η ασύμπτωτη;",
+            options: [
+                { letter: "Α", text: "$y = x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ξεχάσατε τη σταθερά $\\beta = 2$." },
+                { letter: "Β", text: "$y = x + 2$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η πλάγια ασύμπτωτη έχει τη μορφή $y = \\lambda x + \\beta$, όπου $\\lambda=1$ και $\\beta=2$." },
+                { letter: "Γ", text: "$y = 2x + 1$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $\\lambda$ βρέθηκε 1 και το $\\beta$ βρέθηκε 2." }
+            ]
+        },
+        { // 16
+            text: "Η συνέχεια της συνάρτησης εξετάζεται:",
+            options: [
+                { letter: "Α", text: "Μόνο στα σημεία όπου $f(x)=0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνέχεια είναι ιδιότητα που αφορά κάθε σημείο όπου ορίζεται η συνάρτηση." },
+                { letter: "Β", text: "Σε ολόκληρο το πεδίο ορισμού της.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Είναι το 2ο βήμα της μελέτης και είναι απαραίτητο για να γνωρίζουμε αν η καμπύλη θα είναι 'συνεχής γραμμή'." },
+                { letter: "Γ", text: "Μόνο στο $+\\infty$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Στο $+\\infty$ εξετάζουμε όρια, όχι συνέχεια (καθώς το άπειρο δεν είναι σημείο του πεδίου ορισμού)." }
+            ]
+        },
+        { // 17
+            text: "Γιατί είναι σημαντικό να γνωρίζουμε αν μια συνάρτηση είναι περιοδική;",
+            options: [
+                { letter: "Α", text: "Για να βρούμε τις ρίζες της πιο εύκολα.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η περιοδικότητα βοηθά στη χάραξη, όχι απαραίτητα στην αλγεβρική εύρεση ριζών." },
+                { letter: "Β", text: "Για να αποφύγουμε την άπειρη μελέτη και να σχεδιάσουμε την καμπύλη με 'αντιγραφή' ενός τμήματος.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η περιοδικότητα μας επιτρέπει να μελετήσουμε ένα μικρό διάστημα και να γνωρίζουμε την εικόνα της συνάρτησης σε όλο το $\\mathbb{R}$." },
+                { letter: "Γ", text: "Γιατί οι περιοδικές συναρτήσεις δεν έχουν παραγώγους.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Φυσικά και έχουν παραγώγους (π.χ. ημίτονο)." }
+            ]
+        },
+        { // 18
+            text: "Στη μελέτη της $f(x) = x^4 - 4x^3 + 11$, βρέθηκε ότι η $f''$ μηδενίζεται στα $x=0$ και $x=2$ και αλλάζει πρόσημο. Τι είναι αυτά τα σημεία;",
+            options: [
+                { letter: "Α", text: "Τοπικά μέγιστα.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα ακρότατα σχετίζονται με την $f'$." },
+                { letter: "Β", text: "Σημεία καμπής.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Τα σημεία όπου η δεύτερη παράγωγος μηδενίζεται και αλλάζει το είδος της κυρτότητας ονομάζονται σημεία καμπής." },
+                { letter: "Γ", text: "Κατακόρυφες ασύμπτωτες.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα πολυώνυμα δεν έχουν κατακόρυφες ασύμπτωτες." }
+            ]
+        },
+        { // 19
+            text: "Ποια από τις παρακάτω συναρτήσεις θα είχε άξονα συμμετρίας τον $y'y$;",
+            options: [
+                { letter: "Α", text: "$f(x) = x^3$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι περιττή συνάρτηση ($f(-x)=-f(x)$)." },
+                { letter: "Β", text: "$f(x) = x^2 + 5$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Πρόκειται για άρτια συνάρτηση, αφού $f(-x) = (-x)^2 + 5 = x^2 + 5 = f(x)$." },
+                { letter: "Γ", text: "$f(x) = \\frac{1}{x}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι περιττή συνάρτηση και έχει κέντρο συμμετρίας το $(0,0)$." }
+            ]
+        },
+        { // 20
+            text: "Αν μια συνάρτηση εκφράζει ένα φυσικό φαινόμενο, η γραφική της παράσταση:",
+            options: [
+                { letter: "Α", text: "Είναι περιττή πληροφορία.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η οπτικοποίηση είναι κρίσιμη για την επιστήμη." },
+                { letter: "Β", text: "Προσφέρει επιπλέον κατανόηση και εποπτεία του φαινομένου.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η χάραξη της $C_f$ βοηθά στην άμεση κατανόηση της εξέλιξης του φαινομένου." },
+                { letter: "Γ", text: "Χρησιμοποιείται μόνο για να βρούμε το πεδίο ορισμού.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το πεδίο ορισμού είναι η αρχή της μελέτης, όχι το συμπέρασμα της γραφικής παράστασης." }
+            ]
+        },
+        { // 21
+            text: "Στη συνάρτηση $f(x) = \\frac{x^2+x+1}{x-1}$, το πεδίο ορισμού είναι:",
+            options: [
+                { letter: "Α", text: "$\\mathbb{R}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Στο $x=1$ μηδενίζεται ο παρονομαστής." },
+                { letter: "Β", text: "$\\mathbb{R} - \\{1\\}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Πρέπει ο παρονομαστής να είναι διάφορος του μηδενός, άρα $x-1 \\neq 0 \\implies x \\neq 1$." },
+                { letter: "Γ", text: "$(1, +\\infty)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνάρτηση ορίζεται και για $x < 1$." }
+            ]
+        },
+        { // 22
+            text: "Σύμφωνα με τις οδηγίες, οι εφαρμογές του βιβλίου:",
+            options: [
+                { letter: "Α", text: "Εξετάζονται αυτούσιες ως θεωρία.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι οδηγίες αναφέρουν ότι δεν εξετάζονται ούτε ως θεωρία ούτε ως ασκήσεις." },
+                { letter: "Β", text: "Μπορούν να χρησιμοποιηθούν ως προτάσεις για τη λύση ασκήσεων.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Παρόλο που δεν εξετάζονται άμεσα, τα συμπεράσματά τους είναι εργαλεία για άλλες ασκήσεις." },
+                { letter: "Γ", text: "Δεν πρέπει να διαβάζονται καθόλου.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Είναι απαραίτητες για την κατανόηση της μεθοδολογίας." }
+            ]
+        }
+    ];
+
+    // Render quiz
+    const root = document.getElementById('quiz-root');
+
+    async function renderMath(element) {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise([element]);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function buildQuiz() {
+        root.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    await renderMath(feedbackDiv);
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        renderMath(root);
+    }
+    
+    window.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+</body>
+</html>

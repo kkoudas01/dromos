@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Μαθηματικών: Κυρτότητα και Σημεία Καμπής (Ενότητα 2.8)</title>
+    <!-- MathJax (CDN) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Κουμπί Επιστροφής & Υπογραφή */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            color: #1e6f9f;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #0b2b44;
+            transform: translateX(-5px);
+        }
+        .signature {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            color: #4a627a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1000;
+            font-style: italic;
+        }
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .options-area {
+            padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .option-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4662;
+            font-family: inherit;
+            flex: 1 0 auto;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: left;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+            .signature {
+                position: static;
+                text-align: right;
+                display: block;
+                padding-right: 1rem;
+                margin-top: -1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    
+    <!-- Κουμπί Επιστροφής Πάνω Αριστερά -->
+    <a href="index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Αρχική Σελίδα
+    </a>
+
+    <div class="quiz-header">
+        <h1>📐 Quiz Μαθηματικών: Κυρτότητα και Σημεία Καμπής <br><small>Ενότητα 2.8 – Εφαρμογές των Παραγώγων</small></h1>
+        <div class="instructions">
+            📌 Επιλέξτε μία απάντηση για κάθε ερώτηση. <br>
+            ✅ Αμέσως θα δείτε αναλυτική αιτιολόγηση για όλες τις επιλογές (σωστές και λανθασμένες).
+        </div>
+    </div>
+    
+    <div id="quiz-root"></div>
+    
+    <footer>📖 Κάθε απάντηση συνοδεύεται από μαθηματική επεξήγηση — μελέτησε τις ανατροφοδοτήσεις για βαθύτερη κατανόηση.</footer>
+</div>
+
+<!-- Υπογραφή Κάτω Δεξιά -->
+<div class="signature">✍️ Κώστας Κούδας</div>
+
+<script>
+    // Δεδομένα quiz – πλήρης LaTeX σύνταξη με ελληνικές τριγωνομετρικές συναρτήσεις
+    const quizData = [
+        { // 1
+            text: "Μια συνάρτηση $f$ στρέφει τα <strong>κοίλα προς τα άνω</strong> (είναι κυρτή) σε ένα διάστημα $\\Delta$ όταν:",
+            options: [
+                { letter: "Α", text: "Η συνάρτηση $f$ είναι γνησίως αύξουσα στο $\\Delta$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η μονοτονία της $f$ δεν καθορίζει την κυρτότητα. Μια συνάρτηση μπορεί να είναι αύξουσα και ταυτόχρονα είτε κυρτή είτε κοίλη." },
+                { letter: "Β", text: "Η παράγωγος $f'$ είναι γνησίως αύξουσα στο εσωτερικό του $\\Delta$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτός είναι ο ορισμός της κυρτότητας: η κλίση της εφαπτομένης ($f'$) πρέπει να αυξάνεται καθώς το $x$ αυξάνεται." },
+                { letter: "Γ", text: "Η συνάρτηση $f$ παίρνει μόνο θετικές τιμές.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το πρόσημο της συνάρτησης (αν είναι πάνω ή κάτω από τον άξονα $x'x$) δεν σχετίζεται με τον τρόπο που 'στρίβει' η καμπύλη." }
+            ]
+        },
+        { // 2
+            text: "Αν μια συνάρτηση $f$ είναι <strong>κοίλη</strong> σε ένα διάστημα $\\Delta$, τότε η γραφική της παράσταση $C_f$:",
+            options: [
+                { letter: "Α", text: "Βρίσκεται 'κάτω' από κάθε εφαπτομένη της στο $\\Delta$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σε μια κοίλη συνάρτηση, οι εφαπτόμενες βρίσκονται 'πάνω' από τη γραφική παράσταση (με εξαίρεση το σημείο επαφής), άρα η καμπύλη είναι 'κάτω' από αυτές." },
+                { letter: "Β", text: "Βρίσκεται 'πάνω' από κάθε εφαπτομένη της στο $\\Delta$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό ισχύει για τις κυρτές συναρτήσεις." },
+                { letter: "Γ", text: "Είναι μια ευθεία γραμμή.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ευθεία γραμμή έχει σταθερή κλίση, ενώ στην κοίλη συνάρτηση η κλίση πρέπει να μειώνεται." }
+            ]
+        },
+        { // 3
+            text: "Έστω $f$ συνεχής στο $\\Delta$ και δύο φορές παραγωγίσιμη στο εσωτερικό του $\\Delta$. Αν $f''(x) > 0$ για κάθε εσωτερικό σημείο $x$, τότε:",
+            options: [
+                { letter: "Α", text: "Η $f$ είναι κυρτή στο $\\Delta$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με το θεώρημα, αν η δεύτερη παράγωγος είναι θετική, τότε η $f'$ είναι γνησίως αύξουσα, άρα η $f$ είναι κυρτή." },
+                { letter: "Β", text: "Η $f$ έχει τοπικό ελάχιστο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Για να έχει ελάχιστο πρέπει και η πρώτη παράγωγος να είναι μηδέν στο σημείο εκείνο. Εδώ γνωρίζουμε μόνο την κυρτότητα." },
+                { letter: "Γ", text: "Η $f$ είναι γνησίως αύξουσα.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $f''(x) > 0$ εγγυάται τη μονοτονία της $f'$, όχι της $f$." }
+            ]
+        },
+        { // 4
+            text: "Ισχύει το αντίστροφο του θεωρήματος κυρτότητας; Δηλαδή, αν η $f$ είναι κυρτή στο $\\Delta$, είναι υποχρεωτικά $f''(x) > 0$ για κάθε εσωτερικό σημείο;",
+            options: [
+                { letter: "Α", text: "Ναι, είναι ισοδύναμες προτάσεις.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Πρόκειται για συνηθισμένη παρανόηση." },
+                { letter: "Β", text: "Όχι, μπορεί η $f''(x)$ να μηδενίζεται σε κάποια σημεία.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για παράδειγμα, η $f(x) = x^4$ είναι κυρτή στο $\\mathbb{R}$, αλλά $f''(0) = 0$." },
+                { letter: "Γ", text: "Όχι, η $f''(x)$ μπορεί να είναι αρνητική.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν η $f''(x)$ ήταν αρνητική σε κάποιο διάστημα, η συνάρτηση θα ήταν κοίλη εκεί." }
+            ]
+        },
+        { // 5
+            text: "Πότε ένα σημείο $A(x_0, f(x_0))$ ονομάζεται <strong>σημείο καμπής</strong> της γραφικής παράστασης της $f$;",
+            options: [
+                { letter: "Α", text: "Όταν $f''(x_0) = 0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $f''(x_0)=0$ είναι αναγκαία συνθήκη για δύο φορές παραγωγίσιμες συναρτήσεις, αλλά όχι ικανή. Πρέπει να υπάρχει αλλαγή κυρτότητας." },
+                { letter: "Β", text: "Όταν η $f$ αλλάζει κυρτότητα εκατέρωθεν του $x_0$ και η $C_f$ έχει εφαπτομένη στο σημείο αυτό.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτός είναι ο ορισμός: απαιτείται αλλαγή κυρτότητας και ύπαρξη εφαπτομένης στο σημείο." },
+                { letter: "Γ", text: "Όταν η $f$ παρουσιάζει τοπικό ακρότατο στο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα ακρότατα αφορούν την αλλαγή μονοτονίας, ενώ τα σημεία καμπής την αλλαγή κυρτότητας." }
+            ]
+        },
+        { // 6
+            text: "Ποια είναι η γεωμετρική σχέση της εφαπτομένης και της καμπύλης $C_f$ σε ένα σημείο καμπής;",
+            options: [
+                { letter: "Α", text: "Η εφαπτομένη βρίσκεται ολόκληρη πάνω από την καμπύλη.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό συμβαίνει αν η συνάρτηση είναι κοίλη παντού." },
+                { letter: "Β", text: "Η εφαπτομένη 'διαπερνά' την καμπύλη.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Στο σημείο καμπής η καμπύλη περνάει από τη μία πλευρά της εφαπτομένης στην άλλη καθώς αλλάζει η κυρτότητα." },
+                { letter: "Γ", text: "Η εφαπτομένη ταυτίζεται με την καμπύλη.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό συμβαίνει μόνο σε ευθείες γραμμές." }
+            ]
+        },
+        { // 7
+            text: "Αν το $A(x_0, f(x_0))$ είναι σημείο καμπής και η $f$ είναι δύο φορές παραγωγίσιμη, τότε <strong>υποχρεωτικά</strong>:",
+            options: [
+                { letter: "Α", text: "$f''(x_0) = 0$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Είναι θεώρημα ότι αν υπάρχει σημείο καμπής και η δεύτερη παράγωγος ορίζεται, τότε αυτή πρέπει να μηδενίζεται." },
+                { letter: "Β", text: "$f'(x_0) = 0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρώτη παράγωγος στο σημείο καμπής μπορεί να έχει οποιαδήποτε τιμή (κλίση). Αν είναι μηδέν, τότε η εφαπτομένη είναι οριζόντια." },
+                { letter: "Γ", text: "$f(x_0) = 0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η τιμή της συνάρτησης στο σημείο καμπής δεν επηρεάζει την ύπαρξή του." }
+            ]
+        },
+        { // 8
+            text: "Ποιες είναι οι <strong>πιθανές θέσεις</strong> σημείων καμπής μιας συνάρτησης $f$;",
+            options: [
+                { letter: "Α", text: "Τα σημεία όπου $f'(x) = 0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτές είναι οι πιθανές θέσεις τοπικών ακροτάτων (σύμφωνα με το Fermat)." },
+                { letter: "Β", text: "Τα εσωτερικά σημεία όπου $f''(x) = 0$ ή όπου η $f''$ δεν υπάρχει.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Τα σημεία καμπής αναζητούνται εκεί που μηδενίζεται η $f''$ ή εκεί που δεν ορίζεται η $f''$ (αλλά ορίζεται η $f'$)." },
+                { letter: "Γ", text: "Τα άκρα του πεδίου ορισμού.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο ορισμός του σημείου καμπής απαιτεί το $x_0$ να είναι εσωτερικό σημείο ενός διαστήματος $(\\alpha, \\beta)$ ώστε να μπορεί να αλλάξει η κυρτότητα εκατέρωθεν." }
+            ]
+        },
+        { // 9
+            text: "Στη συνάρτηση $f(x) = x^4$, στο σημείο $x_0 = 0$ ισχύει $f''(0) = 0$. Είναι το σημείο $O(0,0)$ σημείο καμπής;",
+            options: [
+                { letter: "Α", text: "Ναι, αφού μηδενίζεται η δεύτερη παράγωγος.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο μηδενισμός της $f''$ δεν αρκεί. Είναι απλώς μια πιθανή θέση." },
+                { letter: "Β", text: "Όχι, γιατί η $f''$ δεν αλλάζει πρόσημο εκατέρωθεν του 0.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η $f''(x) = 12x^2$ είναι θετική τόσο για $x<0$ όσο και για $x>0$. Η συνάρτηση παραμένει κυρτή, άρα δεν υπάρχει καμπή." },
+                { letter: "Γ", text: "Ναι, γιατί η συνάρτηση είναι συνεχής.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνέχεια είναι προϋπόθεση, αλλά δεν εγγυάται την αλλαγή κυρτότητας." }
+            ]
+        },
+        { // 10
+            text: "Αν μια συνάρτηση $f$ έχει $f''(x) \\neq 0$ για κάθε $x \\in \\Delta$, τότε η $f$:",
+            options: [
+                { letter: "Α", text: "Έχει τουλάχιστον ένα σημείο καμπής.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα σημεία καμπής απαιτούν μηδενισμό της $f''$ (για παραγωγίσιμες $f''$)." },
+                { letter: "Β", text: "Δεν έχει κανένα σημείο καμπής στο $\\Delta$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με το θεώρημα, αν η $f''$ δεν μηδενίζεται (και ορίζεται παντού), δεν υπάρχουν θέσεις καμπής." },
+                { letter: "Γ", text: "Είναι οπωσδήποτε γνησίως αύξουσα.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το πρόσημο της $f''$ καθορίζει την κυρτότητα, όχι τη μονοτονία της $f$." }
+            ]
+        },
+        { // 11
+            text: "Για τη συνάρτηση $f(x) = x^3$, το σημείο $O(0,0)$:",
+            options: [
+                { letter: "Α", text: "Είναι σημείο καμπής γιατί η $f''(x) = 6x$ αλλάζει πρόσημο στο 0.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η $f'' < 0$ για $x < 0$ (κοίλη) και $f'' > 0$ για $x > 0$ (κυρτή). Υπάρχει αλλαγή κυρτότητας και εφαπτομένη (ο άξονας $x'x$), άρα είναι σημείο καμπής." },
+                { letter: "Β", text: "Είναι τοπικό ελάχιστο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $f(x) = x^3$ είναι γνησίως αύξουσα στο $\\mathbb{R}$, άρα δεν έχει ακρότατα." },
+                { letter: "Γ", text: "Είναι τοπικό μέγιστο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Για τον ίδιο λόγο όπως παραπάνω." }
+            ]
+        },
+        { // 12
+            text: "Έστω η συνάρτηση θέσης $x = S(t)$ ενός κινητού. Αν η γραφική παράσταση της $S$ είναι <strong>κυρτή</strong> σε ένα διάστημα χρόνου, τότε η κίνηση είναι:",
+            options: [
+                { letter: "Α", text: "Επιταχυνόμενη ($v$ αυξανόμενη).", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Κυρτότητα σημαίνει $S'' > 0$ (ή $S'$ γνησίως αύξουσα). Επειδή η ταχύτητα είναι $v = S'$, αν η $S'$ αυξάνεται, η κίνηση επιταχύνεται." },
+                { letter: "Β", text: "Επιβραδυνόμενη ($v$ μειούμενη).", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα συνέβαινε αν η συνάρτηση ήταν κοίλη ($S'' < 0$)." },
+                { letter: "Γ", text: "Ευθύγραμμη ομαλή.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Στην ομαλή κίνηση η ταχύτητα είναι σταθερή, άρα $S'' = 0$." }
+            ]
+        },
+        { // 13
+            text: "Στον πίνακα μεταβολών, για να δείξουμε ότι μια συνάρτηση είναι <strong>κοίλη</strong>, χρησιμοποιούμε το σύμβολο:",
+            options: [
+                { letter: "Α", text: "$\\cup$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό το σύμβολο (στρέφει τα κοίλα άνω) χρησιμοποιείται για τις κυρτές συναρτήσεις." },
+                { letter: "Β", text: "$\\cap$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το σύμβολο $\\cap$ δείχνει ότι η συνάρτηση στρέφει τα κοίλα προς τα κάτω." },
+                { letter: "Γ", text: "$\\rightarrow$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα βέλη χρησιμοποιούνται για τη δήλωση της μονοτονίας." }
+            ]
+        },
+        { // 14
+            text: "Ποια από τις παρακάτω συναρτήσεις είναι <strong>κυρτή</strong> σε όλο το $\\mathbb{R}$;",
+            options: [
+                { letter: "Α", text: "$f(x) = x^2$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> $f''(x) = 2 > 0$ για κάθε $x \\in \\mathbb{R}$." },
+                { letter: "Β", text: "$f(x) = -x^2$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> $f''(x) = -2 < 0$, άρα είναι κοίλη." },
+                { letter: "Γ", text: "$f(x) = x^3$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αλλάζει κυρτότητα στο 0 (από κοίλη σε κυρτή)." }
+            ]
+        },
+        { // 15
+            text: "Αν σε ένα σημείο $x_0$ η συνάρτηση αλλάζει κυρτότητα αλλά η γραφική παράσταση <strong>δεν έχει εφαπτομένη</strong> στο σημείο αυτό, τότε:",
+            options: [
+                { letter: "Α", text: "Το σημείο είναι οπωσδήποτε σημείο καμπής.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ύπαρξη εφαπτομένης είναι απαραίτητος όρος του ορισμού." },
+                { letter: "Β", text: "Το σημείο δεν είναι σημείο καμπής.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Χωρίς εφαπτομένη (π.χ. σε ένα σημείο όπου η παράγωγος τείνει στο άπειρο από διαφορετικές πλευρές χωρίς να ορίζεται κοινή εφαπτομένη), το σημείο δεν ονομάζεται σημείο καμπής." },
+                { letter: "Γ", text: "Η συνάρτηση δεν είναι συνεχής.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μια συνάρτηση μπορεί να είναι συνεχής αλλά να μην έχει εφαπτομένη σε ένα σημείο (π.χ. 'γωνιακό' σημείο)." }
+            ]
+        },
+        { // 16
+            text: "Η συνάρτηση $f(x) = e^x$:",
+            options: [
+                { letter: "Α", text: "Είναι κυρτή στο $\\mathbb{R}$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> $f'(x) = e^x$ και $f''(x) = e^x$. Επειδή $e^x > 0$ για κάθε $x$, η συνάρτηση είναι παντού κυρτή." },
+                { letter: "Β", text: "Είναι κοίλη στο $\\mathbb{R}$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η δεύτερη παράγωγος είναι θετική, όχι αρνητική." },
+                { letter: "Γ", text: "Έχει σημείο καμπής στο $x=0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αφού η $f''$ δεν μηδενίζεται ποτέ, δεν υπάρχουν σημεία καμπής." }
+            ]
+        },
+        { // 17
+            text: "Η συνάρτηση $f(x) = \\ln x$ στο $(0, +\\infty)$:",
+            options: [
+                { letter: "Α", text: "Είναι κυρτή.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> $f'(x) = \\frac{1}{x}$ και $f''(x) = -\\frac{1}{x^2}$." },
+                { letter: "Β", text: "Είναι κοίλη.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή $f''(x) = -\\frac{1}{x^2} < 0$ για κάθε $x > 0$, η συνάρτηση στρέφει τα κοίλα προς τα κάτω." },
+                { letter: "Γ", text: "Έχει σημείο καμπής στο $x=1$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $f''$ δεν αλλάζει πρόσημο (παραμένει αρνητική), άρα δεν υπάρχει καμπή." }
+            ]
+        },
+        { // 18
+            text: "Αν μια συνάρτηση $f$ είναι κυρτή στο $\\Delta$, τότε η κλίση της εφαπτομένης της:",
+            options: [
+                { letter: "Α", text: "Παραμένει σταθερή.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό συμβαίνει μόνο σε ευθείες γραμμές." },
+                { letter: "Β", text: "Αυξάνεται.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Κυρτότητα εξ ορισμού σημαίνει ότι η $f'$ (κλίση) είναι γνησίως αύξουσα." },
+                { letter: "Γ", text: "Μειώνεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό συμβαίνει στις κοίλες συναρτήσεις." }
+            ]
+        },
+        { // 19
+            text: "Στο σχήμα μιας συνάρτησης $f$ παρατηρούμε ότι η εφαπτομένη στο σημείο $A(x_0, f(x_0))$ βρίσκεται 'πάνω' από την καμπύλη για $x < x_0$ και 'κάτω' από την καμπύλη για $x > x_0$. Το $A$ είναι:",
+            options: [
+                { letter: "Α", text: "Τοπικό μέγιστο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η θέση της εφαπτομένης εκατέρωθεν του σημείου δείχνει αλλαγή κυρτότητας, όχι απαραίτητα ακρότατο." },
+                { letter: "Β", text: "Σημείο καμπής.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αφού η εφαπτομένη αλλάζει πλευρά σε σχέση με την καμπύλη, η συνάρτηση αλλάζει από κοίλη σε κυρτή, άρα το $x_0$ είναι θέση σημείου καμπής." },
+                { letter: "Γ", text: "Σημείο ασυνέχειας.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Για να ορίζεται εφαπτομένη, η συνάρτηση πρέπει να είναι συνεχής και παραγωγίσιμη στο σημείο." }
+            ]
+        },
+        { // 20
+            text: "Ποια από τις παρακάτω προτάσεις για τα σημεία καμπής είναι <strong>λάθος</strong>;",
+            options: [
+                { letter: "Α", text: "Σε ένα σημείο καμπής η $f''$ μπορεί να μην υπάρχει.", isCorrect: false, feedback: "<strong>✅ Σωστή πρόταση.</strong> Είναι δυνατή η ύπαρξη σημείου καμπής χωρίς να υπάρχει η $f''$, αρκεί να υπάρχει η $f'$ (εφαπτομένη) και αλλαγή κυρτότητας." },
+                { letter: "Β", text: "Αν $f''(x_0) = 0$, τότε το $x_0$ είναι οπωσδήποτε θέση σημείου καμπής.", isCorrect: true, feedback: "<strong>❌ Λάθος (Άρα αυτή είναι η απάντηση).</strong> Ο μηδενισμός της $f''$ είναι αναγκαία συνθήκη για παραγωγίσιμες $f''$, αλλά όχι ικανή. Χρειάζεται και αλλαγή προσήμου." },
+                { letter: "Γ", text: "Τα σημεία καμπής είναι πάντα εσωτερικά σημεία του πεδίου ορισμού.", isCorrect: false, feedback: "<strong>✅ Σωστή πρόταση.</strong> Ο ορισμός απαιτεί διάστημα εκατέρωθεν του σημείου." }
+            ]
+        },
+        { // 21
+            text: "Στη συνάρτηση $f(x) = \\text{ημ} x$ στο διάστημα $[0, 2\\pi]$, το σημείο $x = \\pi$:",
+            options: [
+                { letter: "Α", text: "Είναι σημείο καμπής.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> $f''(x) = -\\text{ημ} x$. Στο $[0, \\pi]$ η $f'' \\leq 0$ (κοίλη) και στο $[\\pi, 2\\pi]$ η $f'' \\geq 0$ (κυρτή). Υπάρχει αλλαγή κυρτότητας στο $\\pi$ και εφαπτομένη, άρα είναι σημείο καμπής." },
+                { letter: "Β", text: "Είναι θέση τοπικού μεγίστου.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το μέγιστο βρίσκεται στο $\\frac{\\pi}{2}$ όπου $f' = 0$." },
+                { letter: "Γ", text: "Είναι θέση τοπικού ελαχίστου.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το ελάχιστο βρίσκεται στο $\\frac{3\\pi}{2}$ όπου $f' = 0$." }
+            ]
+        },
+        { // 22
+            text: "Αν μια συνάρτηση $f$ είναι δύο φορές παραγωγίσιμη και η $f''$ αλλάζει πρόσημο εκατέρωθεν του $x_0$, τότε:",
+            options: [
+                { letter: "Α", text: "Η $f$ παρουσιάζει τοπικό ακρότατο στο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η αλλαγή προσήμου της $f''$ αφορά την κυρτότητα, όχι τα ακρότατα." },
+                { letter: "Β", text: "Η $f$ παρουσιάζει καμπή στο $x_0$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η αλλαγή προσήμου της $f''$ σημαίνει αλλαγή κυρτότητας. Αφού η $f$ είναι παραγωγίσιμη, έχει εφαπτομένη, άρα το $x_0$ είναι θέση σημείου καμπής." },
+                { letter: "Γ", text: "Η $f$ είναι σταθερή κοντά στο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν ήταν σταθερή, η παράγωγός της θα ήταν μηδέν σε διάστημα, άρα και η $f''$ θα ήταν μηδέν χωρίς αλλαγή προσήμου." }
+            ]
+        }
+    ];
+
+    // Render quiz
+    const root = document.getElementById('quiz-root');
+
+    async function renderMath(element) {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise([element]);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function buildQuiz() {
+        root.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    await renderMath(feedbackDiv);
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        renderMath(root);
+    }
+    
+    window.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+</body>
+</html>

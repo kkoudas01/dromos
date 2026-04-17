@@ -136,4 +136,10 @@
 
 [Quiz: Γραφικές παραστάσεις](LykeioC/EidosGrapg.html)
 
+### Όρια
 
+[Quiz: Όρια](LykeioC/oria.html)
+
+## Χημεία
+
+[Γενικό Quiz Α Θέμα](LykeioC/Chem/quizTheory.html)

@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Χημείας Γ' Λυκείου | Προσανατολισμού</title>
+    <!-- MathJax (CDN) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* --- Κουμπί Επιστροφής & Υπογραφή --- */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            color: #1e6f9f;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #0b2b44;
+            transform: translateX(-5px);
+        }
+
+        .signature {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            color: #4a627a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1000;
+            font-style: italic;
+        }
+        /* ------------------------------------------------ */
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .options-area {
+            padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .option-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4662;
+            font-family: inherit;
+            flex: 1 0 auto;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        .feedback-content ul {
+            margin: 0.5rem 0 0 1.5rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: left;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+            .signature {
+                position: static;
+                text-align: right;
+                display: block;
+                padding-right: 1rem;
+                margin-top: -1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    
+    <!-- Κουμπί Επιστροφής Πάνω Αριστερά -->
+    <a href="index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Αρχική Σελίδα
+    </a>
+
+    <div class="quiz-header">
+        <h1>⚗️ Quiz Χημείας Γ' Λυκείου <br><small>Προσανατολισμού – Βασισμένο στα Θέματα Α (Θεωρία)</small></h1>
+        <div class="instructions">
+            📌 Το παρόν quiz περιλαμβάνει 50 ερωτήσεις που καλύπτουν όλο το εύρος της ύλης (Κβαντομηχανική, Περιοδικός Πίνακας, Θερμοχημεία, Κινητική, Ισορροπία, Οξέα-Βάσεις, Οργανική). <br>
+            ✅ Μετά από κάθε ερώτηση εμφανίζεται αναλυτική επεξήγηση.
+        </div>
+    </div>
+    
+    <div id="quiz-root"></div>
+    
+    <footer>📖 Κάθε απάντηση συνοδεύεται από πλήρη επεξήγηση – μελέτησε την ανατροφοδότηση για βαθύτερη κατανόηση.</footer>
+</div>
+
+<!-- Υπογραφή Κάτω Δεξιά -->
+<div class="signature">✍️ Κώστας Κούδας</div>
+
+<script>
+    // Δεδομένα quiz – Πλήρης LaTeX σύνταξη
+    const quizData = [
+        { // 1
+            text: "Ένα ηλεκτρόνιο που ανήκει στο τροχιακό $2p_z$ μπορεί να έχει την εξής τετράδα κβαντικών αριθμών (OEFE 2021 A1):",
+            options: [
+                { letter: "Α", text: "$(2, 0, 0, +1/2)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Εδώ $l=0$, που αντιστοιχεί σε τροχιακό $s$ ($2s$) και όχι $p$. Διαίσθηση: Το $s$ είναι σφαιρικό, το $p$ έχει λοβούς. [1, 4]." },
+                { letter: "Β", text: "$(2, 1, 0, +1/2)$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ο κύριος κβαντικός αριθμός είναι $n=2$. Για υποστιβάδα $p$, ο αζιμουθιακός $l$ πρέπει να είναι 1. Ο μαγνητικός $m_l$ για το τροχιακό $z$ αντιστοιχεί συνήθως στο 0 (ή και -1, 1). Το spin $m_s$ είναι +1/2. [1-3]." },
+                { letter: "Γ", text: "$(1, 0, 0, -1/2)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Εδώ $n=1$. Η πρώτη στιβάδα (K) έχει μόνο τροχιακά $s$ ($1s$). Δεν υπάρχει $1p$. [5]." },
+                { letter: "Δ", text: "$(2, -1, 0, -1/2)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο $l$ παίρνει μόνο μη αρνητικές τιμές ($0 \\dots n-1$). Το -1 είναι μαθηματικά αδύνατο. [6]." }
+            ]
+        },
+        { // 2
+            text: "Υδατικό διάλυμα $HCl$ $10^{-7}$ M στους $25^\\circ C$ έχει (OEFE 2021 A2):",
+            options: [
+                { letter: "Α", text: "$pH = 7$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $pH=7$ είναι για το απόλυτα ουδέτερο νερό. Η διαίσθηση λέει: 'έριξες οξύ, άρα έγινε έστω και λίγο όξινο'. [9]." },
+                { letter: "Β", text: "$pH > 7$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> $pH > 7$ σημαίνει βασικό διάλυμα. Ένα οξύ δεν μπορεί να κάνει το νερό βάση. [7]." },
+                { letter: "Γ", text: "$pH < 7$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αν και το οξύ είναι εξαιρετικά αραιό, παραμένει οξύ. Η προσθήκη έστω και ελάχιστου οξέος στο καθαρό νερό αυξάνει τη συγκέντρωση $[H_3O^+]$ πάνω από $10^{-7} M$, άρα το pH γίνεται μικρότερο του 7. [7, 8]." },
+                { letter: "Δ", text: "Δεν μπορούμε να γνωρίζουμε.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μπορούμε να εξάγουμε το συμπέρασμα λογικά, παρότι ο ακριβής υπολογισμός απαιτεί την επίδραση του ιοντισμού του νερού." }
+            ]
+        },
+        { // 3
+            text: "Από τα παρακάτω το μικρότερο σημείο βρασμού έχει (OEFE 2021 A3):",
+            options: [
+                { letter: "Α", text: "το $H_2$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το $H_2$ είναι μη πολικό μόριο με ελάχιστη μάζα, άρα έχει πολύ ασθενείς δυνάμεις London. Είναι αέριο σε πολύ χαμηλές θερμοκρασίες. [10, 11]." },
+                { letter: "Β", text: "το $NaCl$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $NaCl$ είναι ιοντική ένωση με ισχυρότατες ηλεκτροστατικές έλξεις. Βράζει σε πάνω από $1400^\\circ C$. [11]." },
+                { letter: "Γ", text: "η $CH_3CH_2OH$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η αιθανόλη σχηματίζει δεσμούς υδρογόνου, που είναι πολύ ισχυροί διαμοριακοί δεσμοί. [12, 13]." },
+                { letter: "Δ", text: "το $HCl$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $HCl$ είναι πολικό μόριο (δυνάμεις διπόλου-διπόλου), άρα έχει ισχυρότερες δυνάμεις από το $H_2$. [12, 13]." }
+            ]
+        },
+        { // 4
+            text: "Στις εξώθερμες αντιδράσεις ισχύει (OEFE 2021 A4):",
+            options: [
+                { letter: "Α", text: "$\\Delta H = 0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> $\\Delta H=0$ σημαίνει ότι δεν υπάρχει θερμική μεταβολή. [14]." },
+                { letter: "Β", text: "$\\Delta H < 0$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Εξώθερμη σημαίνει ότι εκλύεται θερμότητα στο περιβάλλον. Το σύστημα χάνει ενέργεια, άρα η τελική ενθαλπία είναι μικρότερη από την αρχική. [14, 15]." },
+                { letter: "Γ", text: "$H_{\\text{αντ}} < H_{\\text{πρ}}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό ισχύει στις ενδόθερμες αντιδράσεις, όπου τα προϊόντα έχουν περισσότερη ενέργεια από τα αντιδρώντα. [16]." },
+                { letter: "Δ", text: "Τίποτα από τα παραπάνω.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Υπάρχει σωστή επιλογή." }
+            ]
+        },
+        { // 5
+            text: "Για την ετερογενή ισορροπία $C(s) + CO_2(g) \\rightleftharpoons 2CO(g)$, η έκφραση της $K_c$ είναι (Βασισμένο στο OEFE 2021 A5):",
+            options: [
+                { letter: "Α", text: "$[CO]^2 / ([C] \\cdot [CO_2])$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Περιλαμβάνει το στερεό C, κάτι που απαγορεύεται στον ορισμό της $K_c$. [19, 20]." },
+                { letter: "Β", text: "$[CO]^2 / [CO_2]$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Στην $K_c$ δεν περιλαμβάνονται οι συγκεντρώσεις των καθαρών στερεών (s) γιατί η συγκέντρωσή τους παραμένει σταθερή. Διαίσθηση: Μόνο τα αέρια 'πιέζουν' την ισορροπία. [17, 18]." },
+                { letter: "Γ", text: "$[CO_2] / [CO]^2$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Είναι το αντίστροφο κλάσμα από το σωστό." },
+                { letter: "Δ", text: "$[CO]^2 \\cdot [CO_2]$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η σταθερά $K_c$ ορίζεται ως πηλίκο προϊόντων προς αντιδρώντα." }
+            ]
+        },
+        { // 6
+            text: "Ποιο από τα παρακάτω άτομα/ιόντα είναι παραμαγνητικό (OEFE 2022 A1 / 2025 B1);",
+            options: [
+                { letter: "Α", text: "$Ca^{2+}$ (Z=20)", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $Ca^{2+}$ έχει δομή ευγενούς αερίου ($Ar$), όλα τα ηλεκτρόνια είναι συζευγμένα. [22, 23]." },
+                { letter: "Β", text: "$Zn^{2+}$ (Z=30)", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $Zn^{2+}$ έχει συμπληρωμένη τη $3d^{10}$ υποστιβάδα. Κανένα μονήρες ηλεκτρόνιο. [22]." },
+                { letter: "Γ", text: "$N$ (Z=7)", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το άζωτο έχει δομή $1s^2 2s^2 2p^3$. Στην υποστιβάδα $p$ υπάρχουν 3 μονήρη ηλεκτρόνια (κανόνας Hund), άρα έλκεται από μαγνητικό πεδίο. [21, 22]." },
+                { letter: "Δ", text: "$Ne$ (Z=10)", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $Ne$ είναι ευγενές αέριο με πλήρεις στιβάδες. [23]." }
+            ]
+        },
+        { // 7
+            text: "Ενδόθερμη διαδικασία είναι (OEFE 2022 A2):",
+            options: [
+                { letter: "Α", text: "Η καύση του άνθρακα.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Όλες οι καύσεις είναι εξώθερμες (παράγουν φωτιά/θερμότητα). [14, 15]." },
+                { letter: "Β", text: "Ο ιοντισμός του $Mg(g) \\to Mg^+(g) + e^-$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για να απομακρυνθεί ένα ηλεκτρόνιο από ένα άτομο, πρέπει να προσφέρουμε ενέργεια (Ενέργεια Ιοντισμού). Άρα το σύστημα απορροφά ενέργεια. [24, 25]." },
+                { letter: "Γ", text: "Η εξουδετέρωση $NaOH + HCl$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι εξουδετερώσεις είναι πάντα εξώθερμες αντιδράσεις. [26, 27]." },
+                { letter: "Δ", text: "Η δημιουργία δεσμού.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η δημιουργία δεσμού πάντα εκλύει ενέργεια (το σύστημα γίνεται πιο σταθερό). Η διάσπαση δεσμού είναι ενδόθερμη. [14]." }
+            ]
+        },
+        { // 8
+            text: "Ποιο από τα παρακάτω διαλύματα είναι ρυθμιστικό (OEFE 2022 A3):",
+            options: [
+                { letter: "Α", text: "$NaOH$ 0,1M / $NaCl$ 0,1M", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Περιέχει ισχυρή βάση. Τα ρυθμιστικά θέλουν ασθενή συστατικά. [28]." },
+                { letter: "Β", text: "$NaCN$ 1M / $HCN$ 1M", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ένα ρυθμιστικό διάλυμα αποτελείται από ένα ασθενές οξύ ($HCN$) και τη συζυγή του βάση ($CN^-$ από το άλας $NaCN$). [25, 28]." },
+                { letter: "Γ", text: "$KCN$ 0,1M / $NaCN$ 1M", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Περιέχει δύο άλατα της ίδιας βάσης. Δεν υπάρχει οξύ για να εξουδετερώσει προσθήκη βάσης. [25, 29]." },
+                { letter: "Δ", text: "$NaOH$ 0,1M / $NH_3$ 0,1M", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Περιέχει ισχυρή βάση ($NaOH$) και ασθενή βάση ($NH_3$). Δεν αποτελεί ρυθμιστικό." }
+            ]
+        },
+        { // 9
+            text: "Η ένωση που δίνει κίτρινο ίζημα με $I_2 / NaOH$ είναι η (OEFE 2022 A4):",
+            options: [
+                { letter: "Α", text: "$CH_3COOH$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το οξικό οξύ, αν και έχει το τμήμα $CH_3CO$, δεν δίνει την αντίδραση (εξαίρεση στα καρβοξυλικά). [32]." },
+                { letter: "Β", text: "$HCHO$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η μεθανάλη δεν περιέχει την ομάδα μεθυλο-κετόνης." },
+                { letter: "Γ", text: "$CH_3COCH_3$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η ακετόνη (προπανόνη) διαθέτει την ομάδα $CH_3CO-$, η οποία είναι απαραίτητη για την αλογονοφορμική αντίδραση (παραγωγή $CHI_3$). [30, 31]." },
+                { letter: "Δ", text: "$CH_3CH_2CH_2OH$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Είναι πρωτοταγής αλκοόλη (1-προπανόλη). Μόνο η αιθανόλη και οι δευτεροταγείς αλκοόλες με $CH_3CH(OH)-$ δίνουν την αντίδραση. [32, 33]." }
+            ]
+        },
+        { // 10
+            text: "Ο $\\sigma$ δεσμός μεταξύ $C_1$ και $C_2$ στο $CH_3CH_2CH_2COOH$ σχηματίζεται με επικάλυψη (OEFE 2022 A5):",
+            options: [
+                { letter: "Α", text: "$sp^2 - sp^3$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ο άνθρακας 1 (του καρβοξυλίου) έχει διπλό δεσμό με οξυγόνο, άρα είναι $sp^2$ υβριδισμένος. Ο άνθρακας 2 έχει μόνο απλούς δεσμούς, άρα είναι $sp^3$. [31, 34, 35]." },
+                { letter: "Β", text: "$sp - sp^3$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν ανταποκρίνεται στους υβριδισμούς των ατόμων $C_1$ και $C_2$." },
+                { letter: "Γ", text: "$sp - sp$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Θα σήμαινε ύπαρξη τριπλού δεσμού (ή δύο διπλών) και στα δύο άτομα άνθρακα." },
+                { letter: "Δ", text: "$sp^2 - sp^2$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Θα απαιτούσε διπλό δεσμό μεταξύ των δύο ανθράκων ($C=C$). [36]." }
+            ]
+        },
+        { // 11
+            text: "Στο προπίνιο ($CH_3-C \\equiv CH$), ο άνθρακας 1 (της $CH_3$) έχει υβριδισμό (OEFE 2023 A1):",
+            options: [
+                { letter: "Α", text: "$sp$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο $sp$ αντιστοιχεί στους άλλους δύο άνθρακες που συμμετέχουν στον τριπλό δεσμό. [39]." },
+                { letter: "Β", text: "$sp^2$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτός ο υβριδισμός δεν αντιστοιχεί σε άνθρακα με 4 απλούς δεσμούς." },
+                { letter: "Γ", text: "$sp^3$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ο άνθρακας αυτός συνδέεται με 4 απλούς δεσμούς $\\sigma$ (3 με Η και 1 με C), άρα απαιτεί 4 υβριδικά τροχιακά ($sp^3$). [37, 38]." },
+                { letter: "Δ", text: "Δεν έχει υβριδισμό.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Όλοι οι άνθρακες σε οργανικές ενώσεις παρουσιάζουν κάποιο είδος υβριδισμού." }
+            ]
+        },
+        { // 12
+            text: "Ο μέγιστος αριθμός ηλεκτρονίων με $n=4, l=2, m_l=-1$ είναι (OEFE 2023 A2):",
+            options: [
+                { letter: "Α", text: "10", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το 10 είναι ο αριθμός ηλεκτρονίων όλης της υποστιβάδας $d$ ($l=2$), όχι ενός τροχιακού. [21]." },
+                { letter: "Β", text: "14", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αντιστοιχεί στη χωρητικότητα της υποστιβάδας $f$." },
+                { letter: "Γ", text: "2", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Οι τρεις πρώτοι κβαντικοί αριθμοί καθορίζουν ένα <strong>συγκεκριμένο τροχιακό</strong>. Σε κάθε τροχιακό χωράνε το πολύ 2 ηλεκτρόνια με αντίθετο spin. [2, 38]." },
+                { letter: "Δ", text: "6", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αντιστοιχεί στη χωρητικότητα μιας $p$ υποστιβάδας." }
+            ]
+        },
+        { // 13
+            text: "Αν μια αντίδραση $2A \\to B$ γίνεται σε δύο στάδια και το αργό είναι το $A \\to \\Delta$, ο νόμος ταχύτητας είναι (Βασισμένο στο OEFE 2023 A3):",
+            options: [
+                { letter: "Α", text: "$v = k [A]^2$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα ίσχυε αν η αντίδραση ήταν απλή (ένα στάδιο). [41, 42]." },
+                { letter: "Β", text: "$v = k [A]$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η ταχύτητα μιας πολύπλοκης αντίδρασης καθορίζεται από το <strong>βραδύτερο στάδιο</strong>. Οι συντελεστές των αντιδρώντων στο αργό στάδιο γίνονται εκθέτες στο νόμο ταχύτητας. [38, 40]." },
+                { letter: "Γ", text: "$v = k [A] [\\Delta]$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο νόμος ταχύτητας εξαρτάται μόνο από τα αντιδρώντα του βραδύτερου σταδίου." },
+                { letter: "Δ", text: "$v = k [A]^0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν ανταποκρίνεται στη στοιχειομετρία του βραδύτερου σταδίου." }
+            ]
+        },
+        { // 14
+            text: "Στο ορατό φάσμα του υδρογόνου, το μεγαλύτερο μήκος κύματος αντιστοιχεί στη μετάπτωση (OEFE 2023 A4):",
+            options: [
+                { letter: "Α", text: "$n=6 \\to n=2$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $6 \\to 2$ έχει μεγάλη διαφορά ενέργειας, άρα μικρό $\\lambda$ (ιώδες). [44]." },
+                { letter: "Β", text: "$n=3 \\to n=2$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Μεγαλύτερο $\\lambda$ σημαίνει μικρότερη ενέργεια. Η μετάπτωση $3 \\to 2$ έχει τη μικρότερη διαφορά ενέργειας στην περιοχή του ορατού (σειρά Balmer). [42, 43]." },
+                { letter: "Γ", text: "$n=2 \\to n=1$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $2 \\to 1$ ανήκει στο υπεριώδες (σειρά Lyman), δεν είναι ορατή. [44]." },
+                { letter: "Δ", text: "$n=4 \\to n=2$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Έχει μεγαλύτερη διαφορά ενέργειας από την $3 \\to 2$, άρα μικρότερο μήκος κύματος." }
+            ]
+        },
+        { // 15
+            text: "<strong>Σωστό ή Λάθος:</strong> Ο καταλύτης αυξάνει την ταχύτητα γιατί αυξάνει την κινητική ενέργεια των μορίων. (OEFE 2023 A5.1)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη. Δείτε την επεξήγηση του Λάθους." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ο καταλύτης <strong>δεν</strong> αλλάζει την κινητική ενέργεια (αυτό το κάνει μόνο η θερμοκρασία). Ο καταλύτης προσφέρει μια νέα πορεία με χαμηλότερη ενέργεια ενεργοποίησης ($E_a$). [43, 45]." }
+            ]
+        },
+        { // 16
+            text: "<strong>Σωστό ή Λάθος:</strong> Διάλυμα $NaCl$ 0,4 Μ είναι ισοτονικό με διάλυμα γλυκόζης 0,4 Μ. (OEFE 2023 A5.2)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το $NaCl$ διίσταται σε 2 ιόντα ($Na^+, Cl^-$), άρα η ολική συγκέντρωση σωματιδίων είναι 0,8 Μ. Η γλυκόζη είναι μοριακή ένωση (0,4 Μ). Το $NaCl$ είναι <strong>υπερτονικό</strong> (μεγαλύτερη ωσμωτική πίεση). [43, 46]." }
+            ]
+        },
+        { // 17
+            text: "<strong>Σωστό ή Λάθος:</strong> Η προσθήκη $NaF$ σε διάλυμα $HF$ αυξάνει το pH. (OEFE 2023 A5.3)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Λόγω επίδρασης κοινού ιόντος ($F^-$), η ισορροπία ιοντισμού του $HF$ μετατοπίζεται αριστερά. Η συγκέντρωση $[H_3O^+]$ μειώνεται, άρα το pH αυξάνεται. [47, 48]." },
+                { letter: "Β", text: "Λάθος", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι σωστή. Δείτε την επεξήγηση." }
+            ]
+        },
+        { // 18
+            text: "<strong>Σωστό ή Λάθος:</strong> Το χρώμα της όξινης μορφής ενός δείκτη επικρατεί όταν $pH < pK_a - 1$. (OEFE 2023 A5.4)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Όταν το pH είναι αρκετά χαμηλό (όξινο), η ισορροπία του δείκτη μετατοπίζεται προς την όξινη μορφή ($H\\Delta$). [48, 49]." },
+                { letter: "Β", text: "Λάθος", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι σωστή." }
+            ]
+        },
+        { // 19
+            text: "<strong>Σωστό ή Λάθος:</strong> Αντιδραστήριο Grignard με μεθανάλη ($HCHO$) δίνει δευτεροταγή αλκοόλη. (OEFE 2023 A5.5)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η μεθανάλη είναι η μοναδική αλδεΰδη που δίνει <strong>πρωτοταγή</strong> αλκοόλη. Οι υπόλοιπες αλδεΰδες δίνουν δευτεροταγείς. [48, 50]." }
+            ]
+        },
+        { // 20
+            text: "Η υποστιβάδα $3d$ αποτελείται από πόσα ατομικά τροχιακά; (OEFE 2024 A1)",
+            options: [
+                { letter: "Α", text: "3", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αντιστοιχεί στα τροχιακά της υποστιβάδας $p$." },
+                { letter: "Β", text: "5", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για $l=2$ ($d$), ο $m_l$ παίρνει τιμές $-2, -1, 0, 1, 2$ (συνολικά 5). [21, 51]." },
+                { letter: "Γ", text: "1", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αντιστοιχεί στο τροχιακό της υποστιβάδας $s$." },
+                { letter: "Δ", text: "7", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η υποστιβάδα $f$ ($l=3$) έχει 7 τροχιακά. [21]." }
+            ]
+        },
+        { // 21
+            text: "Με το αντιδραστήριο Tollens αντιδρούν οι (OEFE 2025 A1):",
+            options: [
+                { letter: "Α", text: "Κετόνες", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι κετόνες δεν οξειδώνονται από ήπια οξειδωτικά όπως το Tollens ή το Fehling. [53]." },
+                { letter: "Β", text: "Αλδεΰδες", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Οι αλδεΰδες οξειδώνονται εύκολα από το ήπιο οξειδωτικό $Ag^+$ (Tollens), σχηματίζοντας το 'κάτοπτρο αργύρου'. [32, 52]." },
+                { letter: "Γ", text: "Αιθέρες", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι αιθέρες δεν οξειδώνονται από το αντιδραστήριο Tollens." },
+                { letter: "Δ", text: "Αλκοόλες", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν και οι πρωτοταγείς/δευτεροταγείς οξειδώνονται, θέλουν πιο ισχυρά οξειδωτικά ($KMnO_4, K_2Cr_2O_7$). Δεν αντιδρούν με Tollens." }
+            ]
+        },
+        { // 22
+            text: "Η απλή αντίδραση $A(g) + B(g) \\to 2AB(g)$ είναι (OEFE 2025 A2):",
+            options: [
+                { letter: "Α", text: "Μηδενικής τάξης", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η τάξη προκύπτει από το άθροισμα των συντελεστών στην απλή αντίδραση." },
+                { letter: "Β", text: "Πρώτης τάξης", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Θα έπρεπε να συμμετέχει μόνο ένα αντιδρών μόριο." },
+                { letter: "Γ", text: "Δεύτερης τάξης", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σε μια <strong>απλή</strong> αντίδραση, η τάξη ισούται με το άθροισμα των συντελεστών των αντιδρώντων ($1+1=2$). [41, 54]." },
+                { letter: "Δ", text: "Τρίτης τάξης", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο σωστός υπολογισμός είναι 1+1=2." }
+            ]
+        },
+        { // 23
+            text: "Στο μόριο του προπενίου ($CH_3-CH=CH_2$) υπάρχουν (OEFE 2025 A3):",
+            options: [
+                { letter: "Α", text: "$8\\sigma$ και $1\\pi$ δεσμοί", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Μετρώντας όλους τους απλούς δεσμούς και έναν από τον διπλό ($\\sigma$) βρίσκουμε 8. Ο δεύτερος του διπλού είναι $\\pi$. [36, 54]." },
+                { letter: "Β", text: "$7\\sigma$ και $2\\pi$ δεσμοί", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο σωστός υπολογισμός δίνει 8 απλούς/$\\sigma$ δεσμούς και 1 διπλό (1 $\\sigma$ + 1 $\\pi$)." },
+                { letter: "Γ", text: "$6\\sigma$ και $1\\pi$ δεσμοί", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μην ξεχνάτε τους δεσμούς C-H." },
+                { letter: "Δ", text: "$6\\sigma$ και $2\\pi$ δεσμοί", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν υπάρχει τριπλός δεσμός στο προπένιο για να δικαιολογήσει $2\\pi$." }
+            ]
+        },
+        { // 24
+            text: "Ποια τετράδα κβαντικών αριθμών είναι δυνατή (OEFE 2025 A4):",
+            options: [
+                { letter: "Α", text: "$(1, 1, 1, +1/2)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν $n=1$, ο $l$ <strong>δεν</strong> μπορεί να είναι 1 (πρέπει $l < n$). [6]." },
+                { letter: "Β", text: "$(1, 0, 0, -1/2)$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> $n=1$, άρα $l=0$ (μοναδική τιμή). Αν $l=0$, τότε $m_l=0$. Το $m_s=-1/2$ είναι έγκυρο. [54, 55]." },
+                { letter: "Γ", text: "$(2, 0, 1, +1/2)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν $l=0$, ο $m_l$ <strong>πρέπει</strong> να είναι 0. [1]." },
+                { letter: "Δ", text: "$(3, 2, 1, 0)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο $m_s$ παίρνει μόνο τιμές $\\pm 1/2$. Το 0 είναι αδύνατο. [2]." }
+            ]
+        },
+        { // 25
+            text: "<strong>Σωστό ή Λάθος:</strong> Ηλεκτρολυτική διάσταση είναι η απομάκρυνση των ιόντων από τον κρύσταλλο. (OEFE 2025 A5.1)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Τα ιόντα προϋπάρχουν στο κρυσταλλικό πλέγμα (ιοντικές ενώσεις) και απλώς ελευθερώνονται/απομακρύνονται στο νερό. [56, 57]." },
+                { letter: "Β", text: "Λάθος", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι σωστή. Το φαινόμενο αφορά τις ιοντικές ενώσεις." }
+            ]
+        },
+        { // 26
+            text: "<strong>Σωστό ή Λάθος:</strong> Προσθήκη αντιδραστηρίου Grignard σε προπανόνη δίνει πρωτοταγή αλκοόλη. (OEFE 2025 A5.2)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η προπανόνη είναι κετόνη. Κετόνη + Grignard = <strong>Τριτοταγής</strong> αλκοόλη. [50, 57]." }
+            ]
+        },
+        { // 27
+            text: "<strong>Σωστό ή Λάθος:</strong> Η θεωρία της προσρόφησης ερμηνεύει την ομογενή κατάλυση. (OEFE 2025 A5.3)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η προσρόφηση αφορά την <strong>ετερογενή</strong> κατάλυση (στερεός καταλύτης - αέρια αντιδρώντα). Η ομογενής ερμηνεύεται από τη θεωρία των ενδιάμεσων προϊόντων. [45, 57]." }
+            ]
+        },
+        { // 28
+            text: "<strong>Σωστό ή Λάθος:</strong> Μεταξύ των μορίων $HI$ αναπτύσσονται δεσμοί υδρογόνου. (OEFE 2025 A5.4)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Δεσμός υδρογόνου αναπτύσσεται μόνο όταν το H συνδέεται με F, O, N (πολύ ηλεκτραρνητικά άτομα). Το I (Ιώδιο) δεν είναι αρκετά ηλεκτραρνητικό. [46, 57]." }
+            ]
+        },
+        { // 29
+            text: "<strong>Σωστό ή Λάθος:</strong> Η ατομική ακτίνα αυξάνεται από πάνω προς τα κάτω σε μια ομάδα. (OEFE 2025 A5.5)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Κατεβαίνοντας σε μια ομάδα προστίθενται νέες στιβάδες ηλεκτρονίων (μεγαλύτερο n), άρα το άτομο 'φουσκώνει' και η ακτίνα αυξάνεται. [57, 58]." },
+                { letter: "Β", text: "Λάθος", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι σωστή." }
+            ]
+        },
+        { // 30
+            text: "Η ηλεκτρονιοσυγγένεια του $F$ (Z=9) είναι πιο αρνητική από του $Li$ (Z=3) γιατί:",
+            options: [
+                { letter: "Α", text: "Το $F$ έχει μεγαλύτερη ακτίνα.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $F$ έχει <strong>μικρότερη</strong> ακτίνα από το $Li$ (ίδια περίοδος, μεγαλύτερο πυρηνικό φορτίο). [59]." },
+                { letter: "Β", text: "Το $F$ αποκτά δομή ευγενούς αερίου με την πρόσληψη ηλεκτρονίου.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το φθόριο 'θέλει' απεγνωσμένα ένα ηλεκτρόνιο για να συμπληρώσει την οκτάδα του, άρα η ενέργεια που εκλύεται είναι μεγάλη. [59, 60]." },
+                { letter: "Γ", text: "Το $Li$ είναι αμέταλλο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $Li$ είναι μέταλλο αλκαλίων." },
+                { letter: "Δ", text: "Το $F$ έχει λιγότερα πρωτόνια.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $F$ έχει 9 πρωτόνια, το $Li$ έχει 3. Έχει περισσότερα." }
+            ]
+        },
+        { // 31
+            text: "<strong>Σωστό ή Λάθος:</strong> Η ταχύτητα μιας αντίδρασης αυξάνεται με την πάροδο του χρόνου. (Σχολικό 42α)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Καθώς καταναλώνονται τα αντιδρώντα, οι συγκεντρώσεις τους μειώνονται, οι συγκρούσεις γίνονται σπανιότερες και η ταχύτητα πέφτει συνεχώς. [61, 62]." }
+            ]
+        },
+        { // 32
+            text: "Η πρότυπη ενθαλπία σχηματισμού του $O_2(g)$ είναι:",
+            options: [
+                { letter: "Α", text: "Θετική", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong>" },
+                { letter: "Β", text: "Αρνητική", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong>" },
+                { letter: "Γ", text: "Μηδέν", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η ενθαλπία σχηματισμού των στοιχείων στη σταθερή τους μορφή (όπως το αέριο οξυγόνο) σε πρότυπες συνθήκες ορίζεται συμβατικά ως μηδέν. [16]." },
+                { letter: "Δ", text: "Εξαρτάται από την πίεση.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Για τα στοιχεία στην πιο σταθερή τους μορφή, η πρότυπη ενθαλπία σχηματισμού είναι εξ ορισμού μηδέν." }
+            ]
+        },
+        { // 33
+            text: "Σε μια εξώθερμη αντίδραση, η αύξηση της θερμοκρασίας:",
+            options: [
+                { letter: "Α", text: "Αυξάνει την $K_c$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό συμβαίνει στις ενδόθερμες αντιδράσεις." },
+                { letter: "Β", text: "Μειώνει την $K_c$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Στις εξώθερμες αντιδράσεις, η θερμότητα είναι 'προϊόν'. Η αύξηση της θερμοκρασίας ευνοεί την ενδόθερμη κατεύθυνση (αριστερά, προς τα αντιδρώντα), άρα η $K_c$ μειώνεται. [20, 63]." },
+                { letter: "Γ", text: "Δεν επηρεάζει την $K_c$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η θερμοκρασία είναι ο μόνος παράγοντας που μεταβάλλει την τιμή της $K_c$." },
+                { letter: "Δ", text: "Μετατοπίζει την ισορροπία δεξιά.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τη μετατοπίζει προς τα αριστερά." }
+            ]
+        },
+        { // 34
+            text: "Το μόριο του $BeF_2$ έχει σχήμα:",
+            options: [
+                { letter: "Α", text: "Τριγωνικό επίπεδο", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Απαιτεί 3 δεσμικά ζεύγη (π.χ. $BF_3$)." },
+                { letter: "Β", text: "Γραμμικό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το κεντρικό άτομο Be έχει 2 δεσμικά ζεύγη και 0 μη δεσμικά. Σύμφωνα με τη VSEPR, η μέγιστη απομάκρυνση επιτυγχάνεται στις $180^\\circ$. [64, 65]." },
+                { letter: "Γ", text: "Τετραεδρικό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Απαιτεί 4 δεσμικά ζεύγη γύρω από το κεντρικό άτομο (π.χ. $CH_4$)." },
+                { letter: "Δ", text: "Γωνιακό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Απαιτεί 2 δεσμικά και 1 ή 2 μη δεσμικά ζεύγη (π.χ. $H_2O$)." }
+            ]
+        },
+        { // 35
+            text: "<strong>Σωστό ή Λάθος:</strong> Στην ισορροπία, οι ταχύτητες των δύο αντίθετων αντιδράσεων μηδενίζονται. (OEFE 2024 A5.3)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η ισορροπία είναι <strong>δυναμική</strong>. Οι αντιδράσεις συνεχίζονται με ίσες και μη μηδενικές ταχύτητες ($v_1=v_2 \\neq 0$), γι' αυτό οι συγκεντρώσεις μένουν σταθερές. [65, 66]." }
+            ]
+        },
+        { // 36
+            text: "<strong>Σωστό ή Λάθος:</strong> Η πρότυπη ενθαλπία εξουδετέρωσης είναι πάντα θετική. (OEFE 2024 A5.4)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η αντίδραση εξουδετέρωσης (όπου σχηματίζεται νερό από $H^+$ και $OH^-$) είναι πάντα <strong>εξώθερμη</strong>, άρα η ενθαλπία της είναι αρνητική ($\\Delta H < 0$). [65]." }
+            ]
+        },
+        { // 37
+            text: "<strong>Σωστό ή Λάθος:</strong> Τα κατώτερα μέλη των αλκοολών διαλύονται εύκολα στο νερό. (OEFE 2024 A5.5)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Μικρές αλκοόλες όπως η μεθανόλη και η αιθανόλη κάνουν δεσμούς υδρογόνου με το νερό και το υδρόφιλο τμήμα ($OH$) επικρατεί της μικρής υδρόφοβης ανθρακικής αλυσίδας. [65]." },
+                { letter: "Β", text: "Λάθος", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι σωστή. Καθώς μεγαλώνει η ανθρακική αλυσίδα, η διαλυτότητα μειώνεται." }
+            ]
+        },
+        { // 38
+            text: "Ποιο οξύ είναι το ισχυρότερο; (Βασισμένο στο OEFE 2021 B4)",
+            options: [
+                { letter: "Α", text: "$CH_2FCOOH$ ($pK_a = 2,7$)", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δείτε την επεξήγηση της σωστής απάντησης." },
+                { letter: "Β", text: "$CH_2ClCOOH$ ($pK_a = 2,86$)", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το Cl προκαλεί ασθενέστερο επαγωγικό φαινόμενο από το F." },
+                { letter: "Γ", text: "$CH_3COOH$ ($pK_a = 4,75$)", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν έχει αλογόνο να τραβάει ηλεκτρόνια, οπότε είναι το πιο ασθενές της λίστας." },
+                { letter: "Δ", text: "$CF_3COOH$ ($pK_a = -0,25$)", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το μικρότερο (ή και αρνητικό) $pK_a$ σημαίνει μεγαλύτερη $K_a$, άρα ισχυρότερο οξύ. Τα 3 άτομα $F$ (πολύ ηλεκτραρνητικά) προκαλούν ισχυρότατο $-I$ επαγωγικό φαινόμενο, διευκολύνοντας την απομάκρυνση του $H^+$. [67]." }
+            ]
+        },
+        { // 39
+            text: "Σε δοχείο $V$ με 2 mol $H_2$ και 2 mol $He$, η ολική πίεση είναι $P$. Η μερική πίεση του $H_2$ είναι:",
+            options: [
+                { letter: "Α", text: "P", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι η ολική πίεση." },
+                { letter: "Β", text: "P/2", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Εφόσον τα mol των δύο αερίων είναι ίσα (2 mol έκαστο), το γραμμομοριακό κλάσμα του καθενός είναι 0,5. Άρα κάθε αέριο ασκεί τη μισή ολική πίεση ($P/2$). [68, 69]." },
+                { letter: "Γ", text: "2P", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η μερική πίεση είναι πάντα μικρότερη από την ολική." },
+                { letter: "Δ", text: "P/4", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong>" }
+            ]
+        },
+        { // 40
+            text: "Ποια ένωση έχει ασύμμετρο άτομο άνθρακα; (Σχολικό 51)",
+            options: [
+                { letter: "Α", text: "$2-προπανόλη$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο κεντρικός άνθρακας συνδέεται με δύο πανομοιότυπα μεθύλια ($-CH_3$). [70]." },
+                { letter: "Β", text: "$2-βουτανόλη$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Στη $2-βουτανόλη$, ο $C_2$ συνδέεται με: $-H$, $-OH$, $-CH_3$, $-CH_2CH_3$. Τέσσερις διαφορετικές ομάδες, άρα είναι ασύμμετρος. [70, 71]." },
+                { letter: "Γ", text: "$1-βουτανόλη$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο $C_1$ συνδέεται με δύο άτομα $H$ (δεν είναι 4 διαφορετικές ομάδες)." },
+                { letter: "Δ", text: "Αιθανόλη", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο άνθρακας που έχει το $OH$ έχει επίσης δύο άτομα $H$." }
+            ]
+        },
+        { // 41
+            text: "Παράδειγμα αυτοκατάλυσης είναι η αντίδραση του $KMnO_4$ με οξαλικό οξύ, όπου καταλύτης είναι (Σχολικό 14):",
+            options: [
+                { letter: "Α", text: "Το $K^+$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong>" },
+                { letter: "Β", text: "Το $Mn^{2+}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Στην αυτοκατάλυση, ένα από τα προϊόντα δρα ως καταλύτης. Εδώ είναι τα ιόντα $Mn^{2+}$ που παράγονται από την αντίδραση και επιταχύνουν την εξέλιξή της. [40]." },
+                { letter: "Γ", text: "Το $H_2SO_4$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το θειικό οξύ παρέχει το όξινο περιβάλλον, δεν είναι προϊόν που αυτοκαταλύει." },
+                { letter: "Δ", text: "Το $CO_2$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong>" }
+            ]
+        },
+        { // 42
+            text: "Κατά την αραίωση διαλύματος ασθενούς οξέος σε σταθερή θερμοκρασία:",
+            options: [
+                { letter: "Α", text: "Ο βαθμός ιοντισμού $\\alpha$ αυξάνεται.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με τον νόμο αραίωσης του Ostwald ($\\alpha = \\sqrt{K_a / c}$), αν η συγκέντρωση $c$ μειωθεί λόγω αραίωσης, ο βαθμός ιοντισμού $\\alpha$ πρέπει να αυξηθεί. [72, 73]." },
+                { letter: "Β", text: "Η σταθερά $K_a$ αυξάνεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η σταθερά $K_a$ εξαρτάται <strong>μόνο</strong> από τη θερμοκρασία. Εφόσον είναι σταθερή, η $K_a$ παραμένει σταθερή. [73, 74]." },
+                { letter: "Γ", text: "Το pH μειώνεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η αραίωση μειώνει την οξύτητα, άρα το pH αυξάνεται (πλησιάζει το 7)." },
+                { letter: "Δ", text: "Η $[H_3O^+]$ αυξάνεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Παρά την αύξηση του $\\alpha$, η συνολική συγκέντρωση $[H_3O^+]$ μειώνεται λόγω του μεγαλύτερου όγκου νερού. [75]." }
+            ]
+        },
+        { // 43
+            text: "Στην ένωση $K_2Cr_2O_7$, ο Αριθμός Οξείδωσης του χρωμίου είναι (Σχολικό 14):",
+            options: [
+                { letter: "Α", text: "+3", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δείτε τον σωστό υπολογισμό." },
+                { letter: "Β", text: "+6", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το άθροισμα των Α.Ο. πρέπει να είναι μηδέν. Άρα: $2(+1) + 2x + 7(-2) = 0 \\implies 2 + 2x - 14 = 0 \\implies 2x = 12 \\implies x = +6$. [76, 77]." },
+                { letter: "Γ", text: "+7", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong>" },
+                { letter: "Δ", text: "+12", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Προσοχή, υπάρχουν 2 άτομα χρωμίου, οπότε διαιρούμε δια 2." }
+            ]
+        },
+        { // 44
+            text: "<strong>Σωστό ή Λάθος:</strong> Η αύξηση της θερμοκρασίας αυξάνει την ταχύτητα μόνο των ενδόθερμων αντιδράσεων. (Σχολικό 40α)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η αύξηση της θερμοκρασίας αυξάνει την ταχύτητα <strong>όλων</strong> των αντιδράσεων (εξώθερμων και ενδόθερμων) γιατί αυξάνει τη μέση κινητική ενέργεια των μορίων και συνεπώς τον αριθμό των αποτελεσματικών συγκρούσεων. [61, 62]." }
+            ]
+        },
+        { // 45
+            text: "<strong>Σωστό ή Λάθος:</strong> Η προσθήκη καταλύτη αυξάνει την απόδοση μιας αντίδρασης. (Σχολικό 22γ)",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ο καταλύτης αυξάνει μόνο την ταχύτητα με την οποία το σύστημα φτάνει στην ισορροπία (μειώνει τον χρόνο). <strong>Δεν</strong> αλλάζει τη θέση της ισορροπίας ούτε την απόδοση. [78, 79]." }
+            ]
+        },
+        { // 46
+            text: "Ποιο μόριο αποτελεί εξαίρεση στον κανόνα της οκτάδας; (Σχολικό 6.5)",
+            options: [
+                { letter: "Α", text: "$CH_4$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο άνθρακας συμπληρώνει 8 ηλεκτρόνια (4 δικά του + 4 από το υδρογόνο)." },
+                { letter: "Β", text: "$NH_3$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το άζωτο συμπληρώνει την οκτάδα του (1 μη δεσμικό ζεύγος + 3 δεσμικά)." },
+                { letter: "Γ", text: "$BF_3$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το βόριο ($B$) στο $BF_3$ περιβάλλεται από μόνο 6 ηλεκτρόνια. Είναι ένα 'ελλειμματικό' μόριο ως προς τα ηλεκτρόνια σθένους. [80, 81]." },
+                { letter: "Δ", text: "$H_2O$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το οξυγόνο συμπληρώνει την οκτάδα του (2 μη δεσμικά ζεύγη + 2 δεσμικά)." }
+            ]
+        },
+        { // 47
+            text: "Η αγωγιμότητα των ηλεκτρολυτικών αγωγών οφείλεται στην κίνηση:",
+            options: [
+                { letter: "Α", text: "Ηλεκτρονίων", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό ισχύει για τους μεταλλικούς αγωγούς." },
+                { letter: "Β", text: "Ιόντων", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Στους ηλεκτρολύτες (διαλύματα ή τήγματα), το ηλεκτρικό ρεύμα μεταφέρεται μέσω της μετανάστευσης των κατιόντων και ανιόντων. [82]." },
+                { letter: "Γ", text: "Πρωτονίων στον πυρήνα", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα πρωτόνια δεν μετακινούνται από τον πυρήνα κατά την αγωγή ρεύματος." },
+                { letter: "Δ", text: "Μορίων νερού", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα μόρια νερού δεν μεταφέρουν το ηλεκτρικό φορτίο." }
+            ]
+        },
+        { // 48
+            text: "<strong>Σωστό ή Λάθος:</strong> Η ενέργεια που απαιτείται για τη διάσπαση ενός δεσμού είναι ίση με την ενέργεια που εκλύεται κατά τον σχηματισμό του.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτή είναι βασική αρχή της Θερμοχημείας. Το 'κόστος' σπασίματος ενός συγκεκριμένου δεσμού (ενδόθερμη διαδικασία) ισούται αριθμητικά με το 'κέρδος' (εκλυόμενη ενέργεια) κατά τη δημιουργία του (εξώθερμη διαδικασία). [14]." },
+                { letter: "Β", text: "Λάθος", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι σωστή. Οι ενέργειες είναι ίσες κατά απόλυτη τιμή." }
+            ]
+        },
+        { // 49
+            text: "Οι μονάδες της σταθεράς ταχύτητας $k$ για μια αντίδραση 1ης τάξης είναι:",
+            options: [
+                { letter: "Α", text: "$mol \\cdot L^{-1} \\cdot s^{-1}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτές είναι οι μονάδες της σταθεράς για αντίδραση μηδενικής τάξης (ίδιες με της ταχύτητας)." },
+                { letter: "Β", text: "$L \\cdot mol^{-1} \\cdot s^{-1}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτές είναι οι μονάδες για αντίδραση 2ης τάξης." },
+                { letter: "Γ", text: "$s^{-1}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ο νόμος είναι $v = k [A] \\implies [mol/(L \\cdot s)] = k [mol/L]$. Απλοποιώντας τις συγκεντρώσεις, μένει μονάδα $s^{-1}$ (χρόνος εις την πλην ένα). [83, 84]." },
+                { letter: "Δ", text: "$L^2 \\cdot mol^{-2} \\cdot s^{-1}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτές είναι οι μονάδες για αντίδραση 3ης τάξης." }
+            ]
+        },
+        { // 50
+            text: "Στην ισορροπία $H_2(g) + I_2(g) \\rightleftharpoons 2HI(g)$, η αύξηση της πίεσης (με μείωση όγκου):",
+            options: [
+                { letter: "Α", text: "Μετατοπίζει την ισορροπία δεξιά.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η αλλαγή πίεσης μετατοπίζει την ισορροπία προς τα λιγότερα mol, αλλά εδώ τα mol είναι ίσα." },
+                { letter: "Β", text: "Μετατοπίζει την ισορροπία αριστερά.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong>" },
+                { letter: "Γ", text: "Δεν μετατοπίζει την ισορροπία.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή ο αριθμός των mol των αερίων αντιδρώντων ($1+1=2$) είναι ίσος με τον αριθμό των mol των αερίων προϊόντων (2), η μεταβολή της πίεσης/όγκου <strong>δεν</strong> επηρεάζει τη θέση της ισορροπίας. [78, 79]." },
+                { letter: "Δ", text: "Μειώνει την απόδοση.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η απόδοση παραμένει αμετάβλητη." }
+            ]
+        }
+    ];
+
+    // Render quiz
+    const root = document.getElementById('quiz-root');
+
+    async function renderMath(element) {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise([element]);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function buildQuiz() {
+        root.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    await renderMath(feedbackDiv);
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        renderMath(root);
+    }
+    
+    window.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+</body>
+</html>

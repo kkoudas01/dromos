@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Μαθηματικών Κατεύθυνσης Γ' Λυκείου | Μονοτονία - Ακρότατα - 1-1 - Αντίστροφη</title>
+    <!-- MathJax με προκαθορισμένες παραμέτρους για σωστή απόδοση -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true,
+                tags: 'none'
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady();
+                }
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+        }
+
+        /* για μαθηματικά μέσα στο κείμενο */
+        .question-text mjx-container {
+            font-size: 1.05em;
+        }
+
+        .options-area {
+            padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .option-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4662;
+            font-family: inherit;
+            flex: 1 0 auto;
+            text-align: center;
+        }
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        .feedback-content ul {
+            margin: 0.5rem 0 0 1.5rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: center;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    <div class="quiz-header">
+        <h1>📐 Quiz Μαθηματικών Κατεύθυνσης Γ' Λυκείου <br><small>Ενότητα 1.3: Μονοτονία - Ακρότατα - Συνάρτηση 1-1 - Αντίστροφη</small></h1>
+        <div class="instructions">
+            📌 Επιλέξτε μία απάντηση για κάθε ερώτηση πατώντας πάνω στην επιλογή. <br>
+            ✅ Αμέσως θα εμφανιστεί η <strong>αιτιολόγηση</strong> γιατί η επιλογή είναι σωστή ή λάθος, με πλήρη μαθηματική ανατροφοδότηση.
+        </div>
+    </div>
+    <div id="quiz-root"></div>
+    <footer>📖 Κάθε απάντηση συνοδεύεται από μαθηματική επεξήγηση — μελέτησε τις ανατροφοδοτήσεις για βαθύτερη κατανόηση.</footer>
+</div>
+
+<script>
+    // ============================================================
+    // Δεδομένα ερωτήσεων (πλήρως συμβατά με LaTeX)
+    // ============================================================
+    const quizData = [
+        { // 1
+            text: "Μια συνάρτηση $f$ λέγεται <strong>γνησίως αύξουσα</strong> σε ένα διάστημα $\\Delta$, όταν για οποιαδήποτε $x_{1}, x_{2} \\in \\Delta$ με $x_{1} < x_{2}$ ισχύει:",
+            options: [
+                { letter: "Α", text: "$f(x_{1}) \\leq f(x_{2})$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτός είναι ο ορισμός της <em>αύξουσας</em> συνάρτησης. Η ισότητα επιτρέπει στη συνάρτηση να παραμένει σταθερή σε κάποια τμήματα, κάτι που απαγορεύεται στη γνησίως αύξουσα." },
+                { letter: "Β", text: "$f(x_{1}) < f(x_{2})$", isCorrect: true, feedback: "<strong>Σωστή:</strong> Στη γνησίως αύξουσα συνάρτηση, η αυστηρή ανισότητα των ορισμάτων διατηρείται αυστηρά και στις τιμές." },
+                { letter: "Γ", text: "$f(x_{1}) > f(x_{2})$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτός ο ορισμός αντιστοιχεί στη γνησίως φθίνουσα συνάρτηση." }
+            ]
+        },
+        { // 2
+            text: "Ποιο είναι το είδος μονοτονίας της συνάρτησης $f(x) = x^{2}$ στο διάστημα $(-\\infty, 0]$;",
+            options: [
+                { letter: "Α", text: "Γνησίως αύξουσα", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η $x^{2}$ αυξάνεται μόνο στο $[0, +\\infty)$. Στο αρνητικό τμήμα του άξονα, οι τιμές μειώνονται καθώς το $x$ πλησιάζει το μηδέν." },
+                { letter: "Β", text: "Γνησίως φθίνουσα", isCorrect: true, feedback: "<strong>Σωστή:</strong> Για $x_{1} < x_{2} \\leq 0$, ισχύει $0 \\leq -x_{2} < -x_{1}$, άρα $(-x_{2})^{2} < (-x_{1})^{2}$, δηλαδή $f(x_{2}) < f(x_{1})$." },
+                { letter: "Γ", text: "Σταθερή", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η συνάρτηση αλλάζει τιμές συνεχώς στο διάστημα αυτό." }
+            ]
+        },
+        { // 3
+            text: "Μια συνάρτηση $f$ με πεδίο ορισμού $A$ παρουσιάζει στο $x_{0} \\in A$ <strong>ολικό ελάχιστο</strong>, όταν για κάθε $x \\in A$ ισχύει:",
+            options: [
+                { letter: "Α", text: "$f(x) \\leq f(x_{0})$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτή η συνθήκη περιγράφει το ολικό μέγιστο, όπου το $f(x_{0})$ είναι η μεγαλύτερη τιμή." },
+                { letter: "Β", text: "$f(x_{0}) = 0$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Το ελάχιστο δεν χρειάζεται να είναι μηδέν. Μπορεί να είναι οποιοσδήποτε πραγματικός αριθμός." },
+                { letter: "Γ", text: "$f(x) \\geq f(x_{0})$", isCorrect: true, feedback: "<strong>Σωστή:</strong> Το $f(x_{0})$ είναι ολικό ελάχιστο αν καμία άλλη τιμή της συνάρτησης δεν είναι μικρότερη από αυτό." }
+            ]
+        },
+        { // 4
+            text: "Η συνάρτηση $f(x) = x^{3}$ στο $\\mathbb{R}$:",
+            options: [
+                { letter: "Α", text: "Παρουσιάζει ελάχιστο στο $x=0$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Παρόλο που η γραφική παράσταση οριζοντιώνεται στιγμιαία στο 0, η συνάρτηση συνεχίζει να αυξάνεται αμέσως μετά." },
+                { letter: "Β", text: "Δεν παρουσιάζει ακρότατα", isCorrect: true, feedback: "<strong>Σωστή:</strong> Η $x^{3}$ είναι γνησίως αύξουσα σε όλο το $\\mathbb{R}$, άρα οι τιμές της εκτείνονται από το $-\\infty$ έως το $+\\infty$ χωρίς να σταματούν σε κάποιο ακρότατο." },
+                { letter: "Γ", text: "Έχει μέγιστο το $+\\infty$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Το $+\\infty$ δεν είναι πραγματικός αριθμός για να θεωρηθεί 'μέγιστο' της συνάρτησης." }
+            ]
+        },
+        { // 5
+            text: "Ποια από τις παρακάτω συναρτήσεις παρουσιάζει μέγιστο το $1$;",
+            options: [
+                { letter: "Α", text: "$f(x) = \\sin x$", isCorrect: true, feedback: "<strong>Σωστή:</strong> Η συνάρτηση ημίτονο έχει εύρος τιμών $[-1, 1]$, άρα η μέγιστη τιμή της είναι το 1." },
+                { letter: "Β", text: "$f(x) = x^{2} + 1$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η $x^{2} + 1$ έχει ελάχιστο το 1 στο $x=0$, αλλά δεν έχει μέγιστο καθώς τείνει στο $+\\infty$." },
+                { letter: "Γ", text: "$f(x) = e^{x}$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η εκθετική συνάρτηση δεν έχει μέγιστο στο $\\mathbb{R}$." }
+            ]
+        },
+        { // 6
+            text: "Μια συνάρτηση $f: A \\to \\mathbb{R}$ λέγεται <strong>συνάρτηση 1-1</strong>, όταν για οποιαδήποτε $x_{1}, x_{2} \\in A$ ισχύει:",
+            options: [
+                { letter: "Α", text: "Αν $x_{1} = x_{2}$, τότε $f(x_{1}) = f(x_{2})$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτή είναι η ιδιότητα που καθιστά μια αντιστοίχιση 'συνάρτηση' γενικά, όχι απαραίτητα 1-1." },
+                { letter: "Β", text: "Αν $x_{1} \\neq x_{2}$, τότε $f(x_{1}) \\neq f(x_{2})$", isCorrect: true, feedback: "<strong>Σωστή:</strong> Αυτός είναι ο ορισμός: διαφορετικά στοιχεία του πεδίου ορισμού αντιστοιχίζονται υποχρεωτικά σε διαφορετικές εικόνες." },
+                { letter: "Γ", text: "Αν $f(x_{1}) = f(x_{2})$, τότε $x_{1} \\neq x_{2}$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η σωστή συνεπαγωγή για το 1-1 είναι: 'αν $f(x_{1}) = f(x_{2})$, τότε $x_{1} = x_{2}$'." }
+            ]
+        },
+        { // 7
+            text: "Ποιο από τα παρακάτω αποτελεί γεωμετρικό κριτήριο ώστε μια συνάρτηση να είναι 1-1;",
+            options: [
+                { letter: "Α", text: "Κάθε κατακόρυφη ευθεία τέμνει τη $C_{f}$ το πολύ σε ένα σημείο.", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτό το κριτήριο ελέγχει αν μια καμπύλη είναι γραφική παράσταση συνάρτησης γενικά." },
+                { letter: "Β", text: "Η $C_{f}$ περνά από την αρχή των αξόνων.", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η διέλευση από το $(0,0)$ δεν σχετίζεται με την ιδιότητα 1-1." },
+                { letter: "Γ", text: "Κάθε οριζόντια ευθεία τέμνει τη $C_{f}$ το πολύ σε ένα σημείο.", isCorrect: true, feedback: "<strong>Σωστή:</strong> Αν μια οριζόντια ευθεία έτεμνε τη $C_{f}$ σε δύο σημεία, αυτά θα είχαν το ίδιο $y$ για διαφορετικά $x$, άρα η $f$ δεν θα ήταν 1-1." }
+            ]
+        },
+        { // 8
+            text: "Αν μια συνάρτηση $f$ είναι <strong>γνησίως μονότονη</strong> σε ένα διάστημα $\\Delta$, τότε:",
+            options: [
+                { letter: "Α", text: "Είναι υποχρεωτικά συνάρτηση 1-1 στο $\\Delta$.", isCorrect: true, feedback: "<strong>Σωστή:</strong> Επειδή η συνάρτηση 'ανεβαίνει' ή 'κατεβαίνει' συνεχώς, δεν μπορεί να πάρει την ίδια τιμή δύο φορές." },
+                { letter: "Β", text: "Δεν μπορεί να είναι 1-1.", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η γνησία μονοτονία είναι ικανή συνθήκη για την ιδιότητα 1-1." },
+                { letter: "Γ", text: "Είναι 1-1 μόνο αν είναι γνησίως αύξουσα.", isCorrect: false, feedback: "<strong>Λάθος:</strong> Τόσο η γνησίως αύξουσα όσο και η γνησίως φθίνουσα είναι 1-1." }
+            ]
+        },
+        { // 9
+            text: "Ισχύει ότι κάθε συνάρτηση 1-1 είναι υποχρεωτικά γνησίως μονότονη;",
+            options: [
+                { letter: "Α", text: "Ναι, είναι ταυτόσημες έννοιες.", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτή είναι μια συνηθισμένη παρανόηση. Η γνησία μονοτονία συνεπάγεται το 1-1, αλλά όχι πάντα το αντίστροφο." },
+                { letter: "Β", text: "Όχι, υπάρχουν συναρτήσεις 1-1 που δεν είναι γνησίως μονότονες.", isCorrect: true, feedback: "<strong>Σωστή:</strong> Υπάρχουν συναρτήσεις (π.χ. δίκλαδες ή με ασυνέχειες) που είναι 1-1 χωρίς να είναι γνησίως μονότονες σε όλο το πεδίο ορισμού τους." },
+                { letter: "Γ", text: "Μόνο αν η συνάρτηση είναι πολυωνυμική.", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η ιδιότητα 1-1 δεν εξαρτάται από το αν η συνάρτηση είναι πολυώνυμο." }
+            ]
+        },
+        { // 10
+            text: "Για να ορίζεται η <strong>αντίστροφη συνάρτηση</strong> $f^{-1}$, η συνάρτηση $f$ πρέπει να είναι:",
+            options: [
+                { letter: "Α", text: "Γνησίως μονότονη", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η μονοτονία εξασφαλίζει την ύπαρξη αντίστροφης, αλλά δεν είναι η <em>μοναδική</em> περίπτωση. Η αναγκαία συνθήκη είναι το 1-1." },
+                { letter: "Β", text: "Συνεχής", isCorrect: false, feedback: "<strong>Λάθος:</strong> Μια συνάρτηση μπορεί να είναι ασυνεχής αλλά 1-1, και άρα να έχει αντίστροφη." },
+                { letter: "Γ", text: "Συνάρτηση 1-1", isCorrect: true, feedback: "<strong>Σωστή:</strong> Η ιδιότητα 1-1 είναι απαραίτητη ώστε κάθε $y$ του συνόλου τιμών να αντιστοιχίζεται σε μοναδικό $x$." }
+            ]
+        },
+        { // 11
+            text: "Ποιο είναι το <strong>πεδίο ορισμού</strong> της αντίστροφης συνάρτησης $f^{-1}$;",
+            options: [
+                { letter: "Α", text: "Το πεδίο ορισμού $A$ της $f$.", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτό είναι το <em>σύνολο τιμών</em> της $f^{-1}$." },
+                { letter: "Β", text: "Το σύνολο τιμών $f(A)$ της $f$.", isCorrect: true, feedback: "<strong>Σωστή:</strong> Η $f^{-1}$ 'αντιστρέφει' τη διαδικασία, άρα δέχεται ως εισόδους τις εξόδους (τιμές) της $f$." },
+                { letter: "Γ", text: "Το σύνολο των πραγματικών αριθμών $\\mathbb{R}$.", isCorrect: false, feedback: "<strong>Λάθος:</strong> Το πεδίο ορισμού της $f^{-1}$ εξαρτάται αποκλειστικά από το σύνολο τιμών της $f$." }
+            ]
+        },
+        { // 12
+            text: "Ποια βασική ισοδυναμία συνδέει την $f$ με την $f^{-1}$;",
+            options: [
+                { letter: "Α", text: "$f(x) = y \\iff f^{-1}(y) = x$", isCorrect: true, feedback: "<strong>Σωστή:</strong> Αν η $f$ αντιστοιχίζει το $x$ στο $y$, τότε η $f^{-1}$ αντιστοιχίζει το $y$ στο $x$." },
+                { letter: "Β", text: "$f(x) \\cdot f^{-1}(x) = 1$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτή η σχέση αφορά το γινόμενο αριθμών, όχι την αντίστροφη συνάρτηση." },
+                { letter: "Γ", text: "$f(x) = f^{-1}(x)$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτό ισχύει μόνο αν η συνάρτηση είναι ίση με την αντίστροφή της (αυτοαντίστροφη)." }
+            ]
+        },
+        { // 13
+            text: "Οι γραφικές παραστάσεις $C$ και $C'$ των συναρτήσεων $f$ και $f^{-1}$ είναι συμμετρικές ως προς:",
+            options: [
+                { letter: "Α", text: "Τον άξονα $y'y$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτή είναι η συμμετρία των άρτιων συναρτήσεων." },
+                { letter: "Β", text: "Την ευθεία $y = x$", isCorrect: true, feedback: "<strong>Σωστή:</strong> Επειδή τα σημεία $(x, y)$ της $C$ γίνονται $(y, x)$ στην $C'$, οι καμπύλες είναι συμμετρικές ως προς τη διχοτόμο $y=x$." },
+                { letter: "Γ", text: "Την αρχή των αξόνων $O(0,0)$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτή είναι η συμμετρία των περιττών συναρτήσεων." }
+            ]
+        },
+        { // 14
+            text: "Αν μια συνάρτηση $f$ είναι γνησίως αύξουσα στο $\\Delta$, τότε για οποιαδήποτε $x_{1}, x_{2} \\in \\Delta$ ισχύει η συνεπαγωγή:",
+            options: [
+                { letter: "Α", text: "$f(x_{1}) < f(x_{2}) \\iff x_{1} < x_{2}$", isCorrect: true, feedback: "<strong>Σωστή:</strong> Στη γνησίως αύξουσα συνάρτηση η φορά της ανισότητας διατηρείται. Αυτή η πρόταση χρησιμοποιείται αναπόδεικτα στις ασκήσεις." },
+                { letter: "Β", text: "$f(x_{1}) < f(x_{2}) \\iff x_{1} > x_{2}$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτό ισχύει για τις γνησίως φθίνουσες συναρτήσεις." },
+                { letter: "Γ", text: "$f(x_{1}) < f(x_{2}) \\iff x_{1} = x_{2}$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η ανισότητα των τιμών δεν μπορεί να οδηγεί σε ισότητα των ορισμάτων." }
+            ]
+        },
+        { // 15
+            text: "Αν $f, g$ είναι γνησίως αύξουσες στο $\\Delta$, τότε η συνάρτηση $h = f + g$ είναι:",
+            options: [
+                { letter: "Α", text: "Γνησίως φθίνουσα στο $\\Delta$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Το άθροισμα δύο αυξανόμενων μεγεθών δεν μπορεί να μειώνεται." },
+                { letter: "Β", text: "Σταθερή", isCorrect: false, feedback: "<strong>Λάθος:</strong> Το άθροισμα θα είναι σταθερό μόνο αν $f$ και $g$ έχουν αντίθετη μονοτονία και 'εξουδετερώνει' η μία την άλλη." },
+                { letter: "Γ", text: "Γνησίως αύξουσα στο $\\Delta$", isCorrect: true, feedback: "<strong>Σωστή:</strong> Το άθροισμα γνησίως αυξουσών συναρτήσεων διατηρεί τη μονοτονία τους." }
+            ]
+        },
+        { // 16
+            text: "Η αντίστροφη της εκθετικής συνάρτησης $f(x) = e^{x}$ είναι:",
+            options: [
+                { letter: "Α", text: "$f^{-1}(x) = \\ln x$", isCorrect: true, feedback: "<strong>Σωστή:</strong> Η λογαριθμική συνάρτηση με βάση το $e$ είναι εξ ορισμού η αντίστροφη της εκθετικής με βάση το $e$." },
+                { letter: "Β", text: "$f^{-1}(x) = x^{e}$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτή είναι μια δύναμη, όχι η αντίστροφη της εκθετικής." },
+                { letter: "Γ", text: "$f^{-1}(x) = \\frac{1}{e^{x}}$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτή είναι η αντίστροφη τιμή της συνάρτησης, όχι η αντίστροφη συνάρτηση." }
+            ]
+        },
+        { // 17
+            text: "Για να είναι το γινόμενο $f \\cdot g$ γνησίως αύξουσα συνάρτηση στο $\\Delta$, όταν οι $f, g$ είναι γνησίως αύξουσες, πρέπει επιπλέον:",
+            options: [
+                { letter: "Α", text: "$f(x) \\geq 0$ και $g(x) \\geq 0$ για κάθε $x \\in \\Delta$", isCorrect: true, feedback: "<strong>Σωστή:</strong> Χρειάζεται οι τιμές να είναι μη αρνητικές για να διατηρηθεί η φορά της ανισότητας κατά τον πολλαπλασιασμό." },
+                { letter: "Β", text: "$f(x) < 0$ και $g(x) < 0$ για κάθε $x \\in \\Delta$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αν οι συναρτήσεις είναι αρνητικές, το γινόμενο δύο αυξουσών συναρτήσεων μπορεί να γίνει φθίνουσα." },
+                { letter: "Γ", text: "Καμία άλλη προϋπόθεση", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η μονοτονία του γινομένου δεν είναι πάντα εγγυημένη μόνο από τη μονοτονία των παραγόντων." }
+            ]
+        },
+        { // 18
+            text: "Τι ονομάζουμε <strong>ακρότατα</strong> μιας συνάρτησης;",
+            options: [
+                { letter: "Α", text: "Τα σημεία τομής με τον άξονα $x'x$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτές είναι οι ρίζες της συνάρτησης." },
+                { letter: "Β", text: "Το ολικό μέγιστο και το ολικό ελάχιστο", isCorrect: true, feedback: "<strong>Σωστή:</strong> Ο όρος ακρότατα περιλαμβάνει συγκεντρωτικά τα ολικά μέγιστα και ελάχιστα." },
+                { letter: "Γ", text: "Το πεδίο ορισμού και το σύνολο τιμών", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτά είναι τα σύνολα στα οποία ορίζεται και κινείται η συνάρτηση." }
+            ]
+        },
+        { // 19
+            text: "Αν μια συνάρτηση $f$ είναι γνησίως αύξουσα στο $\\Delta$, η συνάρτηση $h(x) = -f(x)$ είναι:",
+            options: [
+                { letter: "Α", text: "Γνησίως αύξουσα στο $\\Delta$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Το αρνητικό πρόσημο αναστρέφει τη φορά των τιμών." },
+                { letter: "Β", text: "Γνησίως φθίνουσα στο $\\Delta$", isCorrect: true, feedback: "<strong>Σωστή:</strong> Η μονοτονία αντιστρέφεται όταν πολλαπλασιάζουμε τη συνάρτηση με αρνητικό αριθμό." },
+                { letter: "Γ", text: "Σταθερή", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η μονοτονία αλλάζει είδος, δεν καταργείται." }
+            ]
+        },
+        { // 20
+            text: "Η συνάρτηση $f(x) = |x - 1|$ παρουσιάζει ολικό ελάχιστο στο:",
+            options: [
+                { letter: "Α", text: "$x = 0$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Στο $x=0$, $f(0) = |0-1| = 1$, που δεν είναι η μικρότερη τιμή." },
+                { letter: "Β", text: "$x = -1$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Στο $x=-1$, $f(-1) = |-1-1| = 2$." },
+                { letter: "Γ", text: "$x = 1$", isCorrect: true, feedback: "<strong>Σωστή:</strong> Στο $x=1$, $f(1) = |1-1| = 0$. Επειδή η απόλυτη τιμή είναι πάντα $\\geq 0$, το 0 είναι το ολικό ελάχιστο." }
+            ]
+        },
+        { // 21
+            text: "Στη συνάρτηση $f(x) = \\alpha x + \\beta$, αν $\\alpha \\neq 0$, η συνάρτηση είναι πάντα:",
+            options: [
+                { letter: "Α", text: "1-1", isCorrect: true, feedback: "<strong>Σωστή:</strong> Κάθε μη οριζόντια ευθεία είναι γνησίως μονότονη, άρα και 1-1." },
+                { letter: "Β", text: "Σταθερή", isCorrect: false, feedback: "<strong>Λάθος:</strong> Σταθερή είναι μόνο αν $\\alpha = 0$." },
+                { letter: "Γ", text: "Μη αντιστρέψιμη", isCorrect: false, feedback: "<strong>Λάθος:</strong> Εφόσον είναι 1-1, είναι πάντα αντιστρέψιμη." }
+            ]
+        },
+        { // 22
+            text: "Η πρόταση 'Αν $f(x_{1}) = f(x_{2})$, τότε $x_{1} = x_{2}$' είναι:",
+            options: [
+                { letter: "Α", text: "Ορισμός της γνησίως αύξουσας συνάρτησης", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η μονοτονία ορίζεται με ανισότητες." },
+                { letter: "Β", text: "Ικανή και αναγκαία συνθήκη για την ιδιότητα 1-1", isCorrect: true, feedback: "<strong>Σωστή:</strong> Αυτή η συνεπαγωγή αποτελεί τον εναλλακτικό ορισμό της συνάρτησης 1-1 (με απαγωγή σε άτομο)." },
+                { letter: "Γ", text: "Ορισμός του ολικού μεγίστου", isCorrect: false, feedback: "<strong>Λάθος:</strong> Το μέγιστο ορίζεται με τη σχέση $f(x) \\leq f(x_{0})$." }
+            ]
+        },
+        { // 23
+            text: "Η συνάρτηση $f(x) = \\beta$ (σταθερή) στο $\\mathbb{R}$:",
+            options: [
+                { letter: "Α", text: "Είναι 1-1", isCorrect: false, feedback: "<strong>Λάθος:</strong> Διαφορετικά $x$ αντιστοιχίζονται στο ίδιο $y$, άρα παραβιάζεται το 1-1." },
+                { letter: "Β", text: "Δεν είναι 1-1", isCorrect: true, feedback: "<strong>Σωστή:</strong> Επειδή $f(x_{1}) = f(x_{2}) = \\beta$ για οποιαδήποτε $x_{1} \\neq x_{2}$." },
+                { letter: "Γ", text: "Είναι γνησίως μονότονη", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η σταθερή συνάρτηση είναι μονότονη (αύξουσα και φθίνουσα ταυτόχρονα), αλλά <strong>όχι γνησίως</strong> μονότονη." }
+            ]
+        },
+        { // 24
+            text: "Αν μια συνάρτηση $f$ είναι 1-1, η εξίσωση $f(x) = y$ στο σύνολο τιμών της:",
+            options: [
+                { letter: "Α", text: "Έχει ακριβώς μία λύση ως προς $x$", isCorrect: true, feedback: "<strong>Σωστή:</strong> Αυτό είναι το βασικό χαρακτηριστικό των 1-1 συναρτήσεων που επιτρέπει τον ορισμό της αντίστροφης." },
+                { letter: "Β", text: "Έχει τουλάχιστον δύο λύσεις", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αν είχε δύο λύσεις, τότε δύο διαφορετικά $x$ θα είχαν το ίδιο $y$, άρα η $f$ δεν θα ήταν 1-1." },
+                { letter: "Γ", text: "Είναι αδύνατη", isCorrect: false, feedback: "<strong>Λάθος:</strong> Στο σύνολο τιμών υπάρχει πάντα τουλάχιστον μία λύση." }
+            ]
+        },
+        { // 25
+            text: "Αν $f$ είναι γνησίως φθίνουσα στο $\\Delta$, τότε για $x_{1} < x_{2}$ ισχύει:",
+            options: [
+                { letter: "Α", text: "$f(x_{1}) > f(x_{2})$", isCorrect: true, feedback: "<strong>Σωστή:</strong> Στη γνησίως φθίνουσα συνάρτηση η φορά της ανισότητας αντιστρέφεται." },
+                { letter: "Β", text: "$f(x_{1}) < f(x_{2})$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Αυτό συμβαίνει στη γνησίως αύξουσα." },
+                { letter: "Γ", text: "$f(x_{1}) = f(x_{2})$", isCorrect: false, feedback: "<strong>Λάθος:</strong> Η ισότητα απαγορεύεται στη γνησία μονοτονία." }
+            ]
+        }
+    ];
+
+    // Συνάρτηση για αναγκαστική μεταγλώττιση όλων των μαθηματικών
+    async function renderMath() {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise();
+            } catch (err) {
+                console.warn("MathJax typeset error:", err);
+            }
+        }
+    }
+
+    // Δημιουργία ολόκληρου του quiz
+    function buildQuiz() {
+        const root = document.getElementById('quiz-root');
+        root.innerHTML = '';
+        
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            // Header με το ερώτημα
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            // Περιοχή επιλογών
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            // Περιοχή feedback (αρχικά κρυφή)
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    // Αφαίρεση παλαιών στυλ από όλα τα κουμπιά της ίδιας ερώτησης
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    // Προσθήκη χρώματος ανάλογα με την ορθότητα
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    // Εμφάνιση feedback με την κατάλληλη αιτιολόγηση
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    // Αναγκαστική μεταγλώττιση του νέου περιεχομένου (για τυχόν μαθηματικά στο feedback)
+                    if (window.MathJax) {
+                        await MathJax.typesetPromise([feedbackDiv]);
+                    }
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        
+        // Αφού προστεθεί όλο το περιεχόμενο, αποδίδουμε τα μαθηματικά
+        renderMath();
+    }
+    
+    // Όταν φορτώσει πλήρως η σελίδα, χτίζουμε το quiz και ξανατρέχουμε τη MathJax
+    window.addEventListener('load', () => {
+        buildQuiz();
+    });
+</script>
+</body>
+</html>
