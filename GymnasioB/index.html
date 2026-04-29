@@ -25,8 +25,8 @@
   --font-head: system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden}
-@media(max-height:500px){body{overflow:auto}}
+html{height:100%}
+body{height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--text);font-family:var(--font-ui);display:flex;flex-direction:column}
 #bg-layer{
   position:fixed;inset:0;z-index:0;
@@ -222,28 +222,32 @@ body::after{
 @media(max-width:700px){
   #menu-toggle{display:block}
   #sidebar{
-    position:fixed;left:0;top:56px;bottom:0;z-index:200;
-    transform:translateX(-110%);
+    /* fixed overlay — top αγκυρωμένο στο topbar, bottom στο κάτω μέρος οθόνης */
+    position:fixed;
+    top:56px;
+    left:0;
+    bottom:0;
+    width:var(--sidebar-w);
+    max-width:90vw;
+    z-index:200;
+    /* scroll με native touch kinetics */
     overflow-y:auto;
-    /* ύψος = όλη η οθόνη μείον topbar, με scroll αν χρειαστεί */
-    max-height:calc(100vh - 56px);
-    height:calc(100vh - 56px);
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:contain;
+    /* κρυμμένο με opacity+pointer-events αντί transform/left
+       ώστε να μην σπάει το overflow context */
+    opacity:0;
+    pointer-events:none;
+    visibility:hidden;
+    transition:opacity var(--transition),visibility var(--transition);
   }
-  #sidebar.open{transform:translateX(0)}
+  #sidebar.open{
+    opacity:1;
+    pointer-events:auto;
+    visibility:visible;
+  }
   #search-input{width:140px}
-}
-@media(max-width:700px) and (orientation:landscape){
-  /* Σε landscape η οθόνη είναι κοντή — το sidebar πρέπει να scrollάρει */
-  #sidebar{
-    /* ξαναορίζουμε ύψος με βάση το 100dvh αν υποστηρίζεται, αλλιώς 100vh */
-    height:calc(100dvh - 56px);
-    max-height:calc(100dvh - 56px);
-    overflow-y:auto;
-    /* scrollbar πάντα ορατό ώστε να ξέρει ο χρήστης ότι υπάρχει κύλιση */
-    overscroll-behavior:contain;
-  }
-  /* Επιτρέπουμε scroll στο main περιεχόμενο */
-  #main{overflow-y:auto}
 }
 </style>
 </head>

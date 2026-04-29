@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Θεωρίας Φυσικής Προσανατολισμού | Προετοιμασία για Θέμα Α</title>
+    <!-- MathJax (CDN) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* --- Κουμπί Επιστροφής & Υπογραφή --- */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            color: #1e6f9f;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #0b2b44;
+            transform: translateX(-5px);
+        }
+
+        .signature {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            color: #4a627a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1000;
+            font-style: italic;
+        }
+        /* ------------------------------------------------ */
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .options-area {
+            padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .option-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4662;
+            font-family: inherit;
+            flex: 1 0 auto;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        .feedback-content ul {
+            margin: 0.5rem 0 0 1.5rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: left;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+            .signature {
+                position: static;
+                text-align: right;
+                display: block;
+                padding-right: 1rem;
+                margin-top: -1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    
+    <!-- Κουμπί Επιστροφής Πάνω Αριστερά -->
+    <a href="../index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Αρχική Σελίδα
+    </a>
+
+    <div class="quiz-header">
+        <h1>⚛️ Quiz Θεωρίας Φυσικής Προσανατολισμού <br><small>Προετοιμασία για Θέμα Α</small></h1>
+        <div class="instructions">
+            📌 Επιλέξτε τη σωστή απάντηση σε κάθε ερώτηση. <br>
+            ✅ Το quiz περιλαμβάνει ερωτήσεις Πολλαπλής Επιλογής και Σωστού-Λάθους. Μετά από κάθε επιλογή σας εμφανίζεται αναλυτική επεξήγηση.
+        </div>
+    </div>
+    
+    <div id="quiz-root"></div>
+    
+    <footer>📖 Κάθε απάντηση συνοδεύεται από πλήρη επεξήγηση – μελέτησε την ανατροφοδότηση για βαθύτερη κατανόηση.</footer>
+</div>
+
+<!-- Υπογραφή Κάτω Δεξιά -->
+<div class="signature">✍️ Κώστας Κούδας</div>
+
+<script>
+    // Δεδομένα quiz – Πλήρης LaTeX σύνταξη και escape
+    const quizData = [
+        // --- Πολλαπλής Επιλογής ---
+        { 
+            text: "Σε ένα στρεφόμενο πλαίσιο μέσα σε ομογενές μαγνητικό πεδίο, αν διπλασιάσουμε την περίοδο περιστροφής $T$, το πλάτος της εναλλασσόμενης τάσης $V$:",
+            options: [
+                { letter: "α", text: "Διπλασιάζεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η μέγιστη τάση δίνεται από τη σχέση $V = NBA\\omega$. Επειδή $\\omega = 2\\pi/T$, αν διπλασιάσουμε το $T$, η γωνιακή ταχύτητα $\\omega$ υποδιπλασιάζεται, άρα και το πλάτος $V$ υποδιπλασιάζεται. [1, 2]" },
+                { letter: "β", text: "Παραμένει σταθερό.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η μέγιστη τάση δίνεται από τη σχέση $V = NBA\\omega$. Επειδή $\\omega = 2\\pi/T$, αν διπλασιάσουμε το $T$, η γωνιακή ταχύτητα $\\omega$ υποδιπλασιάζεται, άρα και το πλάτος $V$ υποδιπλασιάζεται. [1, 2]" },
+                { letter: "γ", text: "Υποδιπλασιάζεται.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η μέγιστη τάση δίνεται από τη σχέση $V = NBA\\omega$. Επειδή $\\omega = 2\\pi/T$, αν διπλασιάσουμε το $T$, η γωνιακή ταχύτητα $\\omega$ υποδιπλασιάζεται, άρα και το πλάτος $V$ υποδιπλασιάζεται [1, 2]. <em>Διαίσθηση: Όσο πιο αργά γυρίζει το πλαίσιο, τόσο πιο αργά 'κόβει' τις μαγνητικές γραμμές, άρα παράγει λιγότερη τάση.</em>" },
+                { letter: "δ", text: "Τετραπλασιάζεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η μέγιστη τάση δίνεται από τη σχέση $V = NBA\\omega$. Επειδή $\\omega = 2\\pi/T$, αν διπλασιάσουμε το $T$, η γωνιακή ταχύτητα $\\omega$ υποδιπλασιάζεται, άρα και το πλάτος $V$ υποδιπλασιάζεται. [1, 2]" }
+            ]
+        },
+        {
+            text: "Κατά τη σύνθεση δύο απλών αρμονικών ταλαντώσεων (ΑΑΤ) της ίδιας διεύθυνσης και γύρω από την ίδια θέση ισορροπίας, με παραπλήσιες συχνότητες $f_1, f_2$:",
+            options: [
+                { letter: "α", text: "Το αποτέλεσμα είναι πάντα μια νέα ΑΑΤ.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το αποτέλεσμα δεν είναι ΑΑΤ, αλλά ταλάντωση με μεταβαλλόμενο πλάτος." },
+                { letter: "β", text: "Το πλάτος της σύνθετης ταλάντωσης παραμένει σταθερό.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το πλάτος μεταβάλλεται." },
+                { letter: "γ", text: "Το πλάτος της σύνθετης ταλάντωσης μεταβάλλεται περιοδικά.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Όταν οι συχνότητες είναι παραπλήσιες, το πλάτος μεταβάλλεται περιοδικά μεταξύ μιας μέγιστης και μιας ελάχιστης τιμής, δημιουργώντας το φαινόμενο των διακροτημάτων [3, 4]." },
+                { letter: "δ", text: "Η συχνότητα του διακροτήματος είναι ίση με $f_1 + f_2$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συχνότητα του διακροτήματος είναι ίση με $|f_1 - f_2|$." }
+            ]
+        },
+        {
+            text: "Η εξίσωση του Bernoulli στη ροή των υγρών αποτελεί έκφραση:",
+            options: [
+                { letter: "α", text: "Της αρχής διατήρησης της ορμής.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αποτελεί έκφραση της διατήρησης της ενέργειας." },
+                { letter: "β", text: "Της αρχής διατήρησης της ενέργειας.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η εξίσωση Bernoulli προκύπτει από το Θεώρημα Έργου-Ενέργειας για μια ποσότητα ρευστού που κινείται σε ένα σωλήνα [5, 6]. <em>Διαίσθηση: Η πίεση, η ταχύτητα και το ύψος είναι διαφορετικές μορφές 'ενεργειακής πυκνότητας' που το άθροισμά τους μένει σταθερό.</em>" },
+                { letter: "γ", text: "Της αρχής διατήρησης του φορτίου.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η διατήρηση φορτίου αφορά τον ηλεκτρισμό." },
+                { letter: "δ", text: "Του νόμου του Pascal.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο νόμος του Pascal αφορά τη μετάδοση των πιέσεων στα ρευστά." }
+            ]
+        },
+        {
+            text: "Δύο παράλληλοι ευθύγραμμοι αγωγοί απείρου μήκους διαρρέονται από ομόρροπα ρεύματα. Οι δυνάμεις που ασκούνται μεταξύ τους είναι:",
+            options: [
+                { letter: "α", text: "Ελκτικές.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με τον νόμο του Ampere και τον κανόνα των τριών δακτύλων, τα ομόρροπα ρεύματα έλκονται [5, 7]." },
+                { letter: "β", text: "Απωστικές.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό συμβαίνει αν τα ρεύματα είναι αντίρροπα." },
+                { letter: "γ", text: "Μηδενικές.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα παράλληλα ρεύματα αλληλεπιδρούν πάντα μέσω των μαγνητικών τους πεδίων." },
+                { letter: "δ", text: "Κάθετες στο επίπεδο των αγωγών.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι δυνάμεις δρουν πάνω στο επίπεδο που ορίζουν οι δύο αγωγοί." }
+            ]
+        },
+        {
+            text: "Η υδροστατική πίεση στον πυθμένα ενός δοχείου με κατακόρυφα τοιχώματα που περιέχει ιδανικό υγρό:",
+            options: [
+                { letter: "α", text: "Εξαρτάται από το εμβαδόν του πυθμένα.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η δύναμη εξαρτάται από το εμβαδόν, αλλά όχι η πίεση." },
+                { letter: "β", text: "Είναι ανεξάρτητη από την επιτάχυνση της βαρύτητας $g$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Εξαρτάται ευθέως από το $g$." },
+                { letter: "γ", text: "Εξαρτάται από το μέτρο της επιτάχυνσης της βαρύτητας $g$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η υδροστατική πίεση δίνεται από $P = \\rho g h$. Επομένως εξαρτάται άμεσα από το $g$ [6, 8]." },
+                { letter: "δ", text: "Είναι ανεξάρτητη από την πυκνότητα του υγρού.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πίεση εξαρτάται επίσης και από την πυκνότητα $\\rho$." }
+            ]
+        },
+        {
+            text: "Στην απλή αρμονική ταλάντωση, όταν το σώμα κινείται από μια ακραία θέση προς τη θέση ισορροπίας:",
+            options: [
+                { letter: "α", text: "Η δυναμική ενέργεια αυξάνεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η δυναμική ενέργεια μειώνεται, αφού η απομάκρυνση $x$ μικραίνει." },
+                { letter: "β", text: "Το μέτρο της επιτάχυνσης μειώνεται.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Καθώς το σώμα πλησιάζει τη θέση ισορροπίας, η απομάκρυνση $x$ μειώνεται. Επειδή η δύναμη επαναφοράς $F = -Dx$ και η επιτάχυνση $a = \\Sigma F/m$, τα μέτρα τους μειώνονται και μηδενίζονται στη θέση ισορροπίας [9, 10]." },
+                { letter: "γ", text: "Το μέτρο της ταχύτητας μειώνεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ταχύτητα αυξάνεται και μεγιστοποιείται στη θέση ισορροπίας." },
+                { letter: "δ", text: "Το μέτρο της δύναμης επαναφοράς αυξάνεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το μέτρο της δύναμης επαναφοράς μειώνεται." }
+            ]
+        },
+        {
+            text: "Αν το πλάτος της έντασης ενός εναλλασσόμενου ρεύματος υποδιπλασιαστεί, τότε ο ρυθμός έκλυσης θερμότητας (ισχύς) στον αντιστάτη:",
+            options: [
+                { letter: "α", text: "Υποδιπλασιάζεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ισχύς εξαρτάται από το τετράγωνο της έντασης." },
+                { letter: "β", text: "Υποτετραπλασιάζεται.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η ισχύς είναι ανάλογη του τετραγώνου της έντασης ($P = I_{\\text{εν}}^2 R$). Αν το πλάτος $I_0$ υποδιπλασιαστεί, τότε και η $I_{\\text{εν}} = I_0/\\sqrt{2}$ υποδιπλασιάζεται, οπότε η ισχύς γίνεται $(1/2)^2 = 1/4$ της αρχικής [2, 9, 11]." },
+                { letter: "γ", text: "Παραμένει σταθερός.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ισχύς μεταβάλλεται." },
+                { letter: "δ", text: "Τετραπλασιάζεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα συνέβαινε αν η ένταση διπλασιαζόταν." }
+            ]
+        },
+        {
+            text: "Στο φωτοηλεκτρικό φαινόμενο, το έργο εξαγωγής ενός μετάλλου εξαρτάται από:",
+            options: [
+                { letter: "α", text: "Τη συχνότητα της προσπίπτουσας ακτινοβολίας.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το έργο εξαγωγής είναι χαρακτηριστικό του ίδιου του υλικού." },
+                { letter: "β", text: "Την ένταση της προσπίπτουσας ακτινοβολίας.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν εξαρτάται από χαρακτηριστικά της ακτινοβολίας." },
+                { letter: "γ", text: "Τη φύση του υλικού του μετάλλου.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το έργο εξαγωγής $\\phi$ είναι η ελάχιστη ενέργεια που χρειάζεται ένα ηλεκτρόνιο για να βγει από το μέταλλο και είναι χαρακτηριστικό του κάθε μετάλλου [12, 13]." },
+                { letter: "δ", text: "Την ταχύτητα των εκπεμπόμενων ηλεκτρονίων.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ταχύτητα των ηλεκτρονίων προκύπτει από την περίσσεια ενέργειας, αφού αφαιρεθεί το έργο εξαγωγής." }
+            ]
+        },
+        {
+            text: "Κατά το φαινόμενο Compton, η μεταβολή του μήκους κύματος του φωτονίου είναι μέγιστη όταν η γωνία σκέδασης είναι:",
+            options: [
+                { letter: "α", text: "$0^\\circ$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Σε γωνία $0^\\circ$, το $\\sigma\\upsilon\\nu\\phi = 1$, άρα $\\Delta \\lambda = 0$." },
+                { letter: "β", text: "$90^\\circ$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Εδώ το $\\sigma\\upsilon\\nu\\phi = 0$, οπότε $\\Delta \\lambda = \\lambda_C$, που δεν είναι το μέγιστο." },
+                { letter: "γ", text: "$180^\\circ$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η μεταβολή $\\Delta \\lambda = \\lambda_C (1 - \\sigma\\upsilon\\nu\\phi)$ γίνεται μέγιστη όταν ο όρος $(1 - \\sigma\\upsilon\\nu\\phi)$ μεγιστοποιηθεί, δηλαδή για $\\sigma\\upsilon\\nu\\phi = -1 \\Rightarrow \\phi = 180^\\circ$ [13, 14]. <em>Διαίσθηση: Η μέγιστη 'κρούση' και απώλεια ενέργειας συμβαίνει όταν το φωτόνιο γυρίζει ακριβώς πίσω.</em>" },
+                { letter: "δ", text: "$45^\\circ$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong>" }
+            ]
+        },
+        {
+            text: "Τα ηλεκτρομαγνητικά κύματα είναι:",
+            options: [
+                { letter: "α", text: "Πάντα διαμήκη.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong>" },
+                { letter: "β", text: "Πάντα εγκάρσια.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Τα ηλεκτρομαγνητικά κύματα αποτελούνται από εναλλασσόμενα ηλεκτρικά και μαγνητικά πεδία που είναι πάντα κάθετα μεταξύ τους και κάθετα στη διεύθυνση διάδοσης [12, 15]." },
+                { letter: "γ", text: "Άλλοτε διαμήκη και άλλοτε εγκάρσια.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Είναι αποκλειστικά εγκάρσια." },
+                { letter: "δ", text: "Μηχανικά κύματα που διαδίδονται στο κενό.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν είναι μηχανικά κύματα και δεν χρειάζονται μέσο διάδοσης." }
+            ]
+        },
+        {
+            text: "Η ροπή ενός ζεύγους δυνάμεων είναι:",
+            options: [
+                { letter: "α", text: "Μηδέν ως προς το μέσο της απόστασης των φορέων τους.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ροπή του ζεύγους είναι μη μηδενική και σταθερή." },
+                { letter: "β", text: "Ίδια ως προς οποιοδήποτε σημείο του επιπέδου τους.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το ζεύγος δυνάμεων προκαλεί μόνο στροφή και η συνολική ροπή του είναι σταθερή ανεξάρτητα από το σημείο αναφοράς [6, 16]." },
+                { letter: "γ", text: "Ανάλογη της απόστασης από το σημείο περιστροφής.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ροπή του ζεύγους είναι ανεξάρτητη από το σημείο περιστροφής." },
+                { letter: "δ", text: "Αντίστροφα ανάλογη του μέτρου των δυνάμεων.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Είναι ανάλογη του μέτρου των δυνάμεων ($\\tau = F \\cdot d$)." }
+            ]
+        },
+        {
+            text: "Στον συντονισμό μιας εξαναγκασμένης ταλάντωσης, το πλάτος γίνεται μέγιστο όταν:",
+            options: [
+                { letter: "α", text: "Η συχνότητα του διεγέρτη είναι πολύ μεγαλύτερη της ιδιοσυχνότητας.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τότε το πλάτος γίνεται πολύ μικρό." },
+                { letter: "β", text: "Η συχνότητα του διεγέρτη είναι ίση με την ιδιοσυχνότητα του συστήματος.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Κατά τον συντονισμό, η συχνότητα του διεγέρτη συμπίπτει με την ιδιοσυχνότητα του συστήματος, επιτρέποντας τη μέγιστη μεταφορά ενέργειας [4, 17]." },
+                { letter: "γ", text: "Η σταθερά απόσβεσης $b$ είναι άπειρη.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν η σταθερά $b$ είναι πολύ μεγάλη, το πλάτος είναι ελάχιστο." },
+                { letter: "δ", text: "Η δύναμη απόσβεσης είναι μηδενική.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Σε πραγματικά συστήματα υπάρχει πάντα δύναμη απόσβεσης." }
+            ]
+        },
+        {
+            text: "Η μαγνητική ροή $\\Phi$ που διέρχεται από μια επιφάνεια $S$ είναι μέγιστη όταν:",
+            options: [
+                { letter: "α", text: "Η επιφάνεια είναι παράλληλη στις δυναμικές γραμμές.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Όταν είναι παράλληλη, η ροή είναι μηδέν (καμία γραμμή δεν τη 'διαπερνά')." },
+                { letter: "β", text: "Η επιφάνεια είναι κάθετη στις δυναμικές γραμμές.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η ροή είναι $\\Phi = BS \\sigma\\upsilon\\nu\\theta$. Όταν η επιφάνεια είναι κάθετη στις γραμμές, η κάθετος της επιφάνειας είναι παράλληλη σε αυτές ($\\theta=0^\\circ$), οπότε $\\sigma\\upsilon\\nu\\theta=1$ (μέγιστο) [7, 18, 19]." },
+                { letter: "γ", text: "Το μαγνητικό πεδίο είναι μηδενικό.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τότε και η ροή θα είναι μηδενική." },
+                { letter: "δ", text: "Η γωνία μεταξύ του διανύσματος της επιφάνειας και της έντασης $B$ είναι $90^\\circ$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Σε αυτή την περίπτωση το $\\sigma\\upsilon\\nu 90^\\circ = 0$, άρα η ροή είναι μηδέν." }
+            ]
+        },
+        {
+            text: "Ο κανόνας του Lenz αποτελεί συνέπεια:",
+            options: [
+                { letter: "α", text: "Της διατήρησης της ορμής.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong>" },
+                { letter: "β", text: "Της διατήρησης της ενέργειας.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αν το επαγωγικό ρεύμα δεν αντιτιθέταν στην αιτία του (Lenz), θα μπορούσαμε να παράγουμε ενέργεια από το μηδέν, παραβιάζοντας την Αρχή Διατήρησης Ενέργειας [2, 16]." },
+                { letter: "γ", text: "Της διατήρησης του φορτίου.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο κανόνας του Kirchhoff σχετίζεται με τη διατήρηση του φορτίου." },
+                { letter: "δ", text: "Του νόμου του Coulomb.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong>" }
+            ]
+        },
+        {
+            text: "Στην πλαστική κρούση δύο σωμάτων, η μηχανική ενέργεια του συστήματος:",
+            options: [
+                { letter: "α", text: "Διατηρείται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η μηχανική ενέργεια διατηρείται μόνο στις ελαστικές κρούσεις." },
+                { letter: "β", text: "Αυξάνεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Σε καμία κρούση (χωρίς εξωτερική προσθήκη ενέργειας) δεν αυξάνεται." },
+                { letter: "γ", text: "Μειώνεται (μετατρέπεται σε θερμότητα).", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Στην πλαστική κρούση τα σώματα παραμορφώνονται και γίνονται ένα συσσωμάτωμα. Μέρος της κινητικής ενέργειας 'δαπανάται' για την παραμόρφωση και τη θερμότητα [20, 21]." },
+                { letter: "δ", text: "Μηδενίζεται πάντα.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν μηδενίζεται πάντα (μόνο αν οι αρχικές ορμές ήταν ίσες και αντίθετες)." }
+            ]
+        },
+
+        // --- Ερωτήσεις Σωστού - Λάθους ---
+        { 
+            text: "<strong>Σωστό ή Λάθος:</strong> $1\\text{ Wb} = 1\\text{ V} \\cdot \\text{s}$.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Από τον νόμο της επαγωγής $|\\mathcal{E}| = \\Delta\\Phi/\\Delta t \\Rightarrow \\Phi = \\mathcal{E} \\cdot t$. Άρα $1\\text{ Wb} = 1\\text{ V} \\cdot \\text{s}$ [5, 22]." },
+                { letter: "Β", text: "Λάθος", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι σωστή." }
+            ]
+        },
+        {
+            text: "<strong>Σωστό ή Λάθος:</strong> Η ροή ενός ιδανικού ρευστού παρουσιάζει στροβίλους.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Στο ιδανικό ρευστό η ροή θεωρείται στρωτή (χωρίς στροβίλους) [16, 23]." }
+            ]
+        },
+        {
+            text: "<strong>Σωστό ή Λάθος:</strong> Οι δυναμικές γραμμές του μαγνητικού πεδίου είναι πάντα κλειστές.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Οι μαγνητικές γραμμές δεν έχουν αρχή και τέλος (αντίθετα με τις ηλεκτρικές), σχηματίζοντας πάντα κλειστούς βρόχους [16, 24]." },
+                { letter: "Β", text: "Λάθος", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι σωστή. Επειδή δεν υπάρχουν μαγνητικά μονόπολα, οι γραμμές κλείνουν μέσα στον μαγνήτη." }
+            ]
+        },
+        {
+            text: "<strong>Σωστό ή Λάθος:</strong> Η Γη έχει ιδιοστροφορμή (spin) λόγω της περιστροφής γύρω από τον άξονά της.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η στροφορμή λόγω περιστροφής γύρω από τον άξονα συμμετρίας ονομάζεται ιδιοστροφορμή (spin) [6, 17]." },
+                { letter: "Β", text: "Λάθος", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι σωστή." }
+            ]
+        },
+        {
+            text: "<strong>Σωστό ή Λάθος:</strong> Σύμφωνα με τον Heisenberg, είναι δυνατόν να μετρήσουμε ταυτόχρονα με απόλυτη ακρίβεια τη θέση και την ορμή ενός σωματιδίου.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με την αρχή της αβεβαιότητας, υπάρχει ένα ελάχιστο όριο στην ακρίβεια μέτρησης αυτών των μεγεθών ($\\Delta x \\cdot \\Delta p \\ge h/4\\pi$) [25, 26]." }
+            ]
+        },
+        {
+            text: "<strong>Σωστό ή Λάθος:</strong> Το αποτέλεσμα της σύνθεσης δύο ΑΑΤ με παραπλήσιες συχνότητες είναι απλή αρμονική ταλάντωση.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το αποτέλεσμα είναι μια ταλάντωση με μεταβαλλόμενο πλάτος (διακροτήματα), όχι ΑΑΤ [4, 5]." }
+            ]
+        },
+        {
+            text: "<strong>Σωστό ή Λάθος:</strong> Η ταχύτητα του φωτός στο κενό είναι η ίδια για όλους τους αδρανειακούς παρατηρητές.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Είναι το δεύτερο αξίωμα της Ειδικής Θεωρίας της Σχετικότητας του Αϊνστάιν [27, 28]." },
+                { letter: "Β", text: "Λάθος", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι σωστή." }
+            ]
+        },
+        {
+            text: "<strong>Σωστό ή Λάθος:</strong> Το μήκος κύματος de Broglie ενός σωματιδίου αυξάνεται όταν αυξάνεται η ορμή του.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Από τον τύπο $\\lambda = h/p$, συμπεραίνουμε ότι το μήκος κύματος de Broglie είναι αντιστρόφως ανάλογο της ορμής. Άρα αν αυξηθεί η ορμή, το μήκος κύματος μειώνεται [13, 14]." }
+            ]
+        },
+        {
+            text: "<strong>Σωστό ή Λάθος:</strong> Η ηλεκτρεγερτική δύναμη από αυτεπαγωγή σε ένα πηνίο είναι ανάλογη του ρυθμού μεταβολής της έντασης του ρεύματος.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ισχύει ο τύπος $\\mathcal{E}_{\\text{αυτ}} = -L (di/dt)$ [29, 30]." },
+                { letter: "Β", text: "Λάθος", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι σωστή." }
+            ]
+        },
+        {
+            text: "<strong>Σωστό ή Λάθος:</strong> Το πλάτος μιας φθίνουσας ταλάντωσης παραμένει σταθερό με τον χρόνο.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το πλάτος μειώνεται σταδιακά λόγω των δυνάμεων αντίστασης (απώλεια ενέργειας) [4, 25]." }
+            ]
+        },
+        {
+            text: "<strong>Σωστό ή Λάθος:</strong> Η σταθερά επαναφοράς $D$ στην ΑΑΤ εξαρτάται μόνο από το πλάτος της ταλάντωσης.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η σταθερά $D$ εξαρτάται από τα φυσικά χαρακτηριστικά του συστήματος (π.χ. σκληρότητα ελατηρίου $k$) και όχι από το πλάτος [31]." }
+            ]
+        },
+        {
+            text: "<strong>Σωστό ή Λάθος:</strong> Σε μια ελαστική κρούση διατηρείται η κινητική ενέργεια του συστήματος.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Εξ ορισμού, στην ελαστική κρούση δεν έχουμε απώλειες ενέργειας σε άλλες μορφές, συνεπώς η συνολική κινητική ενέργεια διατηρείται [21, 32]." },
+                { letter: "Β", text: "Λάθος", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι σωστή." }
+            ]
+        },
+        {
+            text: "<strong>Σωστό ή Λάθος:</strong> Η εξίσωση της συνέχειας βασίζεται στη διατήρηση της μάζας.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η μάζα που εισέρχεται σε ένα τμήμα του σωλήνα πρέπει να είναι ίση με τη μάζα που εξέρχεται στον ίδιο χρόνο [6, 23]." },
+                { letter: "Β", text: "Λάθος", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι σωστή." }
+            ]
+        },
+        {
+            text: "<strong>Σωστό ή Λάθος:</strong> Ένα φωτόνιο δεν έχει μάζα ηρεμίας αλλά έχει ορμή.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το φωτόνιο κινείται πάντα με ταχύτητα $c$, άρα δεν έχει μάζα ηρεμίας (διότι δεν μπορεί να ηρεμήσει ποτέ), αλλά μεταφέρει ορμή $p = E/c$ [33, 34]." },
+                { letter: "Β", text: "Λάθος", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι σωστή." }
+            ]
+        },
+        {
+            text: "<strong>Σωστό ή Λάθος:</strong> Ο δείκτης διάθλασης ενός υλικού είναι πάντα μικρότερος ή ίσος της μονάδας.",
+            options: [
+                { letter: "Α", text: "Σωστό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η πρόταση είναι λανθασμένη." },
+                { letter: "Β", text: "Λάθος", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ο δείκτης διάθλασης $n = c/u$ είναι πάντα $n \\ge 1$, αφού η ταχύτητα $u$ σε οποιοδήποτε μέσο είναι μικρότερη ή ίση από την ταχύτητα του φωτός στο κενό $c$ [4, 35]." }
+            ]
+        }
+    ];
+
+    // Render quiz
+    const root = document.getElementById('quiz-root');
+
+    async function renderMath(element) {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise([element]);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function buildQuiz() {
+        root.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter.toUpperCase()}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter.toUpperCase()}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    await renderMath(feedbackDiv);
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        renderMath(root);
+    }
+    
+    window.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+</body>
+</html>

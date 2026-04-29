@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Μαθηματικών: Παραγωγίσιμες Συναρτήσεις (Ενότητα 2.2)</title>
+    <!-- MathJax (CDN) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Κουμπί Επιστροφής & Υπογραφή */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            color: #1e6f9f;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #0b2b44;
+            transform: translateX(-5px);
+        }
+        .signature {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            color: #4a627a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1000;
+            font-style: italic;
+        }
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .options-area {
+            padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .option-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4662;
+            font-family: inherit;
+            flex: 1 0 auto;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: left;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+            .signature {
+                position: static;
+                text-align: right;
+                display: block;
+                padding-right: 1rem;
+                margin-top: -1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    
+    <!-- Κουμπί Επιστροφής Πάνω Αριστερά -->
+    <a href="../index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Αρχική Σελίδα
+    </a>
+
+    <div class="quiz-header">
+        <h1>📐 Quiz Μαθηματικών: Παραγωγίσιμες Συναρτήσεις <br><small>Ενότητα 2.2 – Ορισμοί & Βασικές Παράγωγοι</small></h1>
+        <div class="instructions">
+            📌 Επιλέξτε μία απάντηση για κάθε ερώτηση. <br>
+            ✅ Αμέσως θα δείτε αναλυτική αιτιολόγηση γιατί η επιλογή σας είναι σωστή ή λανθασμένη.
+        </div>
+    </div>
+    
+    <div id="quiz-root"></div>
+    
+    <footer>📖 Κάθε απάντηση συνοδεύεται από μαθηματική επεξήγηση — μελέτησε τις ανατροφοδοτήσεις για βαθύτερη κατανόηση.</footer>
+</div>
+
+<!-- Υπογραφή Κάτω Δεξιά -->
+<div class="signature">✍️ Κώστας Κούδας</div>
+
+<script>
+    // Δεδομένα quiz – με ελληνικές τριγωνομετρικές συναρτήσεις μέσω \text{ημ}, \text{συν}, \text{εφ}, \text{σφ}
+    const quizData = [
+        { // 1
+            text: "Τι ονομάζουμε <strong>πρώτη παράγωγο</strong> μιας συνάρτησης $f$ με πεδίο ορισμού $A$;",
+            options: [
+                { letter: "Α", text: "Τον αριθμό $f'(x_0)$ για ένα συγκεκριμένο $x_0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό είναι η παράγωγος σε ένα <em>σημείο</em>, δηλαδή ένας αριθμός. Η παράγωγος συνάρτηση είναι μια διαδικασία αντιστοίχισης για πολλά σημεία." },
+                { letter: "Β", text: "Τη συνάρτηση που αντιστοιχίζει κάθε $x$ στο οποίο η $f$ είναι παραγωγίσιμη, στο $f'(x)$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η παράγωγος συνάρτηση έχει ως πεδίο ορισμού το σύνολο των σημείων στα οποία η $f$ είναι παραγωγίσιμη." },
+                { letter: "Γ", text: "Την κλίση της εφαπτομένης στην αρχή των αξόνων.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι μια ειδική περίπτωση της τιμής της παραγώγου στο μηδέν, αν αυτό ανήκει στο πεδίο ορισμού." }
+            ]
+        },
+        { // 2
+            text: "Ποιος από τους παρακάτω συμβολισμούς αντιστοιχεί στην παράγωγο της $y = f(x)$;",
+            options: [
+                { letter: "Α", text: "$\\frac{df}{dx}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ο συμβολισμός αυτός («ντε εφ προς ντε χι») είναι ένας από τους επικρατέστερους για την παράγωγο συνάρτηση." },
+                { letter: "Β", text: "$f^{(v)}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτός ο συμβολισμός χρησιμοποιείται για τη νιοστή παράγωγο ($v \\geq 3$)." },
+                { letter: "Γ", text: "$f(x) + c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι η μορφή μιας οικογένειας συναρτήσεων, όχι σύμβολο παραγώγισης." }
+            ]
+        },
+        { // 3
+            text: "Η συνάρτηση $f(x) = c$ (σταθερή) έχει παράγωγο:",
+            options: [
+                { letter: "Α", text: "$1$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το 1 είναι η παράγωγος της ταυτοτικής συνάρτησης $f(x)=x$." },
+                { letter: "Β", text: "$c$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παράγωγος εκφράζει ρυθμό μεταβολής. Μια σταθερή συνάρτηση δεν μεταβάλλεται, άρα η παράγωγός της δεν μπορεί να είναι η ίδια η σταθερά (εκτός αν $c=0$)." },
+                { letter: "Γ", text: "$0$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για κάθε σταθερή συνάρτηση ισχύει $(c)' = 0$ σε όλο το $\\mathbb{R}$." }
+            ]
+        },
+        { // 4
+            text: "Ποια είναι η παράγωγος της συνάρτησης $f(x) = x$;",
+            options: [
+                { letter: "Α", text: "$1$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η συνάρτηση $f(x)=x$ είναι παραγωγίσιμη στο $\\mathbb{R}$ με $f'(x)=1$." },
+                { letter: "Β", text: "$x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνάρτηση δεν είναι ίση με την παράγωγό της." },
+                { letter: "Γ", text: "$0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή θα ήταν η παράγωγος αν η $f$ ήταν σταθερή." }
+            ]
+        },
+        { // 5
+            text: "Για τη συνάρτηση $f(x) = x^{n}$ με $n \\in \\mathbb{N} - \\{0, 1\\}$, η παράγωγος είναι:",
+            options: [
+                { letter: "Α", text: "$x^{n-1}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Λείπει ο συντελεστής $v$ που προκύπτει από τον κανόνα παραγώγισης δυνάμεων." },
+                { letter: "Β", text: "$nx^{n-1}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με τον κανόνα, ο εκθέτης γίνεται συντελεστής και η νέα δύναμη μειώνεται κατά ένα." },
+                { letter: "Γ", text: "$n x^{n}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο εκθέτης πρέπει να μειωθεί κατά 1 μονάδα." }
+            ]
+        },
+        { // 6
+            text: "Η συνάρτηση $f(x) = \\sqrt{x}$ είναι παραγωγίσιμη στο διάστημα:",
+            options: [
+                { letter: "Α", text: "$[0, +\\infty)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Παρόλο που ορίζεται στο 0, η συνάρτηση <strong>δεν</strong> είναι παραγωγίσιμη στο 0, καθώς ο λόγος μεταβολής τείνει στο άπειρο." },
+                { letter: "Β", text: "$(0, +\\infty)$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η παράγωγος $(\\sqrt{x})' = \\frac{1}{2\\sqrt{x}}$ ορίζεται μόνο για θετικά $x$." },
+                { letter: "Γ", text: "$\\mathbb{R}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνάρτηση δεν ορίζεται καν για αρνητικούς αριθμούς." }
+            ]
+        },
+        { // 7
+            text: "Ποιος είναι ο τύπος της παραγώγου της συνάρτησης $f(x) = \\sqrt{x}$;",
+            options: [
+                { letter: "Α", text: "$\\frac{1}{\\sqrt{x}}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Λείπει ο συντελεστής $\\frac{1}{2}$ στον παρονομαστή." },
+                { letter: "Β", text: "$\\frac{1}{2\\sqrt{x}}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτός είναι ο βασικός τύπος παραγώγισης της τετραγωνικής ρίζας." },
+                { letter: "Γ", text: "$2\\sqrt{x}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή η έκφραση δεν αντιστοιχεί στην παράγωγο." }
+            ]
+        },
+        { // 8
+            text: "Η παράγωγος της συνάρτησης $f(x) = \\text{ημ} x$ είναι:",
+            options: [
+                { letter: "Α", text: "$\\text{συν} x$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η συνάρτηση ημίτονο έχει παράγωγο τη συνάρτηση συνημίτονο σε όλο το $\\mathbb{R}$." },
+                { letter: "Β", text: "$-\\text{συν} x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το πρόσημο μείον εμφανίζεται στην παράγωγο του συνημιτόνου." },
+                { letter: "Γ", text: "$\\text{ημ} x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μόνο η $e^x$ ταυτίζεται με την παράγωγό της." }
+            ]
+        },
+        { // 9
+            text: "Η παράγωγος της συνάρτησης $f(x) = \\text{συν} x$ είναι:",
+            options: [
+                { letter: "Α", text: "$\\text{ημ} x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Πρόκειται για συχνό λάθος παράλειψης του προσήμου." },
+                { letter: "Β", text: "$-\\text{ημ} x$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ισχύει $(\\text{συν} x)' = -\\text{ημ} x$ για κάθε $x \\in \\mathbb{R}$." },
+                { letter: "Γ", text: "$-\\text{συν} x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παράγωγος αλλάζει τη συνάρτηση από συνημίτονο σε ημίτονο." }
+            ]
+        },
+        { // 10
+            text: "Ποια συνάρτηση έχει την ιδιότητα $f'(x) = f(x)$ σε όλο το $\\mathbb{R}$;",
+            options: [
+                { letter: "Α", text: "$f(x) = x^2$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παράγωγος της $x^2$ είναι $2x$." },
+                { letter: "Β", text: "$f(x) = \\ln x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $\\ln x$ ορίζεται μόνο για θετικά $x$ και η παράγωγός της είναι $\\frac{1}{x}$." },
+                { letter: "Γ", text: "$f(x) = e^x$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η εκθετική συνάρτηση $e^x$ είναι η μοναδική βασική συνάρτηση που ταυτίζεται με την παράγωγό της. Γενικότερα η σχέση $f'(x)=f(x)$ ισχύει για όλες τις συναρτήσεις της μορδής $c\\cdot e^x$." }
+            ]
+        },
+        { // 11
+            text: "Η συνάρτηση $f(x) = \\ln x$ έχει παράγωγο:",
+            options: [
+                { letter: "Α", text: "$\\frac{1}{x}$ με $x > 0$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η παράγωγος της $\\ln x$ είναι η $\\frac{1}{x}$ στο πεδίο ορισμού της, δηλαδή στο $(0, +\\infty)$." },
+                { letter: "Β", text: "$\\frac{1}{x}$ με $x \\neq 0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Παρόλο που η $\\frac{1}{x}$ ορίζεται για $x < 0$, η αρχική συνάρτηση $\\ln x$ δεν ορίζεται εκεί, άρα ούτε η παράγωγός της." },
+                { letter: "Γ", text: "$e^x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $e^x$ είναι η αντίστροφη συνάρτηση, όχι η παράγωγος." }
+            ]
+        },
+        { // 12
+            text: "Τι εκφράζει η <strong>δεύτερη παράγωγος</strong> $f''$ μιας συνάρτησης;",
+            options: [
+                { letter: "Α", text: "Το τετράγωνο της πρώτης παραγώγου $[f'(x)]^2$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η δεύτερη παράγωγος δεν είναι αλγεβρική δύναμη, αλλά διαδοχική παραγώγιση." },
+                { letter: "Β", text: "Την παράγωγο της συνάρτησης $f'$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αν η $f'$ είναι παραγωγίσιμη, τότε η παράγωγός της ονομάζεται δεύτερη παράγωγος της $f$." },
+                { letter: "Γ", text: "Την παράγωγο της $f$ στο σημείο $2x$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν σχετίζεται με τον διπλασιασμό του ορίσματος." }
+            ]
+        },
+        { // 13
+            text: "Ποια είναι η παράγωγος της $f(x) = x^3$;",
+            options: [
+                { letter: "Α", text: "$3x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο εκθέτης πρέπει να μειωθεί κατά 1, αλλά να παραμείνει ως δύναμη." },
+                { letter: "Β", text: "$3x^2$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με τον τύπο $(x^v)' = vx^{v-1}$ για $v=3$." },
+                { letter: "Γ", text: "$x^2$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Λείπει ο συντελεστής 3." }
+            ]
+        },
+        { // 14
+            text: "Η παράγωγος μιας συνάρτησης στο σημείο $x_0 = 0$ για τη συνάρτηση $f(x) = \\text{ημ} x$ ισούται με:",
+            options: [
+                { letter: "Α", text: "$\\text{ημ} 0 = 0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό είναι η τιμή της συνάρτησης, όχι η παράγωγος." },
+                { letter: "Β", text: "$\\text{συν} 0 = 1$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή $f'(x) = \\text{συν} x$, τότε $f'(0) = \\text{συν} 0 = 1$." },
+                { letter: "Γ", text: "Δεν υπάρχει.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $\\text{ημ} x$ είναι παραγωγίσιμη σε όλο το $\\mathbb{R}$." }
+            ]
+        },
+        { // 15
+            text: "Στην έκφραση $f(x) = \\ln x$, η εφαπτομένη της γραφικής παράστασης στο σημείο $A(x_0, f(x_0))$ έχει κλίση:",
+            options: [
+                { letter: "Α", text: "$\\frac{1}{x_0}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η κλίση της εφαπτομένης ισούται με την τιμή της παραγώγου στο σημείο επαφής." },
+                { letter: "Β", text: "$\\ln x_0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό είναι η τεταγμένη του σημείου, όχι η κλίση." },
+                { letter: "Γ", text: "$e^{x_0}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η εκθετική συνάρτηση δεν σχετίζεται με την κλίση της $\\ln x$." }
+            ]
+        },
+        { // 16
+            text: "Αν μια συνάρτηση $f$ είναι παραγωγίσιμη σε ένα κλειστό διάστημα $[\\alpha, \\beta]$, τότε στο άκρο $\\alpha$:",
+            options: [
+                { letter: "Α", text: "Πρέπει να υπάρχει το όριο $\\lim\\limits_{x \\to \\alpha} \\frac{f(x) - f(\\alpha)}{x-\\alpha}$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Στο άκρο $\\alpha$ δεν θέλουμε να προσεγγίσουμε από τα αριστερά, άρα το όριο είναι πλευρικό." },
+                { letter: "Β", text: "Πρέπει να υπάρχει το όριο $\\lim\\limits_{x \\to \\alpha^+} \\frac{f(x) - f(\\alpha)}{x-\\alpha}$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με τον ορισμό για κλειστό διάστημα, η παραγωγισιμότητα στα άκρα ελέγχεται με το αντίστοιχο πλευρικό όριο, ώστε το $x$ να κινείται μέσα στο διάστημα $(\\alpha, \\beta)$." },
+                { letter: "Γ", text: "Η παράγωγος είναι πάντα μηδέν.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η τιμή της παραγώγου μπορεί να είναι οποιοσδήποτε αριθμός." }
+            ]
+        },
+        { // 17
+            text: "Η νιοστή παράγωγος $f^{(v)}$ για $v=3$ ορίζεται ως:",
+            options: [
+                { letter: "Α", text: "Η παράγωγος της $f''$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επαγωγικά, η νιοστή παράγωγος είναι η παράγωγος της προηγούμενης τάξης παραγώγου." },
+                { letter: "Β", text: "Το γινόμενο $f \\cdot f' \\cdot f''$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι παράγωγοι δεν πολλαπλασιάζονται μεταξύ τους για τον ορισμό ανώτερης τάξης." },
+                { letter: "Γ", text: "Η τρίτη δύναμη της $f$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο συμβολισμός στην παρένθεση $f^{(3)}$ υποδηλώνει παράγωγο, ενώ χωρίς παρένθεση $f^3$ υποδηλώνει δύναμη." }
+            ]
+        },
+        { // 18
+            text: "Ποια είναι η παράγωγος της συνάρτησης $f(x) = \\frac{1}{x}$ για $x \\neq 0$;",
+            options: [
+                { letter: "Α", text: "$\\ln x$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι η συνάρτηση της οποίας η παράγωγος είναι η $\\frac{1}{x}$." },
+                { letter: "Β", text: "$-\\frac{1}{x^2}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αν χρησιμοποιήσουμε τον κανόνα $x^{-1}$, η παράγωγος είναι $-1 \\cdot x^{-2} = -\\frac{1}{x^2}$." },
+                { letter: "Γ", text: "$\\frac{1}{x^2}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Λείπει το αρνητικό πρόσημο που προκύπτει από τον κανόνα των δυνάμεων. Σκέψου ότι η $f$ είναι γνησίως φθίνουσα στο $(0,+\\infty)$." }
+            ]
+        },
+        { // 19
+            text: "Γιατί η συνάρτηση $f(x) = \\sqrt{x}$ δεν είναι παραγωγίσιμη στο $x_0 = 0$;",
+            options: [
+                { letter: "Α", text: "Γιατί δεν είναι συνεχής στο 0.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $\\sqrt{x}$ είναι συνεχής στο 0." },
+                { letter: "Β", text: "Γιατί το όριο $\\lim\\limits_{x \\to 0} \\frac{\\sqrt{x} - 0}{x - 0}$ είναι $+\\infty$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για να είναι μια συνάρτηση παραγωγίσιμη, το όριο του λόγου μεταβολής πρέπει να είναι πραγματικός αριθμός, όχι άπειρο." },
+                { letter: "Γ", text: "Γιατί η τιμή $f(0)$ δεν ορίζεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η τιμή $f(0) = \\sqrt{0} = 0$ ορίζεται κανονικά." }
+            ]
+        },
+        { // 20
+            text: "Η παράγωγος της $f(x) = e^x$ στο $x_0 = 1$ είναι:",
+            options: [
+                { letter: "Α", text: "$1$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα ίσχυε αν $x_0=0$." },
+                { letter: "Β", text: "$e$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή $f'(x) = e^x$, τότε $f'(1) = e^1 = e$." },
+                { letter: "Γ", text: "$0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η εκθετική συνάρτηση δεν έχει μηδενική παράγωγο, διότι ποτέ δεν έχει οριζόντια εφαπτομένη." }
+            ]
+        }
+    ];
+
+    // Render quiz
+    const root = document.getElementById('quiz-root');
+
+    async function renderMath(element) {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise([element]);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function buildQuiz() {
+        root.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    await renderMath(feedbackDiv);
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        renderMath(root);
+    }
+    
+    window.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+</body>
+</html>

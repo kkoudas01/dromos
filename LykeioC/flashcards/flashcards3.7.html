@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Μαθηματικών: Εμβαδόν Επίπεδου Χωρίου | Γ' Λυκείου</title>
+    <!-- MathJax (CDN) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* --- Κουμπί Επιστροφής & Υπογραφή --- */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            color: #1e6f9f;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #0b2b44;
+            transform: translateX(-5px);
+        }
+
+        .signature {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            color: #4a627a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1000;
+            font-style: italic;
+        }
+        /* ------------------------------------------------ */
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .options-area {
+            padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .option-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4662;
+            font-family: inherit;
+            flex: 1 0 auto;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        .feedback-content ul {
+            margin: 0.5rem 0 0 1.5rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: left;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+            .signature {
+                position: static;
+                text-align: right;
+                display: block;
+                padding-right: 1rem;
+                margin-top: -1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    
+    <!-- Κουμπί Επιστροφής Πάνω Αριστερά -->
+    <a href="../index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 5"></polyline>
+        </svg>
+        Αρχική Σελίδα
+    </a>
+
+    <div class="quiz-header">
+        <h1>📐 Quiz Μαθηματικών: Εμβαδόν Επίπεδου Χωρίου <br><small>Ενότητα 3.7</small></h1>
+        <div class="instructions">
+            📌 Επιλέξτε τη σωστή απάντηση. <br>
+            ✅ Μετά από κάθε ερώτηση, μελετήστε τις επεξηγήσεις για να κατανοήσετε πότε το ολοκλήρωμα ταυτίζεται με το εμβαδόν, πώς διαχειριζόμαστε τις αρνητικές τιμές και πώς υπολογίζουμε το εμβαδόν ανάμεσα σε δύο γραφικές παραστάσεις.
+        </div>
+    </div>
+    
+    <div id="quiz-root"></div>
+    
+    <footer>📖 Κάθε απάντηση συνοδεύεται από πλήρη επεξήγηση – μελέτησε την ανατροφοδότηση για βαθύτερη κατανόηση.</footer>
+</div>
+
+<!-- Υπογραφή Κάτω Δεξιά -->
+<div class="signature">✍️ Κώστας Κούδας</div>
+
+<script>
+    // Δεδομένα quiz – Πλήρης LaTeX σύνταξη (Χωρίς macros, απευθείας text)
+    const quizData = [
+        { // 1
+            text: "Αν μια συνάρτηση $f$ είναι συνεχής στο $[\\alpha, \\beta]$ και $f(x) \\geq 0$ για κάθε $x \\in [\\alpha, \\beta]$, τότε το εμβαδόν $E(\\Omega)$ του χωρίου μεταξύ της $C_f$, του άξονα $x'x$ και των ευθειών $x = \\alpha$ και $x = \\beta$ είναι:",
+            options: [
+                { letter: "Α", text: "$E(\\Omega) = \\int_{\\alpha}^{\\beta} f(x) dx$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Όταν η συνάρτηση είναι μη αρνητική, το ορισμένο ολοκλήρωμα εκφράζει ακριβώς το εμβαδόν του χωρίου κάτω από την καμπύλη." },
+                { letter: "Β", text: "$E(\\Omega) = -\\int_{\\alpha}^{\\beta} f(x) dx$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα ίσχυε αν η συνάρτηση ήταν μη θετική ($f(x) \\leq 0$)." },
+                { letter: "Γ", text: "$E(\\Omega) = f(\\beta) - f(\\alpha)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτός ο τύπος θυμίζει το Θεμελιώδες Θεώρημα για την παράγουσα, αλλά δεν δίνει το εμβαδόν παρά μόνο αν η $f$ είναι παράγουσα του εαυτού της." }
+            ]
+        },
+        { // 2
+            text: "Αν για μια συνεχή συνάρτηση $g$ ισχύει $g(x) \\leq 0$ για κάθε $x \\in [\\alpha, \\beta]$, τότε το εμβαδόν του χωρίου μεταξύ της $C_g$ και του άξονα $x'x$ είναι:",
+            options: [
+                { letter: "Α", text: "$\\int_{\\alpha}^{\\beta} g(x) dx$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Εφόσον $g(x) \\leq 0$, το ολοκλήρωμα θα είναι αρνητικός αριθμός, ενώ το εμβαδόν πρέπει να είναι πάντα θετικό." },
+                { letter: "Β", text: "$\\int_{\\alpha}^{\\beta} -g(x) dx$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για να βρούμε το εμβαδόν όταν η καμπύλη είναι κάτω από τον άξονα, ολοκληρώνουμε την αντίθετη συνάρτηση $-g(x)$ ώστε το αποτέλεσμα να είναι θετικό." },
+                { letter: "Γ", text: "$0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το εμβαδόν είναι μηδέν μόνο αν η συνάρτηση είναι η μηδενική παντού. Εν προκειμένω δεν αποκλείεται, αλλά δεν το ξέρουμε κιόλας." }
+            ]
+        },
+        { // 3
+            text: "Έστω $f$ και $g$ συνεχείς στο $[\\alpha, \\beta]$ με $f(x) \\geq g(x)$ για κάθε $x \\in [\\alpha, \\beta]$. Το εμβαδόν του χωρίου που περικλείεται από τις $C_f, C_g$ και τις ευθείες $x = \\alpha, x = \\beta$ δίνεται από τον τύπο:",
+            options: [
+                { letter: "Α", text: "$\\int_{\\alpha}^{\\beta} (f(x) + g(x)) dx$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το άθροισμα των συναρτήσεων δεν δίνει την απόσταση μεταξύ των καμπυλών." },
+                { letter: "Β", text: "$\\int_{\\alpha}^{\\beta} (f(x) - g(x)) dx$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το εμβαδόν μεταξύ δύο καμπυλών είναι το ολοκλήρωμα της διαφοράς «πάνω συνάρτηση μείον κάτω συνάρτηση»." },
+                { letter: "Γ", text: "$\\int_{\\alpha}^{\\beta} f(x) dx \\cdot \\int_{\\alpha}^{\\beta} g(x) dx$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το ολοκλήρωμα του γινομένου δεν σχετίζεται με τον υπολογισμό εμβαδού." }
+            ]
+        },
+        { // 4
+            text: "Ο τύπος $E(\\Omega) = \\int_{\\alpha}^{\\beta} (f(x) - g(x)) dx$ (όπου $f \\geq g$) ισχύει:",
+            options: [
+                { letter: "Α", text: "Μόνο αν οι $f, g$ είναι και οι δύο μη αρνητικές στο $[\\alpha, \\beta]$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν και η απόδειξη ξεκινά από αυτή την υπόθεση, το συμπέρασμα γενικεύεται για κάθε $f, g$." },
+                { letter: "Β", text: "Ακόμα και αν μία ή και οι δύο συναρτήσεις παίρνουν αρνητικές τιμές.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Με τη χρήση μιας κατάλληλης σταθεράς $c$ που 'ανεβάζει' τις καμπύλες πάνω από τον άξονα $x'x$, αποδεικνύεται ότι η διαφορά τους παραμένει η ίδια." },
+                { letter: "Γ", text: "Μόνο αν οι γραφικές τους παραστάσεις δεν τέμνονται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν επηρεάζει τον τύπο για το εμβαδόν οσεσδήποτε φορές και να τέμνονται, αρκεί να μην αντιστρέφεται η διάταξη των συναρτήσεων (από $f \\geq g$ να γίνεται $f \\leq g$)." }
+            ]
+        },
+        { // 5
+            text: "Όταν η διαφορά $f(x) - g(x)$ <strong>δεν</strong> διατηρεί σταθερό πρόσημο στο $[\\alpha, \\beta]$, τότε το εμβαδόν του χωρίου μεταξύ των $C_f$ και $C_g$ είναι:",
+            options: [
+                { letter: "Α", text: "$\\int_{\\alpha}^{\\beta} |f(x) - g(x)| dx$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το απόλυτο <strong>μέσα</strong> στο ολοκλήρωμα εξασφαλίζει ότι θα προσθέσουμε τα εμβαδόντα όλων των επιμέρους χωρίων, ανεξάρτητα από το ποια καμπύλη είναι πάνω." },
+                { letter: "Β", text: "$|\\int_{\\alpha}^{\\beta} (f(x) - g(x)) dx|$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα έδινε την απόλυτη τιμή του 'αλγεβρικού' εμβαδού, όπου τα τμήματα πάνω και κάτω αλληλοαναιρούνται." },
+                { letter: "Γ", text: "$\\int_{\\alpha}^{\\beta} (f(x) - g(x)) dx$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν η διαφορά αλλάζει πρόσημο, αυτό το ολοκλήρωμα δεν εκφράζει το συνολικό εμβαδόν, αλλά τη διαφορά του εμβαδού του χωρίου πάνω από τον $x'x$ μείον του εμβαδού του χωρίου κάτω από τον $x'x$." }
+            ]
+        },
+        { // 6
+            text: "Τι εκφράζει γεωμετρικά η τιμή του ορισμένου ολοκληρώματος $\\int_{\\alpha}^{\\beta} f(x) dx$;",
+            options: [
+                { letter: "Α", text: "Πάντα το εμβαδόν του χωρίου μεταξύ της $C_f$ και του άξονα $x'x$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό ισχύει μόνο αν η συνάρτηση είναι μη αρνητική." },
+                { letter: "Β", text: "Το άθροισμα των εμβαδών των χωρίων πάνω από τον $x'x$ μείον το άθροισμα των εμβαδών των χωρίων κάτω από τον $x'x$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το ορισμένο ολοκλήρωμα δίνει πρόσημο στα εμβαδά ανάλογα με το πρόσημο της συνάρτησης στην εκάστοτε περιοχή." },
+                { letter: "Γ", text: "Την περίμετρο της γραφικής παράστασης.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το ορισμένο ολοκλήρωμα σχετίζεται με εμβαδόν, όχι με μήκος τόξου (περίμετρος)." }
+            ]
+        },
+        { // 7
+            text: "Για να υπολογίσουμε το εμβαδόν του χωρίου που περικλείεται από τη γραφική παράσταση της $f(x) = x^2 - 1$ και τον άξονα $x'x$, το πρώτο βήμα είναι:",
+            options: [
+                { letter: "Α", text: "Να βρούμε τις ρίζες της $f(x) = 0$ για να προσδιορίσουμε τα όρια ολοκλήρωσης.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Οι ρίζες καθορίζουν τα σημεία τομής με τον άξονα $x'x$, τα οποία αποτελούν τα όρια του χωρίου που θέλουμε να μετρήσουμε." },
+                { letter: "Β", text: "Να υπολογίσουμε το $f(0)$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η τιμή στο 0 δίνει το σημείο τομής με τον άξονα $y'y$, που συνήθως δεν βοηθά στα όρια ολοκλήρωσης." },
+                { letter: "Γ", text: "Να παραγωγίσουμε τη συνάρτηση.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παράγωγος βοηθά στη μονοτονία, αλλά για το εμβαδόν χρειαζόμαστε τις ρίζες και την αρχική συνάρτηση." }
+            ]
+        },
+        { // 8
+            text: "Με τι ισούται το $\\int_{-r}^{r} \\sqrt{r^2-x^2}dx$;",
+            options: [
+                { letter: "Α", text: "$E = \\frac{\\pi r^2}{2}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η γραφική παράσταση της $f(x)=\\sqrt{r^2-x^2}$ είναι ένα ημικύκλιο. Καθόσον $f(x)\\geq 0$ το $\\int_{-r}^{r} \\sqrt{r^2-x^2}dx$ εκφράζει το εμβαδόν του ημικυκλίου ακτίνας $r$." },
+                { letter: "Β", text: "$E = \\pi r$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτός είναι ο τύπος για το μήκος ενός ημικυκλίου.  Βλ. αιτιολόγηση σωστής απάντησης." },
+                { letter: "Γ", text: "Δεν μπορεί να υπολογιστεί χρησιμοποιώντας τις γνωστές μας συναρτήσεις.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν έχει πρόβλημα ο υπολογισμός αυτού του ολοκληρώματος. Υπολογίζεται με κατάλληλη τριγωνομετρική αντικατάσταση.  Βλ. αιτιολόγηση σωστής απάντησης." }
+            ]
+        },
+        { // 9
+            text: "Ποιο είναι το εμβαδόν του χωρίου που περικλείεται από τη $g(x) = \\text{ημ} x$, τον άξονα $x'x$ και τις ευθείες $x=0$ και $x=2\\pi$;",
+            options: [
+                { letter: "Α", text: "$\\int_{0}^{2\\pi} \\text{ημ} x dx = 0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το ολοκλήρωμα είναι όντως 0, αλλά το εμβαδόν είναι το άθροισμα των απόλυτων τιμών. Τα τμήματα $(0, \\pi)$ και $(\\pi, 2\\pi)$ πρέπει να υπολογιστούν χωριστά." },
+                { letter: "Β", text: "$4$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Υπολογίζουμε το $\\int_{0}^{2\\pi} |\\text{ημ} x |dx $, δηλαδή την διαφορά $\\int_{0}^{\\pi} \\text{ημ} x dx -\\int_{\\pi}^{2\\pi} \\text{ημ} x dx $, η οποία ισούται με $[-\\text{συν}x]_{0}^{\\pi}-[-\\text{συν}x]_{\\pi}^{2\\pi}=4$." },
+                { letter: "Γ", text: "$2$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό είναι το εμβαδόν μόνο της μίας 'καμπούρας' του ημιτόνου (από 0 έως $\\pi$)." }
+            ]
+        },
+        { // 10
+            text: "Στη μελέτη του εμβαδού μεταξύ $f(x) = x^3$ και $g(x) = x$, ποια είναι τα όρια ολοκλήρωσης;",
+            options: [
+                { letter: "Α", text: "$x = 0$ και $x=1$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Βλ. σχολιασμό σωστής απάντησης." },
+                { letter: "Β", text: "$x = -1$ και $x=1$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Όταν ψάχνουμε το εμβαδόν του χωρίου μεταξύ δύο καμπυλών ($C_f$, $C_g$), χωρίς να μάς δίνονται τα όρια ολοκλήρωσης, τότε τα βρίσκουμε λύνοντας την εξίσωση $f(x)=g(x)$. Το 'κάτω' όριο ολοκλήρωσης είναι η μικρότερη λύση και το 'πάνω' όριο ολοκλήρωσης η μεγαλύτερη λύση. Εν προκειμένω, η εξίσωση $x^3=x$ έχει λύσεις τις $x=0$ και $x=\\pm1$, επομένως δίνει τα όρια $-1$ και $1$. Δηλαδή το ζητούμενο εμβαδόν είναι το $\\int_{-1}^1 |x^3-x|dx$." },
+                { letter: "Γ", text: "Η άσκηση έχει ελλιπή δεδομένα. Δεν γίνεται να μην δίνονται τα όρια ολοκλήρωσης.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Βλ. σχολιασμό σωστής απάντησης." }
+            ]
+        },
+        { // 11
+            text: "Αν μια συνάρτηση $f$ είναι συνεχής και $f(x) \\leq 0$ στο $[\\alpha, \\beta]$, τότε το ολοκλήρωμα $\\int_{\\alpha}^{\\beta} f(x) dx$ είναι:",
+            options: [
+                { letter: "Α", text: "Θετικό.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το ολοκλήρωμα αρνητικής συνάρτησης είναι αρνητικός αριθμός." },
+                { letter: "Β", text: "Ίσο με $-E(\\Omega)$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αφού $E(\\Omega) = \\int_{\\alpha}^{\\beta} -f(x) dx = -\\int_{\\alpha}^{\\beta} f(x) dx$, τότε το ολοκλήρωμα ισούται με την αντίθετη τιμή του εμβαδού." },
+                { letter: "Γ", text: "Ίσο με το $E(\\Omega)$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το εμβαδόν είναι θετικό μέγεθος, ενώ το ολοκλήρωμα εδώ είναι αρνητικό." }
+            ]
+        },
+        { // 12
+            text: "Ποια είναι η βασική προϋπόθεση για να χρησιμοποιήσουμε τον τύπο $\\int_{\\alpha}^{\\beta} (f(x) - g(x)) dx$ για το εμβαδόν;",
+            options: [
+                { letter: "Α", text: "Οι συναρτήσεις να είναι παραγωγίσιμες.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνέχεια αρκεί για την ολοκληρωσιμότητα και τον ορισμό του εμβαδού." },
+                { letter: "Β", text: "Οι συναρτήσεις να είναι συνεχείς και να ισχύει $f(x) \\geq g(x)$ στο $[\\alpha, \\beta]$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η συνέχεια εξασφαλίζει την ύπαρξη του ολοκληρώματος και η ανισότητα $f \\geq g$ εξασφαλίζει ότι το αποτέλεσμα θα είναι το εμβαδόν (θετικό)." },
+                { letter: "Γ", text: "Οι συναρτήσεις να είναι πολυωνυμικές.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο τύπος ισχύει για κάθε συνεχή συνάρτηση (τριγωνομετρική, εκθετική κ.λπ.)." }
+            ]
+        },
+        { // 13
+            text: "Αν έχουμε το χωρίο που περικλείεται από τη $f(x) = x^2 - 3x$ και τον άξονα $x'x$, στο διάστημα των ριζών $[0, 3]$, η συνάρτηση είναι:",
+            options: [
+                { letter: "Α", text: "Θετική.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Για $x \\in (0, 3)$, το $x(x-3)$ είναι γινόμενο θετικού επί αρνητικού αριθμού." },
+                { letter: "Β", text: "Αρνητική.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η παραβολή 'ανοίγει' προς τα πάνω (έχει σχήμα $\\cup$, όχι $\\cap$), επομένως οι τιμές μεταξύ των ριζών είναι αρνητικές. Άρα το εμβαδόν θα είναι $-\\int_{0}^{3} (x^2-3x) dx$." },
+                { letter: "Γ", text: "Μηδέν παντού.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Είναι μηδέν μόνο στα σημεία $x=0$ και $x=3$." }
+            ]
+        },
+        { // 14
+            text: "Αν $f$ συνεχής και $f(x) \\geq 0$, το εμβαδόν του χωρίου από $x = \\alpha$ έως $x = \\beta$ ($\\alpha < \\beta$) είναι $E$. Τότε το $\\int_{\\beta}^{\\alpha} f(x) dx$ είναι:",
+            options: [
+                { letter: "Α", text: "$E$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η αναστροφή των ορίων ολοκλήρωσης αλλάζει το πρόσημο του αποτελέσματος. Βλ. αιτιολόγηση σωστής απάντησης." },
+                { letter: "Β", text: "$-E$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> $\\int_{\\beta}^{\\alpha} f(x) dx = -\\int_{\\alpha}^{\\beta} f(x) dx = -E$." },
+                { letter: "Γ", text: "$0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η αναστροφή των ορίων ολοκλήρωσης αλλάζει το πρόσημο του αποτελέσματος. Βλ. αιτιολόγηση σωστής απάντησης." }
+            ]
+        },
+        { // 15
+            text: "Ποιο από τα παρακάτω χωρία απαιτεί τη χρήση της απόλυτης τιμής $|f(x)|$ στο ολοκλήρωμα για τον υπολογισμό του εμβαδού;",
+            options: [
+                { letter: "Α", text: "Ένα χωρίο όπου η $C_f$ είναι πάντα πάνω από τον $x'x$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Εδώ η $|f(x)|$ ταυτίζεται με την $f(x)$, οπότε δεν είναι απαραίτητη η χρήση της." },
+                { letter: "Β", text: "Ένα χωρίο όπου η $C_f$ έχει τμήματα κάτω από τον $x'x$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η αλλαγή προσήμου επιβάλλει τη χρήση απολύτου ή το 'σπάσιμο' του ολοκληρώματος ώστε να μην αλληλοαναιρεθούν τα εμβαδά μεταξύ τους." },
+                { letter: "Γ", text: "Ένα χωρίο όπου η $f$ είναι σταθερή.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν είναι σταθερά θετική, δεν χρειάζεται." }
+            ]
+        }
+    ];
+
+    // Render quiz
+    const root = document.getElementById('quiz-root');
+
+    async function renderMath(element) {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise([element]);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function buildQuiz() {
+        root.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    await renderMath(feedbackDiv);
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        renderMath(root);
+    }
+    
+    window.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+</body>
+</html>

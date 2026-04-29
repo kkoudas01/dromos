@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Γυάλινοι Κώνοι | Κωνικές Τομές</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'Helvetica Neue', system-ui, -apple-system, sans-serif;
+            touch-action: none; /* βελτιστοποίηση για αφή */
+        }
+        /* Κουμπί επιστροφής πάνω αριστερά */
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: 12px 18px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 30;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            backdrop-filter: blur(12px);
+        }
+        .back-btn:hover {
+            background: rgba(0,0,0,0.8);
+            transform: scale(1.02);
+        }
+        .back-btn:active {
+            transform: scale(0.98);
+        }
+        /* Υπογραφή κάτω δεξιά */
+        .signature {
+            position: absolute;
+            bottom: 18px;
+            right: 20px;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(6px);
+            color: #dddddd;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 400;
+            font-family: monospace;
+            letter-spacing: 0.5px;
+            z-index: 30;
+            pointer-events: none;
+            border-right: 2px solid #ffaa66;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            pointer-events: none;
+            z-index: 10;
+            text-align: right;
+            font-family: monospace;
+        }
+        #controls {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            background: rgba(20,20,40,0.85);
+            backdrop-filter: blur(16px);
+            padding: 10px 20px;
+            border-radius: 60px;
+            border: 1px solid rgba(255,255,255,0.25);
+            z-index: 20;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+            white-space: nowrap;
+        }
+        button {
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #2c2c44;
+            color: #f0f0f0;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            font-family: inherit;
+            touch-action: manipulation;
+        }
+        button.active {
+            background: #ffaa44;
+            color: #1a1a2a;
+            box-shadow: 0 0 12px rgba(255,170,68,0.6);
+        }
+        button#btnShort.active {
+            background: #44cc88;
+            color: #112211;
+        }
+        button#btnTall.active {
+            background: #66aaff;
+            color: #111122;
+        }
+        button:active {
+            transform: scale(0.96);
+        }
+        #message {
+            position: absolute;
+            bottom: 100px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(12px);
+            padding: 10px 18px;
+            border-radius: 24px;
+            color: #ffefc0;
+            font-size: 13px;
+            font-weight: 500;
+            border-left: 4px solid #ffaa66;
+            pointer-events: none;
+            z-index: 10;
+            transition: opacity 0.25s;
+            max-width: 260px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        @media (max-width: 700px) {
+            .back-btn { padding: 8px 14px; font-size: 13px; top: 12px; left: 12px; }
+            .signature { font-size: 10px; bottom: 12px; right: 12px; padding: 4px 10px; }
+            #controls { gap: 8px; padding: 6px 14px; bottom: 18px; }
+            button { padding: 6px 14px; font-size: 11px; }
+            #message { font-size: 11px; bottom: 85px; max-width: 220px; left: 12px; }
+            #info { font-size: 9px; top: 12px; right: 12px; }
+        }
+        .instruction {
+            position: absolute;
+            bottom: 18px;
+            left: 20px;
+            background: rgba(0,0,0,0.4);
+            color: #ccc;
+            font-size: 9px;
+            padding: 4px 8px;
+            border-radius: 16px;
+            pointer-events: none;
+            font-family: monospace;
+        }
+        @media (max-width: 600px) {
+            .instruction { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-btn">← Επιστροφή</a>
+    <div class="signature">Κώστας Κούδας</div>
+    <div id="info">
+        🔴 ΚΟΝΤΟΣ (πλατύς) &nbsp;| 🔵 ΨΗΛΟΣ (στενός)
+    </div>
+    <div id="controls">
+        <button id="btnShort">🔻 ΚΟΝΤΟΣ<br><span style="font-size:9px;">εφαπτ. + έλλειψη</span></button>
+        <button id="btnTall">🔺 ΨΗΛΟΣ<br><span style="font-size:9px;">εφαπτ. + υπερβολή</span></button>
+    </div>
+    <div id="message" style="opacity:0;"></div>
+    <div class="instruction">🖱️ 1 δάχτυλο: περιστροφή | 2 δάχτυλα: μετατόπιση/ζουμ</div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Σκηνή, κάμερα (κατάλληλη για κινητά) ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x030618);
+        scene.fog = new THREE.FogExp2(0x030618, 0.008);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.body.appendChild(renderer.domElement);
+
+        const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(6.2, 5.0, 8.2);
+        camera.lookAt(0, 2.8, 0);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.07;
+        controls.rotateSpeed = 1.0;
+        controls.zoomSpeed = 1.0;
+        controls.panSpeed = 0.8;
+        controls.enableTouchRotate = true;
+        controls.enableZoom = true;
+        controls.enablePan = true;
+        controls.target.set(0, 2.8, 0);
+
+        // --- Φωτισμός για γυαλάδα ---
+        const ambientLight = new THREE.AmbientLight(0x3a3a5a);
+        scene.add(ambientLight);
+        const mainLight = new THREE.DirectionalLight(0xfff5e0, 1.3);
+        mainLight.position.set(4, 8, 3);
+        mainLight.castShadow = true;
+        scene.add(mainLight);
+        const backLight = new THREE.DirectionalLight(0x88aaff, 0.65);
+        backLight.position.set(-2, 5, -4);
+        scene.add(backLight);
+        const glowLight = new THREE.PointLight(0xffaa77, 1.0);
+        glowLight.position.set(2.5, 3.8, 2.2);
+        scene.add(glowLight);
+        const fillLight = new THREE.PointLight(0x6699ff, 0.45);
+        fillLight.position.set(0, 1.5, 1.8);
+        scene.add(fillLight);
+        
+        const lightSphere = new THREE.Mesh(
+            new THREE.SphereGeometry(0.13, 16, 16),
+            new THREE.MeshStandardMaterial({ color: 0xffaa77, emissive: 0x552200, emissiveIntensity: 1.0 })
+        );
+        lightSphere.position.copy(glowLight.position);
+        scene.add(lightSphere);
+        
+        // Διακοσμητικά
+        const gridHelper = new THREE.GridHelper(12, 24, 0x88aaff, 0x446688);
+        gridHelper.position.y = -0.08;
+        gridHelper.material.transparent = true;
+        gridHelper.material.opacity = 0.25;
+        scene.add(gridHelper);
+        
+        // --- Παράμετροι κώνων ---
+        const H_SHORT = 3.0;
+        const R_SHORT = 2.0;
+        const H_TALL = 6.0;
+        const R_TALL = 1.0;
+        
+        const glassRed = new THREE.MeshPhysicalMaterial({
+            color: 0xcc4444, emissive: 0x220000, metalness: 0.88, roughness: 0.2,
+            transparent: true, opacity: 0.62, clearcoat: 1.0, clearcoatRoughness: 0.12,
+            reflectivity: 0.4, side: THREE.DoubleSide
+        });
+        const glassBlue = new THREE.MeshPhysicalMaterial({
+            color: 0x3399ff, emissive: 0x001133, metalness: 0.9, roughness: 0.18,
+            transparent: true, opacity: 0.58, clearcoat: 1.0, clearcoatRoughness: 0.1,
+            reflectivity: 0.42, side: THREE.DoubleSide
+        });
+        
+        function createCone(radius, height, material, yBase = 0) {
+            const geometry = new THREE.CylinderGeometry(0, radius, height, 80, 80);
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.y = yBase + height / 2;
+            mesh.castShadow = true;
+            return mesh;
+        }
+        
+        const shortCone = createCone(R_SHORT, H_SHORT, glassRed, 0);
+        const tallCone = createCone(R_TALL, H_TALL, glassBlue, 0);
+        scene.add(shortCone);
+        scene.add(tallCone);
+        
+        const baseDisc = new THREE.Mesh(
+            new THREE.CircleGeometry(3.6, 24),
+            new THREE.MeshStandardMaterial({ color: 0x226688, roughness: 0.5, metalness: 0.3, transparent: true, opacity: 0.2 })
+        );
+        baseDisc.rotation.x = -Math.PI / 2;
+        baseDisc.position.y = -0.05;
+        scene.add(baseDisc);
+        
+        // --- Εφαπτόμενα επίπεδα (σωστά) ---
+        const unitNormalShort = new THREE.Vector3(3, 2, 0).normalize();
+        const constShort = 6 / Math.sqrt(13); // 6 / length of (3,2,0)
+        const unitNormalTall = new THREE.Vector3(6, 1, 0).normalize();
+        const constTall = 6 / Math.sqrt(37);
+        
+        function createTangentPlane(normal, constVal, size = 5.2, color = 0x66ff88, opacity = 0.52) {
+            const pointOnPlane = normal.clone().multiplyScalar(constVal);
+            const quat = new THREE.Quaternion().setFromUnitVectors(
+                new THREE.Vector3(0, 0, 1), normal
+            );
+            const geo = new THREE.PlaneGeometry(size, size);
+            const mat = new THREE.MeshPhongMaterial({ color, side: THREE.DoubleSide, transparent: true, opacity, emissive: 0x226622, emissiveIntensity: 0.18 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.copy(pointOnPlane);
+            mesh.quaternion.copy(quat);
+            return mesh;
+        }
+        
+        // --- ΕΛΛΕΙΨΗ (ακριβής παραμετρική) ---
+        function getEllipsePoints() {
+            const points = [];
+            const xc = 0.13335, a = 0.53335, b = 0.5164;
+            for (let ang = 0; ang <= 360; ang += 3) {
+                const rad = ang * Math.PI / 180;
+                const x = xc + a * Math.cos(rad);
+                const y = 3 - 1.5 * x;
+                const z = b * Math.sin(rad);
+                points.push(new THREE.Vector3(x, y, z));
+            }
+            return points;
+        }
+        
+        // --- ΥΠΕΡΒΟΛΗ: Δύο ξεχωριστοί κλάδοι, άνω και κάτω τμήμα (συνεχής καμπύλη) ---
+        // Εξίσωση: z^2 = 15x^2 - 16x + 4. Περιοχές: x <= 0.4  (αριστερός κλάδος) , x >= 0.6667 (δεξιός)
+        // Για ομαλή απεικόνιση, δημιουργούμε 4 γραμμές: Αριστερός άνω, Αριστερός κάτω, Δεξιός άνω, Δεξιός κάτω.
+        function getHyperbolaCurves() {
+            const leftUpper = [], leftLower = [];
+            const rightUpper = [], rightLower = [];
+            
+            // Αριστερός κλάδος: x από -1.5 έως 0.4 (περιορίζεται από τον κώνο)
+            for (let x = -1.8; x <= 0.4; x += 0.035) {
+                const zSq = 15*x*x - 16*x + 4;
+                if (zSq >= 0) {
+                    const z = Math.sqrt(zSq);
+                    const y = 6 - 6*x;
+                    // έλεγχος ορίων κώνου (y μεταξύ 0 και 3)
+                    if (y >= -0.1 && y <= H_SHORT + 0.1) {
+                        leftUpper.push(new THREE.Vector3(x, y, z));
+                        leftLower.push(new THREE.Vector3(x, y, -z));
+                    }
+                }
+            }
+            // Δεξιός κλάδος: x από 0.6667 έως 2.2
+            for (let x = 0.6667; x <= 2.4; x += 0.035) {
+                const zSq = 15*x*x - 16*x + 4;
+                if (zSq >= 0) {
+                    const z = Math.sqrt(zSq);
+                    const y = 6 - 6*x;
+                    if (y >= -0.1 && y <= H_SHORT + 0.1) {
+                        rightUpper.push(new THREE.Vector3(x, y, z));
+                        rightLower.push(new THREE.Vector3(x, y, -z));
+                    }
+                }
+            }
+            return { leftUpper, leftLower, rightUpper, rightLower };
+        }
+        
+        function createLineFromPoints(points, color, lineWidth = 2.5) {
+            if (points.length < 2) return null;
+            const geometry = new THREE.BufferGeometry();
+            const vertices = points.flatMap(p => [p.x, p.y, p.z]);
+            geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+            const material = new THREE.LineBasicMaterial({ color, linewidth: lineWidth });
+            return new THREE.Line(geometry, material);
+        }
+        
+        // --- Διαχείριση UI ---
+        let activePlaneShort = null, activeCurveShort = null;
+        let activePlaneTall = null, activeHyperbolaLines = []; // array of lines
+        let shortActive = false, tallActive = false;
+        
+        const messageDiv = document.getElementById('message');
+        const btnShort = document.getElementById('btnShort');
+        const btnTall = document.getElementById('btnTall');
+        
+        function clearHyperbola() {
+            activeHyperbolaLines.forEach(line => { if (line) scene.remove(line); });
+            activeHyperbolaLines = [];
+        }
+        
+        function updateVisuals() {
+            if (activePlaneShort) scene.remove(activePlaneShort);
+            if (activeCurveShort) scene.remove(activeCurveShort);
+            if (activePlaneTall) scene.remove(activePlaneTall);
+            clearHyperbola();
+            
+            if (shortActive) {
+                activePlaneShort = createTangentPlane(unitNormalShort, constShort, 5.4, 0x77ff99, 0.52);
+                scene.add(activePlaneShort);
+                const ellipsePts = getEllipsePoints();
+                if (ellipsePts.length) {
+                    activeCurveShort = createLineFromPoints(ellipsePts, 0xffdd99, 3);
+                    if (activeCurveShort) scene.add(activeCurveShort);
+                }
+            }
+            
+            if (tallActive) {
+                activePlaneTall = createTangentPlane(unitNormalTall, constTall, 5.6, 0x88ffaa, 0.52);
+                scene.add(activePlaneTall);
+                const curves = getHyperbolaCurves();
+                // Προσθήκη και των 4 τμημάτων για πλήρη υπερβολή
+                const leftUpper = createLineFromPoints(curves.leftUpper, 0xffaa88, 2.8);
+                const leftLower = createLineFromPoints(curves.leftLower, 0xffaa88, 2.8);
+                const rightUpper = createLineFromPoints(curves.rightUpper, 0xffaa88, 2.8);
+                const rightLower = createLineFromPoints(curves.rightLower, 0xffaa88, 2.8);
+                if (leftUpper) { scene.add(leftUpper); activeHyperbolaLines.push(leftUpper); }
+                if (leftLower) { scene.add(leftLower); activeHyperbolaLines.push(leftLower); }
+                if (rightUpper) { scene.add(rightUpper); activeHyperbolaLines.push(rightUpper); }
+                if (rightLower) { scene.add(rightLower); activeHyperbolaLines.push(rightLower); }
+            }
+            
+            // Μήνυμα
+            if (shortActive && tallActive) {
+                messageDiv.style.opacity = '1';
+                messageDiv.innerHTML = "✨ <strong>Οι εικονιζόμενες κωνικές τομές έχουν αντίστροφες εκκεντρότητες.</strong><br> <span style='font-size:11px;'>Έλλειψη & Υπερβολή → e₁·e₂ = 1</span>";
+                messageDiv.style.borderLeftColor = "#ffcc88";
+            } else if (shortActive) {
+                messageDiv.style.opacity = '0.95';
+                messageDiv.innerHTML = "📐 <strong>Ελλειπτική τομή</strong><br>Το πράσινο επίπεδο εφάπτεται στον κοντό κώνο και τέμνει τον ψηλό κώνο σε έλλειψη.";
+                messageDiv.style.borderLeftColor = "#88ff88";
+            } else if (tallActive) {
+                messageDiv.style.opacity = '0.95';
+                messageDiv.innerHTML = "📈 <strong>Υπερβολική τομή</strong><br>Το πράσινο επίπεδο εφάπτεται στον ψηλό κώνο και τέμνει τον κοντό κώνο σε υπερβολή (δύο κλάδοι).";
+                messageDiv.style.borderLeftColor = "#88aaff";
+            } else {
+                messageDiv.style.opacity = '0';
+            }
+        }
+        
+        btnShort.addEventListener('click', () => {
+            shortActive = !shortActive;
+            if (shortActive) btnShort.classList.add('active');
+            else btnShort.classList.remove('active');
+            updateVisuals();
+        });
+        btnTall.addEventListener('click', () => {
+            tallActive = !tallActive;
+            if (tallActive) btnTall.classList.add('active');
+            else btnTall.classList.remove('active');
+            updateVisuals();
+        });
+        
+        // Αρχική κατάσταση: κανένα επίπεδο
+        shortActive = false; tallActive = false;
+        updateVisuals();
+        
+        // --- Γενέτειρες για οπτική επιβεβαίωση εφαπτομένης ---
+        function addLine(p1, p2, color) {
+            const points = [p1, p2];
+            const geom = new THREE.BufferGeometry().setFromPoints(points);
+            const mat = new THREE.LineBasicMaterial({ color });
+            const line = new THREE.Line(geom, mat);
+            scene.add(line);
+        }
+        addLine(new THREE.Vector3(0, H_SHORT, 0), new THREE.Vector3(R_SHORT, 0, 0), 0xffaa77);
+        addLine(new THREE.Vector3(0, H_TALL, 0), new THREE.Vector3(R_TALL, 0, 0), 0x77aaff);
+        
+        // --- Αστέρια (ατμόσφαιρα) ---
+        const starGeo = new THREE.BufferGeometry();
+        const starCount = 1000;
+        const starPos = [];
+        for (let i = 0; i < starCount; i++) {
+            starPos.push((Math.random() - 0.5) * 400);
+            starPos.push((Math.random() - 0.5) * 180);
+            starPos.push((Math.random() - 0.5) * 120 - 50);
+        }
+        starGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(starPos), 3));
+        const starMat = new THREE.PointsMaterial({ color: 0xaaccff, size: 0.1, transparent: true, opacity: 0.6 });
+        const stars = new THREE.Points(starGeo, starMat);
+        scene.add(stars);
+        
+        // --- Κίνηση φωτεινής πηγής (γυαλάδα) ---
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.006;
+            glowLight.position.x = 2.4 + Math.sin(time * 0.5) * 0.2;
+            glowLight.position.z = 2.0 + Math.cos(time * 0.7) * 0.25;
+            lightSphere.position.copy(glowLight.position);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+        // Προσαρμογή σε αλλαγή μεγέθους (κινητά)
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Μικρή βελτίωση για κινητά: απενεργοποίηση context menu σε canvas
+        renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+    </script>
+</body>
+</html>

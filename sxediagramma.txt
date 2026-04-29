@@ -33,6 +33,12 @@
 
 [Javalab](https://javalab.org/en/)
 
+# Τα παιδία παίζει
+
+## Γεωμετρία
+
+[Έλλειψη VS Υπερβολή](fun/conics2.html)
+
 --hline--
 
 # Α Γυμνασίου <folder>GymnasioA</folder>
@@ -140,6 +146,56 @@
 
 [Quiz: Όρια](LykeioC/oria.html)
 
+### Επαναληπτικά
+
+#### Flashcards
+
+[Κεφ. 1.2](LykeioC/flashcards/flashcards1.2.html)
+
+[Κεφ. 1.3](LykeioC/flashcards/flashcards1.3.html)
+
+[Κεφ. 1.4](LykeioC/flashcards/flashcards1.4.html)
+
+[Κεφ. 1.5](LykeioC/flashcards/flashcards1.5.html)
+
+[Κεφ. 1.6](LykeioC/flashcards/flashcards1.6.html)
+
+[Κεφ. 1.7](LykeioC/flashcards/flashcards1.7.html)
+
+[Κεφ. 1.8](LykeioC/flashcards/flashcards1.8.html)
+
+[Κεφ. 2.1](LykeioC/flashcards/flashcards2.1.html)
+
+[Κεφ. 2.2](LykeioC/flashcards/flashcards2.2.html)
+
+[Κεφ. 2.3](LykeioC/flashcards/flashcards2.3.html)
+
+[Κεφ. 2.4](LykeioC/flashcards/flashcards2.4.html)
+
+[Κεφ. 2.5](LykeioC/flashcards/flashcards2.5.html)
+
+[Κεφ. 2.6](LykeioC/flashcards/flashcards2.6.html)
+
+[Κεφ. 2.7](LykeioC/flashcards/flashcards2.7.html)
+
+[Κεφ. 2.8](LykeioC/flashcards/flashcards2.8.html)
+
+[Κεφ. 2.9](LykeioC/flashcards/flashcards2.9.html)
+
+[Κεφ. 2.10](LykeioC/flashcards/flashcards2.10.html)
+
+[Κεφ. 3.1](LykeioC/flashcards/flashcards3.1.html)
+
+[Κεφ. 3.4](LykeioC/flashcards/flashcards3.4.html)
+
+[Κεφ. 3.5](LykeioC/flashcards/flashcards3.5.html)
+
+[Κεφ. 3.7](LykeioC/flashcards/flashcards3.7.html)
+
 ## Χημεία
 
 [Γενικό Quiz Α Θέμα](LykeioC/Chem/quizTheory.html)
+
+## Φυσική
+
+[Γενικό Quiz Α Θέμα](LykeioC/physics/themaA.html)

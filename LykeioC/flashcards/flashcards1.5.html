@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Μαθηματικών: Ιδιότητες των Ορίων | Γ' Λυκείου</title>
+    <!-- MathJax (CDN) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* --- Κουμπί Επιστροφής & Υπογραφή --- */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            color: #1e6f9f;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #0b2b44;
+            transform: translateX(-5px);
+        }
+
+        .signature {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            color: #4a627a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1000;
+            font-style: italic;
+        }
+        /* ------------------------------------------------ */
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .options-area {
+            padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .option-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4662;
+            font-family: inherit;
+            flex: 1 0 auto;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        .feedback-content ul {
+            margin: 0.5rem 0 0 1.5rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: left;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+            .signature {
+                position: static;
+                text-align: right;
+                display: block;
+                padding-right: 1rem;
+                margin-top: -1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    
+    <!-- Κουμπί Επιστροφής Πάνω Αριστερά -->
+    <a href="../index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Αρχική Σελίδα
+    </a>
+
+    <div class="quiz-header">
+        <h1>📐 Quiz Μαθηματικών: Ιδιότητες των Ορίων <br><small>Ενότητα 1.5 – Προετοιμασία για την κατανόηση της Ανάλυσης</small></h1>
+        <div class="instructions">
+            📌 Επιλέξτε τη σωστή απάντηση σε κάθε ερώτηση. <br>
+            ✅ Μετά από κάθε ερώτηση, μελετήστε την επεξήγηση για να κατανοήσετε τη λογική των ιδιοτήτων και να αποφύγετε συνήθεις παρανοήσεις.
+        </div>
+    </div>
+    
+    <div id="quiz-root"></div>
+    
+    <footer>📖 Κάθε απάντηση συνοδεύεται από πλήρη επεξήγηση – μελέτησε την ανατροφοδότηση για βαθύτερη κατανόηση.</footer>
+</div>
+
+<!-- Υπογραφή Κάτω Δεξιά -->
+<div class="signature">✍️ Κώστας Κούδας</div>
+
+<script>
+    // Δεδομένα quiz – Πλήρης LaTeX σύνταξη
+    const quizData = [
+        { // 1
+            text: "Αν μια συνάρτηση $f$ έχει όριο $\\ell > 0$ στο $x_{0}$, τότε τι ισχύει για τις τιμές της $f(x)$ κοντά στο $x_{0}$;",
+            options: [
+                { letter: "Α", text: "$f(x) > 0$ για κάθε $x$ του πεδίου ορισμού της.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο καθορίζει τη συμπεριφορά της συνάρτησης μόνο τοπικά, κοντά στο $x_{0}$, και όχι σε ολόκληρο το πεδίο ορισμού." },
+                { letter: "Β", text: "$f(x) > 0$ κοντά στο $x_{0}$.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Σύμφωνα με το 1ο Θεώρημα, αν το όριο είναι θετικό, η συνάρτηση διατηρεί το πρόσημο του ορίου της στην περιοχή του $x_{0}$." },
+                { letter: "Γ", text: "$f(x_{0}) > 0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο δεν μας δίνει καμία πληροφορία για την τιμή της συνάρτησης στο ίδιο το σημείο $x_{0}$." }
+            ]
+        },
+        { // 2
+            text: "Αν ισχύει $f(x) < g(x)$ κοντά στο $x_{0}$ και οι δύο συναρτήσεις έχουν όριο στο $x_{0}$, τότε αναγκαστικά:",
+            options: [
+                { letter: "Α", text: "$\\lim\\limits_{x \\to x_{0}} f(x) < \\lim\\limits_{x \\to x_{0}} g(x)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι μια πολύ συνηθισμένη παρανόηση. Η αυστηρή ανισότητα μεταξύ συναρτήσεων δεν μεταφέρεται απαραίτητα στα όρια· μπορεί τα όρια να είναι ίσα." },
+                { letter: "Β", text: "$\\lim\\limits_{x \\to x_{0}} f(x) \\leq \\lim\\limits_{x \\to x_{0}} g(x)$", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Η διάταξη των ορίων περιλαμβάνει πάντα την ισότητα ($\\leq$), ακόμα και αν η αρχική ανισότητα των συναρτήσεων είναι αυστηρή ($<$)." },
+                { letter: "Γ", text: "$\\lim\\limits_{x \\to x_{0}} f(x) = \\lim\\limits_{x \\to x_{0}} g(x)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα όρια μπορεί να είναι ίσα, αλλά δεν είναι υποχρεωτικό." }
+            ]
+        },
+        { // 3
+            text: "Για να χρησιμοποιήσουμε την ιδιότητα $\\lim\\limits_{x \\to x_{0}} [f(x) + g(x)] = \\lim\\limits_{x \\to x_{0}} f(x) + \\lim\\limits_{x \\to x_{0}} g(x)$, ποια είναι η απαραίτητη προϋπόθεση;",
+            options: [
+                { letter: "Α", text: "Οι συναρτήσεις να είναι πολυωνυμικές.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ιδιότητα ισχύει για κάθε είδος συνάρτησης, αρκεί να υπάρχουν τα όρια." },
+                { letter: "Β", text: "Να υπάρχουν τα όρια των $f$ και $g$ στο $x_{0}$ ως πραγματικοί αριθμοί.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Το θεώρημα των πράξεων προϋποθέτει ρητά την ύπαρξη των ορίων των επιμέρους συναρτήσεων. Αρκεί, βέβαια, να μην βγαίνουν $\pm\\infty$ τα αποτελέσματα, διότι δεν επιτρέπεται να γράφουμε πράξεις σαν αυτήν $-\\infty+(-\\infty)$, ασχέτως αν τις κάνουμε με το μυαλό μας." },
+                { letter: "Γ", text: "Η συνάρτηση $f+g$ να ορίζεται στο $x_{0}$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο εξαρτάται από τις τιμές κοντά στο $x_{0}$, όχι στο αν ορίζεται η συνάρτηση στο $x_{0}$." }
+            ]
+        },
+        { // 4
+            text: "Πότε μπορούμε να υπολογίσουμε το όριο μιας ρητής συνάρτησης $\\frac{P(x)}{Q(x)}$ στο $x_{0}$ με απλή αντικατάσταση ($\\frac{P(x_{0})}{Q(x_{0})}$);",
+            options: [
+                { letter: "Α", text: "Πάντα.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν ο παρονομαστής μηδενίζεται, η απλή αντικατάσταση οδηγεί σε μαθηματικό σφάλμα." },
+                { letter: "Β", text: "Μόνο αν $Q(x_{0}) \\neq 0$.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Η ιδιότητα του πηλίκου εφαρμόζεται μόνο όταν το όριο του παρονομαστή είναι διαφορετικό από το μηδέν." },
+                { letter: "Γ", text: "Μόνο αν $P(x_{0}) = 0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν $P(x_{0})=0$ και $Q(x_{0}) \\neq 0$, το όριο είναι 0 και όλα βαίνουν καλώς. Αν όμως $Q(x_{0}) = 0$, η $\\frac{P(x_{0})}{Q(x_{0})}$ δεν ορίζεται." }
+            ]
+        },
+        { // 5
+            text: "Αν κατά τον υπολογισμό ενός ορίου πηλίκου προκύψει η μορφή $\\frac{0}{0}$, αυτό σημαίνει ότι:",
+            options: [
+                { letter: "Α", text: "Το όριο δεν υπάρχει.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η μορφή $\\frac{0}{0}$ είναι απροσδιόριστη· το όριο μπορεί κάλλιστα να υπάρχει." },
+                { letter: "Β", text: "Το όριο ισούται με 0.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το αποτέλεσμα εξαρτάται από την απλοποίηση." },
+                { letter: "Γ", text: "Πρέπει να γίνει επεξεργασία του κλάσματος.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Η μορφή $\\frac{0}{0}$ λέγεται «απροσδιόριστη» διότι μόνο από αυτή ΔΕΝ μπορούμε να καταλάβουμε το τελικό αποτέλεσμα του ορίου. Για να το προσδιορίσουμε πρέπει να δουλέψουμε κι άλλο πάνω στο όριο (π.χ. με παραγοντοποίηση, με D.L.H. κτλ)." }
+            ]
+        },
+        { // 6
+            text: "Σύμφωνα με το Κριτήριο Παρεμβολής, αν $h(x) \\leq f(x) \\leq g(x)$ κοντά στο $x_{0}$ και $\\lim\\limits_{x \\to x_{0}} h(x) = \\lim\\limits_{x \\to x_{0}} g(x) = \\ell$, τότε:",
+            options: [
+                { letter: "Α", text: "Το όριο της $f$ στο $x_{0}$ μπορεί να είναι οποιοσδήποτε αριθμός.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $f$ \"εγκλωβίζεται\" ανάμεσα στις άλλες δύο συναρτήσεις." },
+                { letter: "Β", text: "Η $f$ δεν έχει όριο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το θεώρημα εγγυάται την ύπαρξη του ορίου." },
+                { letter: "Γ", text: "$\\lim\\limits_{x \\to x_{0}} f(x) = \\ell$.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Αυτή είναι η κεντρική ιδέα του Κριτηρίου Παρεμβολής: η $f$ αναγκάζεται να ακολουθήσει το κοινό όριο των $g$ και $h$." }
+            ]
+        },
+        { // 7
+            text: "Ποιο είναι το αποτέλεσμα του ορίου $\\lim\\limits_{x \\to 0} \\frac{\\text{ημ} x}{x}$;",
+            options: [
+                { letter: "Α", text: "0", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν και ο αριθμητής τείνει στο 0, ο λόγος τείνει στη μονάδα. Αν έβγαζε αποτέλεσμα $0$ θα μπορούσαμε να πούμε ότι $\\text{ημ} x\\to 0$ πολύ πιο γρήγορα από ότι $x\\to 0$." },
+                { letter: "Β", text: "1", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Πρόκειται για βασικό τριγωνομετρικό όριο. Βγάζει αποτέλεσμα $1$, διότι $\\text{ημ}x \\approx x$ για $x \\approx 0$." },
+                { letter: "Γ", text: "Δεν υπάρχει, αφού είναι απροσδιόριστης μορφής.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Είναι απροσδιόριστης μορφής και αυτό σημαίνει ότι <strong>μόνο</strong> με την πληροφορία ότι είναι $\\frac{0}{0}$, <strong>δεν</strong> μπορούμε να προσδιορίσουμε την τιμή του. Αυτό, όμως, δεν σημαίνει ότι δεν μπορούμε με κατάλληλες τεχνικές να την προσδιορίσουμε και να διαπιστώσουμε ότι είναι $1$." }
+            ]
+        },
+        { // 8
+            text: "Για μια συνάρτηση $f$ που αλλάζει τύπο στο $x_{0}$ (κλαδική), πότε λέμε ότι υπάρχει το όριο στο $x_{0}$;",
+            options: [
+                { letter: "Α", text: "Όταν υπάρχει το ένα από τα δύο πλευρικά όρια.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Απαιτείται έλεγχος και από τις δύο πλευρές του $x_{0}$." },
+                { letter: "Β", text: "Όταν τα πλευρικά όρια στο $x_{0}$ υπάρχουν και είναι ίσα.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Το όριο καθορίζεται από τη συμπεριφορά της $f(x)$ για $x$ εκατέρωθεν του $x_{0}$. Αν τα πλευρικά όρια διαφέρουν (ή κάποιο δεν υπάρχει καν), το όριο δεν υπάρχει." },
+                { letter: "Γ", text: "Όταν η συνάρτηση είναι συνεχής στο $x_{0}$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ύπαρξη ορίου είναι προϋπόθεση για τη συνέχεια, όχι το αντίστροφο (εδώ εξετάζουμε μόνο την ύπαρξη ορίου)." }
+            ]
+        },
+        { // 9
+            text: "Ποιο είναι το όριο $\\lim\\limits_{x \\to 0} \\frac{\\text{συν} x - 1}{x}$;",
+            options: [
+                { letter: "Α", text: "1", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο αυτό δεν ισούται με 1." },
+                { letter: "Β", text: "0", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Πρόκειται για το δεύτερο βασικό τριγωνομετρικό όριο που παρουσιάζεται στην ενότητα. Το εν λόγω αποτέλεσμα προκύπτει πολλαπλασιάζοντας τους όρους του κλάσματος με $\\text{συν} x + 1$." },
+                { letter: "Γ", text: "-1", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το αποτέλεσμα είναι μηδέν." }
+            ]
+        },
+        { // 10
+            text: "Για τον υπολογισμό του ορίου σύνθετης συνάρτησης $\\lim\\limits_{x \\to x_{0}} f(g(x))$, ποια είναι η συνήθης διαδικασία;",
+            options: [
+                { letter: "Α", text: "Αντικαθιστούμε το $x$ με το $x_{0}$ απευθείας στην $f(g(x))$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό προϋποθέτει δύο πράγματα, τα οποία ίσως δεν είναι εξασφαλισμένα: <strong>(1)</strong> Να ορίζεται η $g$ στο $x_0$ και η $f$ στο $g(x_0)$. <strong>(2)</strong> Να είναι συνεχής η $g$ στο $x_0$ και η $f$ στο $g(x_0)$." },
+                { letter: "Β", text: "Θέτουμε $u = g(x)$, υπολογίζουμε $u_{0} = \\lim\\limits_{x \\to x_{0}} g(x)$ και τέλος βρίσκουμε το $\\lim\\limits_{u \\to u_{0}} f(u)$.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Αυτή είναι η μέθοδος που περιγράφεται για τον προσδιορισμό ορίων σύνθετων συναρτήσεων." },
+                { letter: "Γ", text: "Πολλαπλασιάζουμε τα όρια των $f$ και $g$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η σύνθεση δεν είναι γινόμενο." }
+            ]
+        },
+        { // 11
+            text: "Ισχύει η ανισότητα $|\\text{ημ} x| \\leq |x|$ για κάθε $x \\in \\mathbb{R}$;",
+            options: [
+                { letter: "Α", text: "Ναι, και η ισότητα ισχύει μόνο για $x=0$.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Πρόκειται για μια βασική ανισότητα που χρησιμοποιείται για την απόδειξη τριγωνομετρικών ορίων." },
+                { letter: "Β", text: "Όχι, ισχύει μόνο για θετικά $x$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ισχύει για όλους τους πραγματικούς αριθμούς." },
+                { letter: "Γ", text: "Ισχύει μόνο για $x \\in [-\\frac{\\pi}{2}, \\frac{\\pi}{2}]$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν και η απόδειξη ξεκινά από ένα διάστημα, η ανισότητα γενικεύεται για όλο το $\\mathbb{R}$." }
+            ]
+        },
+        { // 12
+            text: "Αν μια συνάρτηση $f$ είναι εγκλωβισμένη ανάμεσα σε δύο σταθερές τιμές, $1 \\leq f(x) \\leq 1$, τότε $\\lim\\limits_{x \\to x_{0}} f(x) = \\dots$",
+            options: [
+                { letter: "Α", text: "0", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι συναρτήσεις που την εγκλωβίζουν τείνουν στο 1." },
+                { letter: "Β", text: "1", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Εφόσον $g(x)=1$ και $h(x)=1$, το κοινό τους όριο είναι 1, άρα και της $f$." },
+                { letter: "Γ", text: "Δεν μπορούμε να ξέρουμε.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το Κριτήριο Παρεμβολής μας δίνει ακριβές αποτέλεσμα." }
+            ]
+        },
+        { // 13
+            text: "Ποια ιδιότητα χρησιμοποιούμε για να υπολογίσουμε το $\\lim\\limits_{x \\to x_{0}} \\sqrt[k]{f(x)}$;",
+            options: [
+                { letter: "Α", text: "Το όριο μπαίνει μέσα στη ρίζα, αν $\\lim f(x) \\geq 0$.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Είναι η 6η ιδιότητα του θεωρήματος των ορίων, με την προϋπόθεση ότι οι τιμές της $f$ κοντά στο $x_{0}$ επιτρέπουν τον ορισμό της ρίζας." },
+                { letter: "Β", text: "Υψώνουμε τη ρίζα στο τετράγωνο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι μέθοδος επίλυσης εξισώσεων, όχι ιδιότητα ορίων." },
+                { letter: "Γ", text: "Η ρίζα δεν επηρεάζει το όριο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο της ρίζας είναι η ρίζα του ορίου." }
+            ]
+        },
+        { // 14
+            text: "Έστω οι συναρτήσεις $f(x) = x+2$ και $g(x) = \\frac{x^{2}-4}{x-2}$. Τι ισχύει για τα όριά τους στο $x_{0} = 2$;",
+            options: [
+                { letter: "Α", text: "Το όριο της $g$ δεν υπάρχει επειδή δεν ορίζεται στο 2.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο δεν εξαρτάται από το αν η συνάρτηση ορίζεται στο σημείο $x_{0}$." },
+                { letter: "Β", text: "Έχουν το ίδιο όριο στο 2.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Επειδή $g(x) = f(x)$ για κάθε $x \\neq 2$, οι συναρτήσεις έχουν υποχρεωτικά το ίδιο όριο στο 2." },
+                { letter: "Γ", text: "Οι $f$ και $g$ έχουν διαφορετικό πεδίο ορισμού, άρα $f\\neq g$. Επομένως έχουν και διαφορετικά όρια.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ναι, είναι διαφορετικές συναρτήσεις. Αλλά για $x$ <strong>κοντά</strong> στο $2$ (όπερ προϋποθέτει ότι $x\\neq 2$) είναι ίσες." }
+            ]
+        },
+        { // 15
+            text: "Αν γνωρίζουμε ότι $\\lim\\limits_{x \\to x_{0}} f(x) = 5$, τότε η $|f(x)|$ κοντά στο $x_{0}$ είναι:",
+            options: [
+                { letter: "Α", text: "Αρνητική.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η απόλυτη τιμή είναι πάντα μη αρνητική." },
+                { letter: "Β", text: "Θετική.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Εφόσον το όριο είναι θετικό (5), οι τιμές της $f$ είναι θετικές κοντά στο $x_{0}$, άρα και η απόλυτη τιμή τους παραμένει θετική." },
+                { letter: "Γ", text: "Ίση με 0.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο είναι 5, όχι 0." }
+            ]
+        },
+        { // 16
+            text: "Η ιδιότητα του ορίου της δύναμης $\\lim [f(x)]^{n} = [\\lim f(x)]^{n}$ ισχύει:",
+            options: [
+                { letter: "Α", text: "Μόνο αν το $n$ είναι 2.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ισχύει για κάθε φυσικό $n>0$." },
+                { letter: "Β", text: "Για κάθε φυσικό αριθμό $n>0$.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Είναι άμεση συνέπεια της ιδιότητας του γινομένου για $n$ παράγοντες." },
+                { letter: "Γ", text: "Μόνο αν η $f$ είναι θετική.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Για μη μηδενικό φυσικό εκθέτη η $f$ μπορεί να παίρνει οποιεσδήποτε τιμές." }
+            ]
+        },
+        { // 17
+            text: "Γιατί στην άσκηση 5 της Α' Ομάδας ελέγχουμε τα πλευρικά όρια στο σημείο αλλαγής του τύπου;",
+            options: [
+                { letter: "Α", text: "Επειδή το ζητάει η εκφώνηση.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Υπάρχει ουσιαστικός λόγος Ανάλυσης." },
+                { letter: "Β", text: "Επειδή οι τιμές της συνάρτησης κοντά στο $x_{0}$ καθορίζονται από διαφορετικούς τύπους εκατέρωθεν αυτού.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Το όριο εξαρτάται από τις τιμές \"κοντά στο $x_{0}$ και εκατέρωθεν αυτού\". Όταν ο τύπος αλλάζει, πρέπει να επιβεβαιώσουμε ότι και οι δύο πλευρές \"συμφωνούν\"." },
+                { letter: "Γ", text: "Επειδή τα πλευρικά όρια είναι πάντα διαφορετικά.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μπορεί να είναι ίσα, και τότε το όριο υπάρχει." }
+            ]
+        },
+        { // 18
+            text: "Αν μια συνάρτηση $f$ ικανοποιεί τη σχέση $f(x) \\leq 0$ κοντά στο $x_{0}$ και υπάρχει το όριό της, τότε:",
+            options: [
+                { letter: "Α", text: "$\\lim f(x) < 0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο μπορεί να είναι 0." },
+                { letter: "Β", text: "$\\lim f(x) \\leq 0$", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Η ανισότητα διατηρείται στο όριο, συμπεριλαμβανομένης της πιθανότητας ισότητας." },
+                { letter: "Γ", text: "$\\lim f(x) = 0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν είναι υποχρεωτικά μηδέν· μπορεί να είναι οποιοσδήποτε αρνητικός αριθμός." }
+            ]
+        },
+        { // 19
+            text: "Ποιο είναι το όριο $\\lim\\limits_{x \\to 0} \\text{ημ} x$;",
+            options: [
+                { letter: "Α", text: "1", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα ίσχυε για το $\\lim\\limits_{x \\to 0}\\text{συν} x$." },
+                { letter: "Β", text: "0", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Αποδεικνύεται μέσω της ανισότητας $|\\text{ημ} x| \\leq |x|$ και του Κριτηρίου Παρεμβολής (εκτός ύλης η απόδειξη)." },
+                { letter: "Γ", text: "Δεν υπάρχει.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το ημίτονο είναι συνεχή συνάρτηση (όπως θα δούμε μετά), επομένως το όριο ισούται με $\\text{ημ}0$." }
+            ]
+        },
+        { // 20
+            text: "Στην περίπτωση ορίου σύνθετης συνάρτησης, αν η $g(x)$ τείνει στο $u_{0}$, τι πρέπει να ισχύει κοντά στο $x_{0}$ για να εφαρμόσουμε τον τύπο;",
+            options: [
+                { letter: "Α", text: "$g(x) = u_{0}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα δημιουργούσε πρόβλημα στον ορισμό του ορίου της $f$." },
+                { letter: "Β", text: "$g(x) \\neq u_{0}$", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Είναι η απαραίτητη συνθήκη που εξασφαλίζει ότι το $u$ πλησιάζει το $u_{0}$ χωρίς να ταυτίζεται μαζί του." },
+                { letter: "Γ", text: "$g(x) > 0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν απαιτείται θετικότητα, εκτός αν η $f$ είναι π.χ. ρίζα ή λογάριθμος." }
+            ]
+        },
+        { // 21
+            text: "Το όριο $\\lim\\limits_{x \\to 1} \\frac{\\sqrt{x}-1}{x-1}$ υπολογίζεται με:",
+            options: [
+                { letter: "Α", text: "Απλή αντικατάσταση.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οδηγεί σε $\\frac{0}{0}$." },
+                { letter: "Β", text: "Πολλαπλασιασμό με τη συζυγή παράσταση $\\sqrt{x}+1$.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Όταν πολλαπλασιάζουμε με τον συζηγή, γίνεται πιο διαχειρίσιμη η απροσδιοριστία. Αντί το $0$ να προκύπτει από κάτι περίπλοκο, όπως το $\\sqrt{x}-1$, πρόκύπτει από κάτι απλούστερο ($x-1$). Μετά είναι όλα ευκολότερα." },
+                { letter: "Γ", text: "Διαίρεση με το $x$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν βοηθά στην άρση της απροσδιοριστίας." }
+            ]
+        },
+        { // 22
+            text: "Η ιδιότητα $\\lim |f(x)| = |\\lim f(x)|$ ισχύει:",
+            options: [
+                { letter: "Α", text: "Πάντα, εφόσον υπάρχει το $\\lim f(x)$.", isCorrect: true, feedback: "<strong>✅ Σωστή.</strong> Η εν λόγω ισότητα ισχύει <strong>εφόσον</strong> υπάρχει το $\\lim f(x)$. Αν το $\\lim f(x)$ δεν υπάρχει, τότε δεν έχει και νόημα η ισότητα." },
+                { letter: "Β", text: "Μόνο αν $f(x) \\geq 0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ισχύει και για αρνητικές τιμές." },
+                { letter: "Γ", text: "Μόνο αν το όριο είναι 0.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ισχύει για κάθε πραγματικό όριο." }
+            ]
+        }
+    ];
+
+    // Render quiz
+    const root = document.getElementById('quiz-root');
+
+    async function renderMath(element) {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise([element]);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function buildQuiz() {
+        root.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    await renderMath(feedbackDiv);
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        renderMath(root);
+    }
+    
+    window.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+</body>
+</html>

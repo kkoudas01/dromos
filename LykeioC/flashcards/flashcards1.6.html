@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Μαθηματικών: Μη Πεπερασμένο Όριο στο x₀ (Ενότητα 1.6)</title>
+    <!-- MathJax -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true,
+                tags: 'none'
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+        }
+
+        .options-area {
+            padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .option-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4662;
+            font-family: inherit;
+            flex: 1 0 auto;
+            text-align: center;
+        }
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+        }
+
+        /* Κουμπί επιστροφής και υπογραφή */
+        .back-home {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            background: #ffffffcc;
+            backdrop-filter: blur(4px);
+            color: #0b2b44;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid #cbdde6;
+            transition: 0.2s;
+            z-index: 1000;
+            font-family: inherit;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .back-home:hover {
+            background: #ffffff;
+            border-color: #1e6f9f;
+            transform: translateY(-1px);
+        }
+        .signature {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            font-size: 0.75rem;
+            color: #5d7f9e;
+            background: #f8fafcd9;
+            backdrop-filter: blur(4px);
+            padding: 0.25rem 0.8rem;
+            border-radius: 30px;
+            font-family: 'Segoe UI', 'Roboto', monospace;
+            letter-spacing: 0.5px;
+            z-index: 1000;
+            pointer-events: none;
+            border: 1px solid #dce5ec;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: center;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+            .back-home {
+                top: 0.7rem;
+                left: 0.7rem;
+                padding: 0.3rem 0.8rem;
+                font-size: 0.8rem;
+            }
+            .signature {
+                bottom: 0.7rem;
+                right: 0.7rem;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<a href="../index.html" class="back-home" title="Επιστροφή στην αρχική σελίδα">← Αρχική</a>
+<div class="signature">Κώστας Κούδας</div>
+
+<div class="quiz-container">
+    <div class="quiz-header">
+        <h1>📐 Quiz Μαθηματικών: Μη Πεπερασμένο Όριο στο $x_0$ <br><small>Ενότητα 1.6 – Προετοιμασία για την κατανόηση του Απείρου</small></h1>
+        <div class="instructions">
+            📌 Επιλέξτε μία απάντηση για κάθε ερώτηση. <br>
+            ✅ Αμέσως θα δείτε αναλυτική αιτιολόγηση γιατί η επιλογή σας είναι σωστή ή λανθασμένη.
+        </div>
+    </div>
+    <div id="quiz-root"></div>
+    <footer>📖 Κάθε απάντηση συνοδεύεται από μαθηματική επεξήγηση — μελέτησε τις ανατροφοδοτήσεις για βαθύτερη κατανόηση.</footer>
+</div>
+
+<script>
+    // Δεδομένα quiz – πλήρης LaTeX σύνταξη
+    const quizData = [
+        { // 1
+            text: "Όταν λέμε ότι μια συνάρτηση $f$ έχει στο $x_0$ όριο $+\\infty$, εννοούμε διαισθητικά ότι:",
+            options: [
+                { letter: "Α", text: "Οι τιμές $f(x)$ πλησιάζουν έναν πολύ μεγάλο θετικό αριθμό $M$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν οι τιμές πλησίαζαν έναν συγκεκριμένο αριθμό $M$, το όριο θα ήταν πεπερασμένο. Στο $+\\infty$, οι τιμές ξεπερνούν οποιονδήποτε αριθμό $M$." },
+                { letter: "Β", text: "Οι τιμές $f(x)$ αυξάνονται απεριόριστα καθώς το $x$ πλησιάζει το $x_0$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτή είναι η διαισθητική έννοια: οι τιμές γίνονται μεγαλύτερες από οποιονδήποτε θετικό αριθμό $M$ καθώς το $x$ προσεγγίζει το $x_0$." },
+                { letter: "Γ", text: "Η συνάρτηση είναι ορισμένη στο σημείο $x_0$ και η τιμή της $f(x_0)$ είναι τεράστια.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Για την ύπαρξη του ορίου στο $x_0$, δεν απαιτείται η συνάρτηση να ορίζεται στο ίδιο το $x_0$, αλλά κοντά σε αυτό." }
+            ]
+        },
+        { // 2
+            text: "Για να έχει μια συνάρτηση $f$ όριο στο $x_0$ το $+\\infty$, είναι απαραίτητο να είναι γνησίως μονότονη κοντά στο $x_0$;",
+            options: [
+                { letter: "Α", text: "Ναι, πρέπει να αυξάνεται συνεχώς.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι μια συνηθισμένη παρανόηση. Μια συνάρτηση μπορεί να ταλαντώνεται έντονα αλλά οι τιμές της να αυξάνονται απεριόριστα." },
+                { letter: "Β", text: "Όχι, η ύπαρξη μη πεπερασμένου ορίου δεν σχετίζεται υποχρεωτικά με τη μονοτονία.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Μπορεί να υπάρχουν μικρές πτώσεις της $f(x)$ όσο $x\\to x_0$, αλλά εν γένει αυτές να είναι μικρότερες από την αυξητική τάση που τη στέλνει στο άπειρο." },
+                { letter: "Γ", text: "Μόνο αν το $x$ πλησιάζει το $x_0$ από τα δεξιά.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η μονοτονία δεν είναι προϋπόθεση για κανένα από τα δύο πλευρικά όρια στην περίπτωση του απείρου." }
+            ]
+        },
+        { // 3
+            text: "Ποιο είναι το όριο της συνάρτησης $f(x) = \\frac{1}{x^2}$ όταν $x \\to 0$;",
+            options: [
+                { letter: "Α", text: "$+\\infty$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή η δύναμη είναι άρτια ($\\nu=2$), η συνάρτηση παίρνει μόνο θετικές τιμές κοντά στο 0 που αυξάνονται απεριόριστα." },
+                { letter: "Β", text: "$-\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $x^2$ είναι πάντα θετική, άρα το πηλίκο $\\frac{1}{x^2}$ δεν μπορεί να τείνει στο $-\\infty$." },
+                { letter: "Γ", text: "Δεν υπάρχει.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο υπάρχει και είναι το $+\\infty$." }
+            ]
+        },
+        { // 4
+            text: "Για τη συνάρτηση $f(x) = \\frac{1}{x^3}$ στο $x_0 = 0$, τι ισχύει για τα πλευρικά όρια;",
+            options: [
+                { letter: "Α", text: "$\\lim\\limits_{x \\to 0^+} f(x) = +\\infty$ και $\\lim\\limits_{x \\to 0^-} f(x) = +\\infty$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Όταν ο εκθέτης είναι περιττός, το πρόσημο του $x^3$ αλλάζει εκατέροθεν του μηδενός." },
+                { letter: "Β", text: "$\\lim\\limits_{x \\to 0^+} f(x) = +\\infty$ και $\\lim\\limits_{x \\to 0^-} f(x) = -\\infty$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για $x>0$ έχουμε θετικές τιμές ($+\\infty$), ενώ για $x<0$ έχουμε αρνητικές τιμές ($-\\infty$)." },
+                { letter: "Γ", text: "Και τα δύο είναι ίσα με 0.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το πηλίκο $\\frac{1}{x^3}$ αυξάνεται ή μειώνεται απεριόριστα κοντά στο 0." }
+            ]
+        },
+        { // 5
+            text: "Αν $\\lim\\limits_{x \\to x_0} f(x) = +\\infty$ και $\\lim\\limits_{x \\to x_0} g(x) = \\ell$ (όπου $\\ell \\in \\mathbb{R}$), τότε το $\\lim\\limits_{x \\to x_0} (f(x) + g(x))$ ισούται με:",
+            options: [
+                { letter: "Α", text: "$\\ell$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ένας πεπερασμένος αριθμός δεν μπορεί να υπερισχύσει του $+\\infty$." },
+                { letter: "Β", text: "$+\\infty$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Όσο κάτω από το $0$ και να είναι ο $\\ell$, αφού η $f(x)$ «εκρήγνυται» στο $+\\infty$ θα υπερβαίνει την αρνητική «λακκούβα» της $g(x)$." },
+                { letter: "Γ", text: "Είναι απροσδιόριστη μορφή.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή η μορφή $(\\infty + \\ell)$ είναι πάντα καθορισμένη." }
+            ]
+        },
+        { // 6
+            text: "Ποια από τις παρακάτω μορφές ορίου αθροίσματος είναι <strong>απροσδιόριστη</strong>;",
+            options: [
+                { letter: "Α", text: "$(+\\infty) + (+\\infty)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το άθροισμα δύο απεριόριστα μεγάλων θετικών τιμών είναι $+\\infty$." },
+                { letter: "Β", text: "$(+\\infty) + (-\\infty)$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Όταν προσθέτουμε το $+\\infty$ με το $-\\infty$, το αποτέλεσμα εξαρτάται από το ποια συνάρτηση 'επικρατεί', άρα είναι απροσδιόριστο." },
+                { letter: "Γ", text: "$(-\\infty) + (-\\infty)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το άθροισμα δύο απεριόριστα μικρών αρνητικών τιμών είναι $-\\infty$." }
+            ]
+        },
+        { // 7
+            text: "Αν $\\lim\\limits_{x \\to x_0} f(x) = +\\infty$ και $\\lim\\limits_{x \\to x_0} g(x) = \\ell < 0$, τότε το $\\lim\\limits_{x \\to x_0} (f(x) \\cdot g(x))$ είναι:",
+            options: [
+                { letter: "Α", text: "$+\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο πολλαπλασιασμός με αρνητικό αριθμό αλλάζει το πρόσημο του απείρου." },
+                { letter: "Β", text: "$-\\infty$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ισχύουν οι ίδιοι κανόνες με τους αριθμούς (πχ «συν επί πλην = πλην»), αρκεί να μην είναι μορφής $0\\cdot\\infty$." },
+                { letter: "Γ", text: "$0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το γινόμενο απείρου με μη μηδενικό αριθμό δεν μπορεί να είναι 0." }
+            ]
+        },
+        { // 8
+            text: "Ποια από τις παρακάτω μορφές ορίου γινομένου είναι <strong>απροσδιόριστη</strong>;",
+            options: [
+                { letter: "Α", text: "$(+\\infty) \\cdot 0$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η μορφή $0 \\cdot \\infty$ είναι μία από τις βασικές απροσδιόριστες μορφές." },
+                { letter: "Β", text: "$(+\\infty) \\cdot (+\\infty)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το γινόμενο ομοσήμων απείρων είναι $+\\infty$." },
+                { letter: "Γ", text: "$(-\\infty) \\cdot (+\\infty)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το γινόμενο ετεροσήμων απείρων είναι $-\\infty$." }
+            ]
+        },
+        { // 9
+            text: "Αν $\\lim\\limits_{x \\to x_0} f(x) = 0$ και $f(x) > 0$ κοντά στο $x_0$, τότε το $\\lim\\limits_{x \\to x_0} \\frac{1}{f(x)}$ είναι:",
+            options: [
+                { letter: "Α", text: "$0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το αντίστροφο μιας τιμής που τείνει στο 0 αυξάνεται απεριόριστα." },
+                { letter: "Β", text: "$+\\infty$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με τις ιδιότητες, αν ο παρονομαστής τείνει στο 0 από θετικές τιμές, το πηλίκο τείνει στο $+\\infty$." },
+                { letter: "Γ", text: "$-\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αφού η $f(x)$ είναι θετική, το πηλίκο δεν μπορεί να είναι αρνητικό." }
+            ]
+        },
+        { // 10
+            text: "Αν $\\lim\\limits_{x \\to x_0} f(x) = -\\infty$, τότε το $\\lim\\limits_{x \\to x_0} |f(x)|$ είναι:",
+            options: [
+                { letter: "Α", text: "$-\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η απόλυτη τιμή δεν μπορεί να είναι αρνητική." },
+                { letter: "Β", text: "$0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι τιμές της $f$ γίνονται 'τεράστιες' αρνητικές, άρα οι απόλυτες τιμές τους γίνονται 'τεράστιες' θετικές." },
+                { letter: "Γ", text: "$+\\infty$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με τις ιδιότητες, αν $f(x) \\to -\\infty$, τότε $|f(x)| \\to +\\infty$." }
+            ]
+        },
+        { // 11
+            text: "Ποιο είναι το όριο της συνάρτησης $f(x) = \\text{εφ} x$ όταν $x \\to \\frac{\\pi}{2}$ από αριστερά ($x < \\frac{\\pi}{2}$);",
+            options: [
+                { letter: "Α", text: "$+\\infty$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Στο πρώτο τεταρτημόριο η εφάπτομένη είναι θετική και τείνει στο $+\\infty$ καθώς πλησιάζουμε τις $90^\\circ$." },
+                { letter: "Β", text: "$-\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό ισχύει όταν πλησιάζουμε το $\\frac{\\pi}{2}$ από δεξιά (δεύτερο τεταρτημόριο)." },
+                { letter: "Γ", text: "$0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η εφάπτομένη στο $\\frac{\\pi}{2}$ δεν ορίζεται και οι τιμές της αυξάνονται απεριόριστα." }
+            ]
+        },
+        { // 12
+            text: "Αν για μια συνάρτηση $f$ ισχύει $\\lim\\limits_{x \\to x_0^+} f(x) = +\\infty$ και $\\lim\\limits_{x \\to x_0^-} f(x) = -\\infty$, τότε:",
+            options: [
+                { letter: "Α", text: "$\\lim\\limits_{x \\to x_0} f(x) = 0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα πλευρικά όρια δεν τείνουν στο 0." },
+                { letter: "Β", text: "$\\lim\\limits_{x \\to x_0} f(x) = \\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αφενός για να υπάρχει το όριο, πρέπει τα πλευρικά όρια να ταυτίζονται. Αφετέρου δεν έχουμε στο σχολείο το συμβολισμό σκέτο $\\infty$." },
+                { letter: "Γ", text: "Δεν υπάρχει το όριο της $f$ στο $x_0$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή τα πλευρικά όρια δεν είναι ίσα, η συνάρτηση δεν έχει όριο στο σημείο αυτό." }
+            ]
+        },
+        { // 13
+            text: "Ποιο είναι το $\\lim\\limits_{x \\to 2} \\frac{-3}{(x-2)^4}$;",
+            options: [
+                { letter: "Α", text: "$+\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο αριθμητής είναι αρνητικός (-3), ενώ ο παρονομαστής είναι θετικός και τείνει στο 0." },
+                { letter: "Β", text: "$-\\infty$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Ο παρονομαστής $(x-2)^4$ είναι πάντα θετικός κοντά στο 2. Το γινόμενο $(-3) \\cdot (+\\infty)$ μας δίνει $-\\infty$." },
+                { letter: "Γ", text: "$-3$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η διαίρεση με έναν αριθμό που τείνει στο 0 οδηγεί στο άπειρο." }
+            ]
+        },
+        { // 14
+            text: "Ποια από τις παρακάτω μορφές <strong>δεν</strong> είναι απροσδιόριστη;",
+            options: [
+                { letter: "Α", text: "$\\frac{0}{0}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Είναι μία από τις βασικές απροσδιόριστες μορφές." },
+                { letter: "Β", text: "$\\frac{+\\infty}{+\\infty}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Είναι απροσδιόριστη μορφή πηλίκου." },
+                { letter: "Γ", text: "$\\frac{\\ell}{+\\infty}$ (όπου $\\ell \\in \\mathbb{R}$)", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το όριο αυτό είναι ίσο με 0, άρα είναι καθορισμένο." }
+            ]
+        },
+        { // 15
+            text: "Αν $\\lim\\limits_{x \\to x_0} f(x) = +\\infty$, τότε το $\\lim\\limits_{x \\to x_0} \\sqrt[n]{f(x)}$ ισούται με:",
+            options: [
+                { letter: "Α", text: "$+\\infty$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η ρίζα μιας τιμής που αυξάνεται απεριόριστα συνεχίζει να αυξάνεται απεριόριστα." },
+                { letter: "Β", text: "$0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ρίζα δεν μπορεί να μηδενίσει μια απεριόριστα μεγάλη τιμή." },
+                { letter: "Γ", text: "Είναι απροσδιόριστο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το αποτέλεσμα είναι καθορισμένο." }
+            ]
+        },
+        { // 16
+            text: "Τι συμβαίνει με το όριο $\\lim\\limits_{x \\to 0} \\frac{1}{|x|}$;",
+            options: [
+                { letter: "Α", text: "Είναι $+\\infty$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή η απόλυτη τιμή $|x|$ είναι πάντα θετική και τείνει στο 0, το πηλίκο τείνει στο $+\\infty$." },
+                { letter: "Β", text: "Είναι $-\\infty$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η απόλυτη τιμή εμποδίζει το αποτέλεσμα από το να γίνει αρνητικό." },
+                { letter: "Γ", text: "Δεν υπάρχει επειδή τα πλευρικά όρια διαφέρουν.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα πλευρικά όρια ταυτίζονται, καθώς $|x| > 0$ και στις δύο πλευρές του 0." }
+            ]
+        },
+        { // 17
+            text: "Αν $\\lim\\limits_{x \\to x_0} f(x) = +\\infty$, τότε υπάρχει θετικός αριθμός $M$ τέτοιος ώστε κοντά στο $x_0$ να ισχύει:",
+            options: [
+                { letter: "Α", text: "$f(x) < M$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό θα σήμαινε ότι η συνάρτηση είναι άνω φραγμένη." },
+                { letter: "Β", text: "$f(x) > M$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με τη διαισθητική αντίληψη που έχουμε για τα όρια, για οποιονδήποτε $M>0$, οι τιμές $f(x)$ γίνονται τελικά μεγαλύτερες από αυτόν." },
+                { letter: "Γ", text: "$f(x) = M$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνάρτηση δεν παραμένει σταθερή σε έναν αριθμό $M$." }
+            ]
+        },
+        { // 18
+            text: "Το όριο $\\lim\\limits_{x \\to 0} \\text{σφ} x$ από δεξιά ($x > 0$):",
+            options: [
+                { letter: "Α", text: "Τείνει στο $+\\infty$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Στο πρώτο τεταρτημόριο η συνεφαπτομένη είναι θετική και τείνει στο $+\\infty$ καθώς πλησιάζουμε το 0." },
+                { letter: "Β", text: "Τείνει στο $-\\infty$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό ισχύει όταν πλησιάζουμε το 0 από αρνητικές τιμές (τέταρτο τεταρτημόριο)." },
+                { letter: "Γ", text: "Ισούται με 0.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνεφαπτομένη τείνει στο άπειρο κοντά στο 0." }
+            ]
+        },
+        { // 19
+            text: "Αν $\\lim\\limits_{x \\to x_0} f(x) = +\\infty$ και $\\lim\\limits_{x \\to x_0} g(x) = +\\infty$, τότε το $\\lim\\limits_{x \\to x_0} \\frac{f(x)}{g(x)}$ είναι:",
+            options: [
+                { letter: "Α", text: "$1$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν μπορούμε να 'απλοποιήσουμε' τα άπειρα αν δεν γνωρίζουμε τους ρυθμούς μεταβολής των συναρτήσεων." },
+                { letter: "Β", text: "$+\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μπορεί να είναι οποιοσδήποτε αριθμός ή να μην υπάρχει." },
+                { letter: "Γ", text: "Απροσδιόριστη μορφή.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η μορφή $\\frac{\\infty}{\\infty}$ είναι απροσδιόριστη." }
+            ]
+        },
+        { // 20
+            text: "Ποιο είναι το $\\lim\\limits_{x \\to 0} \\left(-\\frac{1}{x^2}\\right)$;",
+            options: [
+                { letter: "Α", text: "$+\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το πρόσημο μείον μπροστά από το θετικό κλάσμα καθιστά όλες τις τιμές αρνητικές." },
+                { letter: "Β", text: "$-\\infty$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αφού $\\frac{1}{x^2} \\to +\\infty$, τότε $-\\frac{1}{x^2} \\to -\\infty$." },
+                { letter: "Γ", text: "Δεν ορίζεται.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο ορίζεται κανονικά και είναι το $-\\infty$." }
+            ]
+        },
+        { // 21
+            text: "Αν $\\lim\\limits_{x \\to x_0} f(x) = 0$ και η $f$ αλλάζει πρόσημο εκατέρωθεν του $x_0$, τότε το $\\lim\\limits_{x \\to x_0} \\frac{1}{f(x)}$:",
+            options: [
+                { letter: "Α", text: "Είναι $+\\infty$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Για να είναι $+\\infty$, θα έπρεπε η $f$ να είναι θετική και στις δύο πλευρές." },
+                { letter: "Β", text: "Είναι $-\\infty$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Για να είναι $-\\infty$, θα έπρεπε η $f$ να είναι αρνητική και στις δύο πλευρές." },
+                { letter: "Γ", text: "Δεν υπάρχει.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Τα πλευρικά όρια θα είναι ετερόσημα άπειρα, επομένως το όριο δεν υπάρχει." }
+            ]
+        }
+    ];
+
+    const root = document.getElementById('quiz-root');
+
+    async function renderMath(element) {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise([element]);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function buildQuiz() {
+        root.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    await renderMath(feedbackDiv);
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        renderMath(root);
+    }
+    
+    window.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+</body>
+</html>

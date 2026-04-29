@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Μαθηματικών: Όρια Συνάρτησης στο Άπειρο | Γ' Λυκείου</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* --- Κουμπί Επιστροφής & Υπογραφή --- */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            color: #1e6f9f;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #0b2b44;
+            transform: translateX(-5px);
+        }
+
+        .signature {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            color: #4a627a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1000;
+            font-style: italic;
+        }
+        /* ------------------------------------------------ */
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .options-area {
+            padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .option-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbdde6;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4662;
+            font-family: inherit;
+            flex: 1 0 auto;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        .feedback-content ul {
+            margin: 0.5rem 0 0 1.5rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: left;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+            .signature {
+                position: static;
+                text-align: right;
+                display: block;
+                padding-right: 1rem;
+                margin-top: -1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    
+    <a href="../index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Αρχική Σελίδα
+    </a>
+
+    <div class="quiz-header">
+        <h1>📐 Quiz Μαθηματικών: Όρια Συνάρτησης στο Άπειρο <br><small>Ενότητα 1.7 – Προετοιμασία για την κατανόηση της συμπεριφοράς στο άπειρο</small></h1>
+        <div class="instructions">
+            📌 Επιλέξτε τη σωστή απάντηση. <br>
+            ✅ Μετά από κάθε ερώτηση, μελετήστε τις επεξηγήσεις για να κατανοήσετε πλήρως τις έννοιες και να αποφύγετε συνήθεις παρανοήσεις.
+        </div>
+    </div>
+    
+    <div id="quiz-root"></div>
+    
+    <footer>📖 Κάθε απάντηση συνοδεύεται από πλήρη επεξήγηση – μελέτησε την ανατροφοδότηση για βαθύτερη κατανόηση.</footer>
+</div>
+
+<div class="signature">✍️ Κώστας Κούδας</div>
+
+<script>
+    // Δεδομένα quiz – Πλήρης LaTeX σύνταξη
+    const quizData = [
+        { // 1
+            text: "Ποια είναι η απαραίτητη προϋπόθεση για να αναζητήσουμε το όριο μιας συνάρτησης $f$ στο $+\\infty$;",
+            options: [
+                { letter: "Α", text: "Η $f$ να είναι ορισμένη σε ένα διάστημα της μορφής $(\\alpha, +\\infty)$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για να μελετήσουμε τη συμπεριφορά της $f$ καθώς το $x$ αυξάνεται απεριόριστα, η συνάρτηση πρέπει να ορίζεται για όλες τις τιμές μετά από κάποιον αριθμό $\\alpha$." },
+                { letter: "Β", text: "Η $f$ να είναι ορισμένη σε όλο το $\\mathbb{R}$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν απαιτείται η συνάρτηση να ορίζεται παντού· μας ενδιαφέρει μόνο η συμπεριφορά της 'δεξιά' στο άπειρο." },
+                { letter: "Γ", text: "Η $f$ να είναι γνησίως αύξουσα.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η μονοτονία δεν αποτελεί προϋπόθεση για τον ορισμό ή την αναζήτηση ορίου." }
+            ]
+        },
+        { // 2
+            text: "Αν μια συνάρτηση $f$ έχει όριο στο $+\\infty$ έναν πραγματικό αριθμό $\\ell$, τότε η συνάρτηση είναι υποχρεωτικά μονότονη κοντά στο $+\\infty$;",
+            options: [
+                { letter: "Α", text: "Ναι, αλλιώς δεν μπορεί να προσεγγίζει έναν αριθμό.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Πρόκειται για συνηθισμένη παρανόηση. Μια συνάρτηση μπορεί να πλησιάζει μια τιμή χωρίς να είναι μονότονη." },
+                { letter: "Β", text: "Όχι, μπορεί και να μην είναι γνησίως μονότονη σε καμία περιοχή του $+\\infty$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Μπορεί να προσεγγίζει το $\\ell$ ταλαντευόμενη πέριξ αυτού με το πλάτος της ταλάντωσης να ελλατώνετται συνεχως (π.χ. $f(x) = \\frac{\\text{ημ} x}{x} + \\ell$)" },
+                { letter: "Γ", text: "Μόνο αν το $\\ell = 0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η τιμή του ορίου δεν επηρεάζει τη δυνατότητα της συνάρτησης να είναι μη μονότονη. Η συνάρτηση μπορεί να πηγαινοέρχεται συνεχώς μεταξύ αρνητικών-θετικών όσο το $x$ μεγαλώνει, πλησιάζοντας το $0$." }
+            ]
+        },
+        { // 3
+            text: "Ποιο είναι το αποτέλεσμα του ορίου $\\lim\\limits_{x \\to +\\infty} \\frac{1}{x^{\\nu}}$, όπου $\\nu \\in \\mathbb{N}^{*}$;",
+            options: [
+                { letter: "Α", text: "$+\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Καθώς ο παρονομαστής αυξάνεται απεριόριστα, το κλάσμα μικραίνει." },
+                { letter: "Β", text: "$1$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το κλάσμα προσεγγίζει το μηδέν, όχι τη μονάδα." },
+                { letter: "Γ", text: "$0$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Πρόκειται για βασικό όριο: η διαίρεση της μονάδας με μια απεριόριστα αυξανόμενη ποσότητα τείνει στο μηδέν." }
+            ]
+        },
+        { // 4
+            text: "Ποιο είναι το όριο της συνάρτησης $f(x) = x^{3}$ όταν $x \\to -\\infty$;",
+            options: [
+                { letter: "Α", text: "$+\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μια περιττή δύναμη ενός πολύ μεγάλου αρνητικού αριθμού παραμένει αρνητική." },
+                { letter: "Β", text: "$-\\infty$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για περιττούς εκθέτες, ισχύει $\\lim\\limits_{x \\to -\\infty} x^{\\nu} = -\\infty$." },
+                { letter: "Γ", text: "$0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι δυνάμεις του $x$ αυξάνονται (κατ' απόλυτη τιμή) απεριόριστα στο άπειρο." }
+            ]
+        },
+        { // 5
+            text: "Το όριο μιας πολυωνυμικής συνάρτησης $P(x) = \\alpha_{\\nu}x^{\\nu} + \\alpha_{\\nu-1}x^{\\nu-1} + \\dots + \\alpha_{0}$ στο $+\\infty$ είναι ίσο με:",
+            options: [
+                { letter: "Α", text: "Το άθροισμα των ορίων όλων των όρων της.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό συχνά οδηγεί σε απροσδιόριστη μορφή $(+\\infty) + (-\\infty)$." },
+                { letter: "Β", text: "Το όριο του πρωτοβάθμιου όρου $\\alpha_{1}x$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο όρος με τη μεγαλύτερη δύναμη είναι αυτός που καθορίζει τη συμπεριφορά στο άπειρο." },
+                { letter: "Γ", text: "Το όριο του μεγιστοβάθμιου όρου $\\alpha_{\\nu}x^{\\nu}$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Στο άπειρο, η πολυωνυμική συνάρτηση συμπεριφέρεται όπως ο όρος με τη μεγαλύτερη δύναμη." }
+            ]
+        },
+        { // 6
+            text: "Ποιο είναι το $\\lim\\limits_{x \\to +\\infty} (-2x^{3} + 5x - 1)$;",
+            options: [
+                { letter: "Α", text: "$-\\infty$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το όριο ισούται με $\\lim\\limits_{x \\to +\\infty} (-2x^{3})$. Επειδή $x^{3} \\to +\\infty$, το γινόμενο με το $-2$ δίνει $-\\infty$." },
+                { letter: "Β", text: "$+\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο μεγιστοβάθμιος όρος έχει αρνητικό συντελεστή, άρα το όριο είναι $-\\infty$." },
+                { letter: "Γ", text: "$-2$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $-2$ είναι ο συντελεστής, όχι το όριο." }
+            ]
+        },
+        { // 7
+            text: "Σε μια ρητή συνάρτηση $f(x) = \\frac{P(x)}{Q(x)}$, αν ο βαθμός του αριθμητή είναι <strong>μικρότερος</strong> από τον βαθμό του παρονομαστή, τότε το όριο στο $+\\infty$ είναι:",
+            options: [
+                { letter: "Α", text: "$+\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό συμβαίνει όταν ο αριθμητής έχει μεγαλύτερο βαθμό." },
+                { letter: "Β", text: "$0$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Όταν ο παρονομαστής 'μεγαλώνει' πιο γρήγορα από τον αριθμητή, το πηλίκο τείνει στο μηδέν." },
+                { letter: "Γ", text: "Ο λόγος των μεγιστοβάθμιων συντελεστών.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό συμβαίνει μόνο όταν οι βαθμοί είναι ίσοι." }
+            ]
+        },
+        { // 8
+            text: "Ποιο είναι το $\\lim\\limits_{x \\to +\\infty} \\frac{3x^2 - 5}{x^2 + 2x}$;",
+            options: [
+                { letter: "Α", text: "$0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι βαθμοί είναι ίσοι, οπότε το όριο δεν είναι μηδέν." },
+                { letter: "Β", text: "$+\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο είναι πεπερασμένο επειδή οι βαθμοί είναι ίσοι." },
+                { letter: "Γ", text: "$3$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το όριο ισούται με $\\lim\\limits_{x \\to +\\infty} \\frac{3x^2}{x^2} = 3$." }
+            ]
+        },
+        { // 9
+            text: "Για την εκθετική συνάρτηση $f(x) = e^{x}$, το όριο στο $-\\infty$ είναι:",
+            options: [
+                { letter: "Α", text: "$+\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό είναι το όριο στο $+\\infty$." },
+                { letter: "Β", text: "$0$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Καθώς το $x$ τείνει στο $-\\infty$, η $e^{x}$ πλησιάζει τον άξονα $x'x$ από πάνω." },
+                { letter: "Γ", text: "$-\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η εκθετική συνάρτηση παίρνει μόνο θετικές τιμές." }
+            ]
+        },
+        { // 10
+            text: "Ποιο είναι το όριο $\\lim\\limits_{x \\to +\\infty} \\ln x$;",
+            options: [
+                { letter: "Α", text: "$0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ο λογάριθμος αυξάνεται απεριόριστα, αν και αργά." },
+                { letter: "Β", text: "$-\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό είναι το όριο στο $0^{+}$." },
+                { letter: "Γ", text: "$+\\infty$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η λογαριθμική συνάρτηση με βάση $e>1$ τείνει στο $+\\infty$ καθώς το $x \\to +\\infty$." }
+            ]
+        },
+        { // 11
+            text: "Αν $0 < \\alpha < 1$, τότε το $\\lim\\limits_{x \\to +\\infty} \\alpha^{x}$ ισούται με:",
+            options: [
+                { letter: "Α", text: "$0$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Όταν η βάση είναι μεταξύ 0 και 1, η εκθετική συνάρτηση είναι γνησίως φθίνουσα και τείνει στο μηδέν." },
+                { letter: "Β", text: "$+\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό ισχύει μόνο αν $\\alpha > 1$." },
+                { letter: "Γ", text: "$1$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνάρτηση τείνει στο μηδέν." }
+            ]
+        },
+        { // 12
+            text: "Αν για δύο συναρτήσεις $f, g$ ισχύει $f(x) \\geq g(x)$ κοντά στο $+\\infty$ και $\\lim\\limits_{x \\to +\\infty} g(x) = +\\infty$, τότε:",
+            options: [
+                { letter: "Α", text: "$\\lim\\limits_{x \\to +\\infty} f(x) = 0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $f$ είναι μεγαλύτερη από μια συνάρτηση που τείνει στο $+\\infty$, άρα δεν μπορεί να τείνει στο 0." },
+                { letter: "Β", text: "$\\lim\\limits_{x \\to +\\infty} f(x) = +\\infty$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αν μια συνάρτηση ($f$) είναι μεγαλύτερη από μια άλλη ($g$) που τείνει στο $+\\infty$, τότε η $g$ «σπρώχνει» προς τα πάνω την $f$ και την συμπαρασύρει στο στο $+\\infty$." },
+                { letter: "Γ", text: "Το όριο της $f$ μπορεί να είναι ένας πραγματικός αριθμός.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $f$ αναγκάζεται να τείνει στο $+\\infty$ λόγω της ανισότητας." }
+            ]
+        },
+        { // 13
+            text: "Αν $f(x) \\leq g(x)$ κοντά στο $+\\infty$ και $\\lim\\limits_{x \\to +\\infty} g(x) = -\\infty$, τότε:",
+            options: [
+                { letter: "Α", text: "$\\lim\\limits_{x \\to +\\infty} f(x) = -\\infty$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αν η $f$ είναι μικρότερη από μια συνάρτηση $g$ που μειώνεται απεριόριστα, τότε η $g$ «πιέζει» προς τα κάτω την $f$ και την κάνει να «κατρακυλά» μαζί της στο $-\\infty$." },
+                { letter: "Β", text: "$\\lim\\limits_{x \\to +\\infty} f(x) = +\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ανισότητα επιβάλλει στην $f$ να είναι κάτω από μία αρνητική (για $x$ σε περιοχή του $+\\infty$) συνάρτηση, άρα δεν μπορεί να πετάγεται στο $+\\infty$." },
+                { letter: "Γ", text: "Το όριο της $f$ δεν υπάρχει.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο υπάρχει και είναι καθορισμένο από τη σύγκριση." }
+            ]
+        },
+        { // 14
+            text: "Τι ονομάζουμε ακολουθία $(\\alpha_{\\nu})$;",
+            options: [
+                { letter: "Α", text: "Μια συνάρτηση με πεδίο ορισμού το $\\mathbb{R}$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι ακολουθίες ορίζονται μόνο για φυσικούς αριθμούς." },
+                { letter: "Β", text: "Μια συνάρτηση με πεδίο ορισμού το $\\mathbb{N}^{*} = \\{1, 2, 3, \\dots\\}$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με τον ορισμό, ακολουθία είναι κάθε πραγματική συνάρτηση με πεδίο ορισμού το $\\mathbb{N}^{*}$." },
+                { letter: "Γ", text: "Μια λίστα μόνο από άρτιους αριθμούς.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι τιμές (εικόνες) της ακολουθίας μπορεί να είναι οποιοιδήποτε πραγματικοί αριθμοί." }
+            ]
+        },
+        { // 15
+            text: "Ποιο είναι το $\\lim\\limits_{x \\to +\\infty} \\text{συν} x$;",
+            options: [
+                { letter: "Α", text: "$0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τοιαύτη περιπτώσει θα έπρεπε μακροπρόθεσμα οι τιμές του συνημιτόνου να πλησιάζουν το $0$. Όμως μπορούμε πάντα να βρούμε τιμές του και πιο μακριά, π.χ. κοντά στο $-1$ για $x$ κντά στο $2k\\pi+\\pi$ (όπου $k\\in\\mathbb{Z}$)." },
+                { letter: "Β", text: "$1$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τοιαύτη περιπτώσει θα έπρεπε μακροπρόθεσμα οι τιμές του συνημιτόνου να πλησιάζουν το $1$. Όμως μπορούμε πάντα να βρούμε τιμές του και πιο μακριά, π.χ. κοντά στο $-1$ για $x$ κντά στο $2k\\pi+\\pi$ (όπου $k\\in\\mathbb{Z}$)." },
+                { letter: "Γ", text: "Δεν υπάρχει.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το συνημίτονο, όπως και το ημίτονο και κάθε άλλη (μη σταθερή) περιοδική συνάρτηση, δεν έχει όριο στο $\\pm\\infty$. Συγκεκριμένα δεν συμβαίνει $\\lim\\limits_{x \\to +\\infty} \\text{συν} x=\\ell\\in\\mathbb{R}$ διότι μπορούμε να βάλουμε $x\\to+\\infty$ κανοντάς το να «πατάει» σε σημεία που να στέλνουν το $\\text{συν}$ σε σταθερή απόσταση από το $\\ell$." }
+            ]
+        },
+        { // 16
+            text: "Αν $\\lim\\limits_{x \\to +\\infty} f(x) = \\ell$, τότε τι ισχύει για την ακολουθία $\\alpha_{\\nu} = f(\\nu)$;",
+            options: [
+                { letter: "Α", text: "$\\lim\\limits_{\\nu \\to +\\infty} \\alpha_{\\nu} = \\ell$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Επειδή οι ιδιότητες των ορίων συναρτήσεων ισχύουν και για τις ακολουθίες, αν η συνάρτηση τείνει στο $\\ell$, τότε και η ακολουθία των τιμών της για φυσικά $\\nu$ τείνει στο ίδιο όριο." },
+                { letter: "Β", text: "Το όριο της ακολουθίας μπορεί να είναι διαφορετικό.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η ακολουθία είναι 'υποσύνολο' των τιμών της συνάρτησης, άρα ακολουθεί το ίδιο όριο." },
+                { letter: "Γ", text: "Η ακολουθία δεν έχει όριο.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το όριο υπάρχει και είναι το ίδιο $\\ell$." }
+            ]
+        },
+        { // 17
+            text: "Ποιο είναι το $\\lim\\limits_{x \\to +\\infty} \\frac{x + \\text{ημ} x}{x}$; (Υπόδειξη: $\\frac{x + \\text{ημ} x}{x} = 1 + \\frac{\\text{ημ} x}{x}$)",
+            options: [
+                { letter: "Α", text: "$+\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Κανένας από τους προσθεταίους της υπόδειξης δεν αυξάνεται απεριόριστα." },
+                { letter: "Β", text: "$1$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Καθώς $x \\to +\\infty$, το $\\frac{\\text{ημ} x}{x} \\to 0$ (αφού $|\\frac{\\text{ημ} x}{x}| \\leq \\frac{1}{x}$), οπότε το όριο είναι $1 + 0 = 1$." },
+                { letter: "Γ", text: "Δεν υπάρχει.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Παρά την ύπαρξη του ημιτόνου, το όριο υπάρχει κανονικά, διότι αυτή η ταλάντωσή του ελλατώνεται διαρκώς διαιρούμενη με το $x$ που αυξάνει απεριόριστα." }
+            ]
+        },
+        { // 18
+            text: "Στο όριο ρητής συνάρτησης $\\frac{P(x)}{Q(x)}$ στο $-\\infty$, αν ο βαθμός του αριθμητή είναι <strong>μεγαλύτερος</strong> από του παρονομαστή, το αποτέλεσμα:",
+            options: [
+                { letter: "Α", text: "Είναι πάντα $+\\infty$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Εξαρτάται από τους συντελεστές και τις δυνάμεις." },
+                { letter: "Β", text: "Είναι πάντα $-\\infty$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μπορεί να είναι και $+\\infty$." },
+                { letter: "Γ", text: "Είναι $+\\infty$ ή $-\\infty$, ανάλογα με το πρόσημο του λόγου των μεγιστοβάθμιων όρων και τον βαθμό της διαφοράς.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Το όριο ανάγεται στο $\\lim\\limits_{x \\to -\\infty} \\frac{\\alpha_{\\nu}x^{\\nu}}{\\beta_{\\kappa}x^{\\kappa}} = \\frac{\\alpha_{\\nu}}{\\beta_{\\kappa}} \\lim\\limits_{x \\to -\\infty} x^{\\nu-\\kappa}$." }
+            ]
+        },
+        { // 19
+            text: "Ποιο είναι το $\\lim\\limits_{x \\to +\\infty} e^{-x}$;",
+            options: [
+                { letter: "Α", text: "$+\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το $-x$ τείνει στο $-\\infty$, οπότε η δύναμη τείνει στο 0." },
+                { letter: "Β", text: "$0$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> $e^{-x} = \\frac{1}{e^x}$. Καθώς $e^x \\to +\\infty$, το πηλίκο τείνει στο 0." },
+                { letter: "Γ", text: "$-\\infty$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η εκθετική συνάρτηση δεν παίρνει αρνητικές τιμές." }
+            ]
+        },
+        { // 20
+            text: "Αν μια συνάρτηση $f$ έχει πεδίο ορισμού το $(-\\infty, 10]$, μπορούμε να αναζητήσουμε το $\\lim\\limits_{x \\to +\\infty} f(x)$;",
+            options: [
+                { letter: "Α", text: "Ναι, αν αλλάξουμε το πεδίο ορισμού.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν μπορούμε να αλλάξουμε αυθαίρετα το πεδίο ορισμού μιας δοθείσας συνάρτησης." },
+                { letter: "Β", text: "Όχι, το όριο δεν έχει νόημα.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για να αναζητήσουμε όριο στο $+\\infty$ πρέπει η συνάρτηση να ορίζεται 'δεξιά' απεριόριστα. Εν προκειμένω η συνάρτηση δεν ορίζεται σε διάστημα της μορφής $(\\alpha, +\\infty)$" },
+                { letter: "Γ", text: "Μπορούμε, αλλά το όριο δεν υπάρχει.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Για να πούμε ότι το $\\lim\\limits_{x \\to +\\infty} f(x)$ δεν υπάρχει, θα πρέπει να είναι εφικτό το $x\\to+\\infty$. Στην προκειμένη περίπτωση δεν έχει καν νόημα το να πάει το $x$ στο $+\\infty$, άρα δεν έχει καν νόημα το να εξετάσουμε τη συμπεριφορά της $f$ εκεί." }
+            ]
+        },
+        { // 21
+            text: "Στον υπολογισμό του ορίου $\\lim\\limits_{x \\to +\\infty} \\frac{x^2 - x \\text{ημ} x}{x^2 + 1}$, ποια είναι η σωστή προσέγγιση;",
+            options: [
+                { letter: "Α", text: "Το όριο δεν υπάρχει λόγω του $\\text{ημ} x$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το ημίτονο είναι 'μικρό' σε σχέση με το $x^2$, οπότε το όριο μπορεί να υπάρχει." },
+                { letter: "Β", text: "Βγάζουμε «κοινό παράγοντα» το $x^2$ σε αριθμητή και παρονομαστή.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Έτσι το κλάσμα γίνεται $\\frac{1 - \\frac{\\text{ημ} x}{x}}{1 + \\frac{1}{x^2}}$. Καθώς $x \\to +\\infty$, οι όροι $\\frac{\\text{ημ} x}{x}$ και $\\frac{1}{x^2}$ τείνουν στο 0, άρα το όριο είναι 1." },
+                { letter: "Γ", text: "Αντικαθιστούμε το $\\text{ημ} x$ με το 1.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Δεν μπορούμε να αντικαθιστούμε αυθαίρετα συναρτήσεις με τις μέγιστες τιμές τους μέσα σε όρια." }
+            ]
+        }
+    ];
+
+    // Render quiz
+    const root = document.getElementById('quiz-root');
+
+    async function renderMath(element) {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise([element]);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function buildQuiz() {
+        root.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    await renderMath(feedbackDiv);
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        renderMath(root);
+    }
+    
+    window.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+</body>
+</html>

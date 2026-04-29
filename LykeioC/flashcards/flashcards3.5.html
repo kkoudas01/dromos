@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz Μαθηματικών: Θεμελιώδες Θεώρημα Ολοκληρωτικού Λογισμού (Ενότητα 3.5)</title>
+    <!-- MathJax (CDN) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$','$$'], ['\\[','\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'no-mathjax',
+                processHtmlClass: 'math'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            color: #1e2a3e;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Κουμπί Επιστροφής & Υπογραφή */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            color: #1e6f9f;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #0b2b44;
+            transform: translateX(-5px);
+        }
+        .signature {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            color: #4a627a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1000;
+            font-style: italic;
+        }
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0b2b44, #1a4a6f);
+            color: white;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .quiz-header h1 small {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 1.8rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf2;
+        }
+
+        .question-header {
+            background: #f8fafc;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 2px solid #dce5ec;
+        }
+
+        .question-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f3b5c;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-title .q-num {
+            background: #1e6f9f;
+            color: white;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            color: #1e2f3c;
+            background: #ffffff;
+            padding: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .options-area {
+    padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    border-bottom: 1px solid #e9edf2;
+    align-items: stretch; /* Για να έχουν τα κουμπιά ίδιο ύψος στην ίδια σειρά */
+}
+
+        .option-btn {
+    background: #f1f5f9;
+    border: 1px solid #cbdde6;
+    padding: 0.8rem 1.5rem;
+    border-radius: 60px; /* Αν το κείμενο είναι πολύ μεγάλο, ίσως θες να το μειώσεις σε 15px-20px */
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+    color: #1f4662;
+    font-family: inherit;
+    
+    /* ΟΙ ΚΡΙΣΙΜΕΣ ΑΛΛΑΓΕΣ: */
+    flex: 1 1 calc(50% - 1rem); /* Επιτρέπει στο κουμπί να μικρύνει και να αλλάξει σειρά */
+    min-width: 250px;           /* Ελάχιστο πλάτος πριν πάει στην επόμενη σειρά */
+    max-width: 100%;            /* Δεν θα βγει ποτέ έξω από το πλαίσιο */
+    text-align: left;
+    word-wrap: break-word;      /* Σπάσιμο λέξεων αν χρειαστεί */
+    overflow-wrap: break-word;
+    white-space: normal;        /* Επιτρέπει την αλλαγή γραμμής στο κείμενο */
+    display: block;             /* Διασφαλίζει τη σωστή ροή του κειμένου */
+}
+
+        .option-btn:hover {
+            background: #e2eaf1;
+            transform: translateY(-2px);
+            border-color: #8db3cc;
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e1;
+            border-color: #2c8c6e;
+            color: #11553f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn.selected-wrong {
+            background: #ffe0db;
+            border-color: #cd5c5c;
+            color: #a03a2e;
+        }
+
+        .feedback-area {
+            background: #fefcf5;
+            padding: 1.4rem 1.8rem;
+            margin: 0 1.2rem 1.5rem 1.2rem;
+            border-radius: 1.2rem;
+            border-left: 6px solid #3b82b6;
+            font-size: 0.95rem;
+            color: #2c3e4e;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px #fff8, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #1e5f7a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-title span {
+            background: #d9eefb;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .feedback-content {
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            color: #4a627a;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 680px) {
+            .options-area {
+                flex-direction: column;
+            }
+            .option-btn {
+                text-align: left;
+            }
+            .question-title {
+                font-size: 1.3rem;
+            }
+            .signature {
+                position: static;
+                text-align: right;
+                display: block;
+                padding-right: 1rem;
+                margin-top: -1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    
+    <!-- Κουμπί Επιστροφής Πάνω Αριστερά -->
+    <a href="../index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Αρχική Σελίδα
+    </a>
+
+    <div class="quiz-header">
+        <h1>📐 Quiz Μαθηματικών: Θεμελιώδες Θεώρημα Ολοκληρωτικού Λογισμού <br><small>Ενότητα 3.5 – Ολοκληρώματα και Παράγουσες</small></h1>
+        <div class="instructions">
+            📌 Επιλέξτε μία απάντηση για κάθε ερώτηση. <br>
+            ✅ Αμέσως θα δείτε αναλυτική αιτιολόγηση για όλες τις επιλογές (σωστές και λανθασμένες).
+        </div>
+    </div>
+    
+    <div id="quiz-root"></div>
+    
+    <footer>📖 Κάθε απάντηση συνοδεύεται από μαθηματική επεξήγηση — μελέτησε τις ανατροφοδοτήσεις για βαθύτερη κατανόηση.</footer>
+</div>
+
+<!-- Υπογραφή Κάτω Δεξιά -->
+<div class="signature">✍️ Κώστας Κούδας</div>
+
+<script>
+    // Δεδομένα quiz – πλήρης LaTeX σύνταξη με ελληνικές τριγωνομετρικές συναρτήσεις
+    const quizData = [
+        { // 1
+            text: "Για να υπολογίσουμε το $\\int_{0}^{1}x\\ln(x^2+1)dx$ θέτουμε $u=x^2+1$. Αυτό σημαίνει ότι:",
+            options: [
+                { letter: "Α", text: "$du=dx$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η μεταβολή του $u$ δεν είναι ίδια με του $x$. Βλ. αιτιολόγιση σωστής απάντησης." },
+                { letter: "Β", text: "$du=2xdx$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Διαισθητικά προκύπτει από τη σχέση $du=\\frac{du}{dx}dx=u'dx=(x^2+1)'dx=2xdx$." },
+                { letter: "Γ", text: "$du=(\\frac{x^2}{3}+x)dx$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Όταν θέτουμε $u=g(x)$, τότε $du=g'(x)dx$. Βλ. αιτιολόγιση σωστής απάντησης." }
+            ]
+        },
+        { // 2
+            text: "Αν η $f$ είναι συνεχής στο διάστημα $Δ$ και $\\alpha \\in Δ$, τότε η συνάρτηση $F(x) = \\int_{\\alpha}^{x} f(t) dt$ είναι:",
+            options: [
+                { letter: "Α", text: "Μια παράγουσα της $f$ στο $Δ$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Σύμφωνα με σχετικό θεώρημα, η συνάρτηση αυτή είναι παραγωγίσιμη και ισχύει $F'(x) = f(x)$. Αυτό μάς χρησιμεύει για να αποδείξουμε το Θεμελιώδες Θεώρημα του Ολοκληρωτικού Λογισμού." },
+                { letter: "Β", text: "Η παράγωγος της $f$ στο $Δ$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $F$ είναι η 'αρχική' της $f$, όχι η παράγωγός της." },
+                { letter: "Γ", text: "Πάντα μια σταθερή συνάρτηση.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $F(x)$ μεταβάλλεται καθώς αλλάζει το πάνω όριο $x$, εκτός αν η $f$ είναι η μηδενική συνάρτηση." }
+            ]
+        },
+        { // 3
+            text: "Σύμφωνα με το Θεμελιώδες Θεώρημα του Ολοκληρωτικού Λογισμού, αν $G$ είναι μια παράγουσα της συνεχούς συνάρτησης $f$ στο $[\\alpha, \\beta]$, τότε το $\\int_{\\alpha}^{\\beta} f(t) dt$ ισούται με:",
+            options: [
+                { letter: "Α", text: "$G(\\alpha) - G(\\beta)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η σειρά είναι πάντα «τιμή στο πάνω όριο μείον τιμή στο κάτω όριο»." },
+                { letter: "Β", text: "$G(\\beta) - G(\\alpha)$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αυτή είναι η κεντρική φόρμουλα του Θεμελιώδους Θεωρήματος." },
+                { letter: "Γ", text: "$G'(\\beta) - G'(\\alpha)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Οι παράγωγοι $G'$ ισούνται με $f(\\beta)$ και $f(\\alpha)$ αντίστοιχα, κάτι που δεν δίνει την τιμή του ολοκληρώματος." }
+            ]
+        },
+        { // 4
+            text: "Ποια είναι η παράγωγος της συνάρτησης $F(x) = \\int_{2}^{x} \\sqrt{t^2-1} dt$ για $x > 1$;",
+            options: [
+                { letter: "Α", text: "$F'(x) = \\sqrt{x^2-1}$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η παράγωγος της $\\int_{\\alpha}^{x} f(t) dt$ είναι η ίδια η συνάρτηση $f$ υπολογισμένη στο $x$." },
+                { letter: "Β", text: "$F'(x) = \\sqrt{t^2-1}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η παράγωγος πρέπει να είναι συνάρτηση του $x$, όχι της μεταβλητής ολοκλήρωσης $t$." },
+                { letter: "Γ", text: "$F'(x) = \\frac{x}{\\sqrt{x^2-1}}$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι η παράγωγος της συνάρτησης $\\sqrt{x^2-1}$, όχι του ολοκληρώματος." }
+            ]
+        },
+        { // 5
+            text: "Με τι ισούται το $\\int_{1}^{2} 2x dx$;",
+            options: [
+                { letter: "Α", text: "$3$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Μια παράγουσα της $2x$ είναι η $x^2$. Άρα $\\int_{1}^{2} 2x dx=[x^2]_1^2 = 2^2 - 1^2 = 3$." },
+                { letter: "Β", text: "$4$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ξεχάσατε να αφαιρέσετε την τιμή στο κάτω όριο." },
+                { letter: "Γ", text: "$-3$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μάλλον κάνατε ανάποδα την αφαίρεση." }
+            ]
+        },
+        { // 6
+            text: "Στον τύπο της ολοκλήρωσης κατά παράγοντες το ορισμένο ολοκλήρωμα $\\int_{\\alpha}^{\\beta} f(x)g'(x) dx$ ισούται με:",
+            options: [
+                { letter: "Α", text: "$[f(x)g(x)]_{\\alpha}^{\\beta}-\\int_{\\alpha}^{\\beta} f'(x)g(x) dx$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Είναι βασική ιδιότητα που προκύπτει από τη σχέση $[f(x)g(x)]_{\\alpha}^{\\beta}=\\int_{\\alpha}^{\\beta} (f(x)g(x))' dx=\\int_{\\alpha}^{\\beta} f'(x)g(x) dx+\\int_{\\alpha}^{\\beta} f(x)g'(x) dx$." },
+                { letter: "Β", text: "$[f(x)g(x)]_{\\alpha}^{\\beta}+\\int_{\\alpha}^{\\beta} f'(x)g(x) dx$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Θέλει '$-$' ανάμεσα στο 'κουτάκι' και το ολοκλήρωμα." },
+                { letter: "Γ", text: "$\\int_{\\alpha}^{\\beta} f'(x)g(x) dx$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Έχετε ξεχάσει το 'κουτάκι'." }
+            ]
+        },
+        { // 7
+            text: "Κατά την ολοκλήρωση με αλλαγή μεταβλητής $u = g(x)$ σε ένα ορισμένο ολοκλήρωμα $\\int_{\\alpha}^{\\beta} f(g(x))g'(x) dx$, για τα νέα όρια ολοκλήρωσης ($u_1$, $u_2$) ισχύει:",
+            options: [
+                { letter: "Α", text: "$u_1 = \\alpha$ και $u_2 = \\beta$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα όρια πρέπει να προσαρμοστούν στη νέα μεταβλητή $u$." },
+                { letter: "Β", text: "$u_1 = g(\\alpha)$ και $u_2 = g(\\beta)$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για $x=x_1$ έχουμε $u_1=g(x_1)$ και για $x=x_2$ έχουμε $u_2=g(x_2)$." },
+                { letter: "Γ", text: "$\\alpha = g(u_1)$ και $\\beta = g(u_2)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Βλ. αιτιολόγηση σωστής απάντησης." }
+            ]
+        },
+        { // 8
+            text: "Σε μία αλλαγή μεταβλητής, αν $u = \\ln x$, τότε το διαφορικό $du$ ισούται με:",
+            options: [
+                { letter: "Α", text: "$du = \\frac{1}{x} dx$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η παράγωγος του $\\ln x$ είναι $\\frac{1}{x}$, άρα $du = (\\ln x)' dx = \\frac{1}{x} dx$. Απλοϊκά μιλώντας η εξήγηση είναι αυτή $du=\\frac{du}{dx}dx=u'dx=(\\ln x)'dx=\\frac{1}{x}dx$." },
+                { letter: "Β", text: "$\\frac{1}{u} du = dx$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μπερδέψατε τη σειρά. Βλ. αιτιολόγιση σωστής απάντησης." },
+                { letter: "Γ", text: "$du = dx$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το 'βήμα' των $x$ ($dx$) δεν μπορεί να είναι ίδιο με το 'βήμα' των $u$ ($du$), αφού εν προκειμένω η μία μεταβλητή αλλάζει με διαφορετικό ρυθμό από την άλλη. Βλ. αιτιολόγιση σωστής απάντησης." }
+            ]
+        },
+        { // 9
+            text: "Για να υπολογίσουμε το $\\int_{1}^{e} \\frac{\\ln x}{x} dx$ με αντικατάσταση $u = \\ln x$, τα νέα όρια θα είναι:",
+            options: [
+                { letter: "Α", text: "Από $1$ έως $e$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτά είναι τα όρια του $x$." },
+                { letter: "Β", text: "Από $0$ έως $1$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Για $x=1$, $u = \\ln 1 = 0$. Για $x=e$, $u = \\ln e = 1$." },
+                { letter: "Γ", text: "Από $1$ έως $0$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Τα νέα όρια ολοκήρωσης είναι ανάποδα! Βλ. αιτιολόγιση σωστής απάντησης." }
+            ]
+        },
+        { // 10
+            text: "Το σύμβολο $[G(x)]_{\\alpha}^{\\beta}$ είναι μια συντομογραφία για την έκφραση:",
+            options: [
+                { letter: "Α", text: "$G(\\beta) - G(\\alpha)$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Χρησιμοποιείται για να διευκολύνει τη γραφή κατά την εφαρμογή του Θεμελιώδους Θεωρήματος." },
+                { letter: "Β", text: "$G(\\alpha) - G(\\beta)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό είναι το $[G(x)]_{\\beta}^{\\alpha}$." },
+                { letter: "Γ", text: "$G'(\\beta) - G'(\\alpha)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτό είναι το $[G'(x)]_{\\alpha}^{\\beta}$." }
+            ]
+        },
+        { // 11
+            text: "Αν η $f$ είναι συνεχής στο $[1, 2]$ και $G$ είναι μια παράγουσα της $f$, τότε το $\\int_{1}^{2} f(x) dx$ εξαρτάται από τη σταθερά $c$ της $G(x) = F(x) + c$;",
+            options: [
+                { letter: "Α", text: "Ναι, η τιμή αλλάζει ανάλογα με το $c$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αυτή είναι μια βασική παρανόηση. Το ορισμένο ολοκλήρωμα είναι ένας μοναδικός αριθμός. Βλ. και αιτιολόγηση σωστής απάντησης." },
+                { letter: "Β", text: "Όχι, η σταθερά $c$ απαλείφεται κατά την αφαίρεση $G(2) - G(1)$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> $G(2)-G(1)=(F(2)+c) - (F(1)+c) = F(2) - F(1)$, οπότε το $c$ φεύγει πάντα." }
+            ]
+        },
+        { // 12
+            text: "Η συνάρτηση $F(x) = \\int_{\\alpha}^{x} f(t) dt$ ορίζεται αν:",
+            options: [
+                { letter: "Α", text: "Η $f$ είναι συνεχής σε ένα διάστημα που περιέχει τα $\\alpha$ και $x$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η συνέχεια εξασφαλίζει την ύπαρξη του ολοκληρώματος και της παράγουσας." },
+                { letter: "Β", text: "Η $f$ είναι απλώς θετική.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το πρόσημο δεν επηρεάζει τον ορισμό της συνάρτησης ολοκλήρωμα." },
+                { letter: "Γ", text: "Το $x$ είναι μεγαλύτερο από το $\\alpha$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η συνάρτηση ορίζεται ακόμα και αν $x < \\alpha$." }
+            ]
+        },
+        { // 13
+            text: "Αν η $f:\\mathbb{R}\\to\\mathbb{R}$ είναι περιττή, τότε το $\\int_{-k}^{k} f(x) dx$:",
+            options: [
+                { letter: "Α", text: " ισούται με $0$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Λόγω συμμετρίας, το κομμάτι που είναι πάνω από τον $x'x$ ισούται με το κομμάτι που είναι κάτω από τον $x'x$, όπερ σημαίνει ότι το εν λόγω ολοκλήρωμα θα είναι $0$. Αναλυτκότερα, αφού η $f$ είναι περιττή, θα ισχύει $\\int_{-k}^{k} f(x) dx=\\int_{-k}^{k} f(-x)(-1) dx$. Οπότε θέτοντας $u=-x$ έχουμε $\\int_{-k}^{k} f(-x)(-1) dx=\\int_{k}^{-k} f(u)du=-\\int_{-k}^{k} f(u) du$. Άρα $\\int_{-k}^{k} f(x)dx=-\\int_{-k}^{k} f(x)dx$, ὅπερ ἔδει δεῖξαι." },
+                { letter: "Β", text: "είναι θετικό", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το εμβαδόν του χωρίου που είναι πάνω από τον $x'x$ δεν είναι μεγαλύτερο από αυτό που είναι κάτω από τον $x'x$. Βλ. και αιτιολόγηση σωστής απάντησης." },
+                { letter: "Γ", text: "εξαρτάται από το ποιο είναι το $k$ και ποια η $f$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Το αποτέλεσμα εξασφαλίζεται από τη συμμετρία της $C_f$, η οποία είναι ίδια για κάθε $k\\in\\mathbb{R}$ και περιττή συνάρτηση $f$. Βλ. και αιτιολόγηση σωστής απάντησης." }
+            ]
+        },
+        { // 14
+            text: "Αν  $F$ μια παράγουσα της $f$, τότε το $\\int_{\\alpha}^{\\beta} f(x) dt$ ισούται με:",
+            options: [
+                { letter: "Α", text: "$f(x)(\\beta-\\alpha)$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η μεταβλητή του ολοκληρώματος καθορίζεται από το διαφορικό, το οποίο εν προκειμένω είναι το $dt$, άρα η μεταβλητή ολοκλήρωσης είναι το $t$. Αυτό σημαίνει ότι το $f(x)$ αντιμετωπίζεται ως σταθερά." },
+                { letter: "Β", text: "$F(\\beta)-F(\\alpha)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong>  Αυτό θα ίσχυε, αν είχαμε να υπολογίσουμε $\\int_{\\alpha}^{\\beta} f(t) dt$ ή $\\int_{\\alpha}^{\\beta} f(x) dx$. Βλ. και αιτιολόγηση σωστής απάντησης." },
+                { letter: "Γ", text: "$f(\\beta)\\beta-f(\\alpha)\\alpha$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Βλ. αιτιολόγηση σωστής απάντησης." }
+            ]
+        },
+        { // 15
+            text: "Δίνεται $f(x)=e^{x^2}$ και μία παράγουσά της $F$ τέτοια, ώστε $F(1)=1 $. Τότε το $\\int_{0}^{1} F(x) dx$:",
+            options: [
+                { letter: "Α", text: "είναι αδύνατο να υπολογιστεί, αφού η $F$ δεν μπορεί να εκφραστεί με τις γνωστές μας συναρτήσεις.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Κατά έναν παράδοξο τρόπο, ναι μεν όντως η $F$ δεν εκφράζεται με τις γνωστές μας συναρτήσεις, αλλά μπορούμε να βρούμε το ολοκλήρωμά της. Βλ. και αιτιολόγηση σωστής απάντησης." },
+                { letter: "Β", text: "ισούται με $\\frac{1-e}{2}$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Με παραγοντική ολοκλήρωση θα 'πετάξουμε' μια παράγωγο πάνω στην $F$, ώστε να την κάνουμε $f$. Έχουμε $\\int_{0}^{1} F(x) dx=\\int_{0}^{1}(x)' F(x) dx=[xF(x)]_0^1-\\int_{0}^{1}x f(x) dx=-\\int_{0}^{1}(\\frac{e^{x^2}}{2})' dx=\\frac{1-e}{2}$." }
+            ]
+        },
+        { // 16
+            text: "Δίνεται η αντιστρέψιμη $f(x)=x+\\text{ημ} x$. Τότε το $\\int_{0}^{\\pi} f^{-1}(x) dx$:",
+            options: [
+                { letter: "Α", text: "είναι αδύνατο να υπολογιστεί, αφού η $f^{-1}$ δεν μπορεί να εκφραστεί με τις γνωστές μας συναρτήσεις.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Κατά έναν παράδοξο τρόπο, ναι μεν όντως η $f^{-1}$ δεν εκφράζεται με τις γνωστές μας συναρτήσεις, αλλά μπορούμε να βρούμε το ολοκλήρωμά της. Βλ. και αιτιολόγηση σωστής απάντησης." },
+                { letter: "Β", text: "ισούται με $\\frac{\\pi^2}{2}-2$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Εμφανίζουμε στο ολοκλήρωμα το $x$, ώστε να αξιοποιήσουμε τη σχέση $f(f^{-1}(x))=x$. Συγκεκριμένα έχουμε $\\int_{0}^{\\pi} f^{-1}(x) dx=\\int_{0}^{\\pi}(x)' f^{-1}(x) dx=[xf^{-1}(x)]_0^\\pi-\\int_{0}^{\\pi}f(f^{-1}(x)) (f^{-1})'(x) dx$. Θέτοντας $u=f^{-1}(x)$ έχουμε τελικά $\\int_{0}^{\\pi} f^{-1}(x) dx=\\pi^2-\\int_{0}^{\\pi}f(u)  du=\\frac{\\pi^2}{2}-2$." },
+		{ letter: "Α", text: "δεν έχει καν νόημα, αφού η $f$ δεν είναι $1-1$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Η $f$ είναι $1-1$ καθόσον $f'(x)=1+\\text{συν}x\\geq 0$ με το '$=$' να ισχύει μόνο για μεμονομένα σημεία ($x=2k\\pi+\\pi$, $k\\in\\mathbb{Z}$). Βλ. και αιτιολόγηση σωστής απάντησης." }
+            ]
+        },
+        { // 17
+            text: "Αν ισχύει $\\int_{\\alpha}^{6-\\alpha} e^{-x^2} dx=0$, τότε:",
+            options: [
+                { letter: "Α", text: "είναι αδύνατο να προχωρήσουμε την άσκηση, διότι η $e^{-x^2}$ δεν έχει παράγουσα που μπορούμε να την εκφράσουμε μέσω των γνωστών μας συναρτήσεων.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Ένας τρόπος θα ήταν να υπολογίσουμε το $\\int_{\\alpha}^{6-\\alpha} e^{-x^2} dx$ συναρτήσει του $\\alpha$ και μετά να λύσουμε την εξίσωση ($=0$) που προκύπτει. Αυτό, όμως, θα ήταν ανέφικτο, διότι όντως η $e^{-x^2}$ δεν έχει παράγουσα που μπορούμε να την εκφράσουμε μέσω των γνωστών μας συναρτήσεων. Εδώ θα εστιάσουμε στο γεγονός ότι το ολοκλήρωμα ισούται με $0$ και θα λάβουμε υπ' όψιν ότι $e^{-x^2}>0$. Βλ. και αιτιολόγηση σωστής απάντησης." },
+                { letter: "Β", text: "$\\alpha=3$.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αφού $e^{-x^2}>0$, η μόνη περίπτωση να είναι $\\int_{\\alpha}^{6-\\alpha} e^{-x^2} dx=0$ είναι όταν $\\alpha=6-\\alpha$, ήτοι αν $\\alpha=3$. Διαφορετικά, αν π.χ. $\\alpha<6-\\alpha$, τότε $\\int_{\\alpha}^{6-\\alpha} e^{-x^2} dx>0$." }
+            ]
+        }
+    ];
+
+    // Render quiz
+    const root = document.getElementById('quiz-root');
+
+    async function renderMath(element) {
+        if (window.MathJax) {
+            try {
+                await MathJax.typesetPromise([element]);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function buildQuiz() {
+        root.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const qCard = document.createElement('div');
+            qCard.className = 'question-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'question-header';
+            headerDiv.innerHTML = `
+                <div class="question-title">
+                    <span class="q-num">Ερώτηση ${idx+1}</span>
+                </div>
+                <div class="question-text">${q.text}</div>
+            `;
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-area';
+            
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-area';
+            feedbackDiv.style.display = 'none';
+            
+            const buttons = [];
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.letter}.</strong> ${opt.text}`;
+                btn.addEventListener('click', async () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('selected-correct', 'selected-wrong');
+                    });
+                    if (opt.isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                    const correctLabel = opt.isCorrect ? '✅ Σωστή επιλογή' : '❌ Λανθασμένη επιλογή';
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-title">
+                            📘 Ανατροφοδότηση <span>${opt.letter}</span>
+                            <span style="background:${opt.isCorrect ? '#c8f0e1' : '#ffe0db'}">${correctLabel}</span>
+                        </div>
+                        <div class="feedback-content">${opt.feedback}</div>
+                    `;
+                    await renderMath(feedbackDiv);
+                });
+                optionsDiv.appendChild(btn);
+                buttons.push(btn);
+            });
+            
+            qCard.appendChild(headerDiv);
+            qCard.appendChild(optionsDiv);
+            qCard.appendChild(feedbackDiv);
+            root.appendChild(qCard);
+        });
+        renderMath(root);
+    }
+    
+    window.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+</body>
+</html>
