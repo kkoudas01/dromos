@@ -411,9 +411,9 @@
                 <div class="control-group">
                     <label>μετατόπιση (φ)</label>
                     <div class="stepper">
-                        <button onclick="changeComplex('phi', -1)">-</button>
-                        <span id="valComplexPhi">0</span>
-                        <button onclick="changeComplex('phi', 1)">+</button>
+                        <button onclick="changeComplex('phi', -0.5)">-</button>
+                        <span id="valComplexPhi">0.0</span>
+                        <button onclick="changeComplex('phi', 0.5)">+</button>
                     </div>
                 </div>
 
@@ -566,7 +566,9 @@
             const possibleP = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2];
             complex.target.p = possibleP[Math.floor(Math.random() * possibleP.length)];
             complex.target.k = Math.floor(Math.random() * 4) + 2; // k from 2 to 5
-            complex.target.r = Math.floor(Math.random() * 5) + 1; // r from 1 to 5
+            
+            const possibleR = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+            complex.target.r = possibleR[Math.floor(Math.random() * possibleR.length)];
             
             let period = complex.target.k;
             complex.view.maxX = Math.max(10, period * 2.5); // Ensure at least 2 periods
@@ -619,7 +621,7 @@
             document.getElementById('valComplexBeta').innerText = complex.user.beta.toFixed(1);
             document.getElementById('valComplexA').innerText = complex.user.a.toFixed(1);
             document.getElementById('valComplexK').innerText = complex.user.k;
-            document.getElementById('valComplexPhi').innerText = complex.user.phi;
+            document.getElementById('valComplexPhi').innerText = complex.user.phi.toFixed(1);
             
             let phiStr = complex.user.phi === 0 ? '' : (complex.user.phi > 0 ? ` - ${complex.user.phi}` : ` + ${Math.abs(complex.user.phi)}`);
             let betaStr = complex.user.beta === 0 ? '' : (complex.user.beta > 0 ? ` + ${complex.user.beta}` : ` - ${Math.abs(complex.user.beta)}`);
