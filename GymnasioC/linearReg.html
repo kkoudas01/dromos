@@ -256,14 +256,10 @@
             let validSetup = false;
             let attempts = 0;
 
-            // Βρόχος για να εξασφαλίσουμε ότι τα κόκκινα σημεία (x=0 και x=P2_X) 
-            // θα είναι εντός του πλαισίου [-10, 10]
             while (!validSetup && attempts < 100) {
                 targetA = possibleA[Math.floor(Math.random() * possibleA.length)];
-                // Το b επιλέγεται τυχαία μεταξύ -7 και 7
                 targetB = Math.floor(Math.random() * 15) - 7; 
 
-                // Έλεγχος αν το 2ο σημείο y = a*P2_X + b είναι εντός ορίων
                 let p2_y = targetA * P2_X + targetB;
                 if (p2_y >= MIN_Y && p2_y <= MAX_Y && targetB >= MIN_Y && targetB <= MAX_Y) {
                     validSetup = true;
@@ -277,13 +273,11 @@
                 let noise = (Math.random() - 0.5) * 1.0; 
                 let y = targetA * x + targetB + noise;
                 
-                // Κρατάμε μόνο τα σημεία που είναι εντός οπτικού πεδίου
                 if (y >= MIN_Y - 2 && y <= MAX_Y + 2) {
                     points.push({x: x, y: y});
                 }
             }
 
-            // Αν λόγω φιλτραρίσματος έμειναν λίγα σημεία, ξαναδοκιμάζουμε
             if (points.length < NUM_POINTS / 2) {
                 initGame();
                 return;
@@ -296,6 +290,31 @@
             isSuccess = false;
 
             draw();
+        }
+
+        // Σχεδίαση αρίθμησης αξόνων
+        function drawAxisLabels() {
+            ctx.fillStyle = '#999999';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Αρίθμηση X
+            for (let i = MIN_X; i <= MAX_X; i++) {
+                if (i === 0) continue; // Παράλειψη μηδενός
+                let px = mapX(i);
+                let py = mapY(0);
+                ctx.fillText(i, px, py + 15);
+            }
+
+            // Αρίθμηση Y
+            ctx.textAlign = 'right';
+            for (let i = MIN_Y; i <= MAX_Y; i++) {
+                if (i === 0) continue;
+                let px = mapX(0);
+                let py = mapY(i);
+                ctx.fillText(i, px - 10, py);
+            }
         }
 
         function draw() {
@@ -324,6 +343,9 @@
             ctx.moveTo(0, mapY(0));
             ctx.lineTo(canvas.width, mapY(0));
             ctx.stroke();
+
+            // Αρίθμηση
+            drawAxisLabels();
 
             // Λευκά σημεία
             ctx.fillStyle = '#ffffff';
@@ -451,7 +473,6 @@
 
             if (draggingPoint === 'P1') {
                 userB = Math.round(logicalY);
-                // Περιορισμός για να μην φεύγει εκτός οθόνης το σημείο
                 if (userB > MAX_Y) userB = MAX_Y;
                 if (userB < MIN_Y) userB = MIN_Y;
                 inputB.value = userB;
