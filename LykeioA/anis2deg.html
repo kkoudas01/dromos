@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ανισώσεις 2ου βαθμού</title>
+    <style>
+        :root {
+            --gray50: #707070; 
+            --red-sign: #ff3333;
+            --blue-sign: #44aaff;
+            --green-btn: #28a745;
+            --green-btn-hover: #218838;
+            --page-bg: #fdf5e6; 
+            --panel-border: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--page-bg);
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            text-decoration: none;
+            color: #333;
+            background: #e0e0e0;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .signature {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .container {
+            max-width: 850px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .panel {
+            background: var(--page-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 3px solid var(--panel-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeIn 0.4s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+            width: 100%;
+            border-bottom: 2px solid var(--panel-border);
+            padding-bottom: 10px;
+        }
+
+        .hidden { display: none !important; }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .gray50-box {
+            background-color: var(--gray50);
+            color: black;
+            border: 2px solid #444;
+            padding: 12px 18px;
+            font-size: 22px;
+            border-radius: 6px;
+            outline: none;
+            font-weight: bold;
+        }
+
+        input.gray50-box::placeholder { color: #222; font-weight: normal; opacity: 0.7; }
+
+        select.gray50-box {
+            color: var(--red-sign);
+            cursor: pointer;
+            appearance: none;
+            text-align: center;
+        }
+        select.gray50-box option { background-color: white; color: black; }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: all 0.2s;
+            margin-top: 15px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+        .btn-primary { background-color: #4a69bd; }
+        .btn-primary:hover { background-color: #1e3799; transform: translateY(-1px); }
+        .btn-green { background-color: var(--green-btn); }
+        .btn-green:hover { background-color: var(--green-btn-hover); }
+        .btn-refresh { background-color: #636e72; margin-top: 30px; }
+
+        .math-text { font-size: 26px; font-weight: bold; }
+        .math-eq-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--gray50);
+            padding: 15px 25px;
+            border-radius: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            border: 2px solid #333;
+        }
+        .white-text { color: white; }
+
+        .solutions-box {
+            font-size: 22px;
+            font-weight: bold;
+            color: #222;
+            margin-top: 20px;
+            text-align: center;
+            padding: 10px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 5px;
+            border: 1px dashed var(--panel-border);
+        }
+
+        canvas {
+            background: var(--gray50);
+            border: 2px solid #333;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+            height: 320px; /* Λίγο περισσότερο ύψος για την αρίθμηση */
+            margin: 0 auto;
+            display: block;
+        }
+
+        .sign-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+        .sign-table {
+            display: grid;
+            border: 2px solid black;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            background: var(--gray50);
+            min-width: 500px;
+            margin: 0 auto;
+        }
+        .sign-table > div {
+            padding: 15px 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .st-border-r { border-right: 2px solid black; }
+        .st-border-b { border-bottom: 2px solid black; }
+        
+        .zero-line::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 2px;
+            background: black;
+            z-index: 1;
+        }
+        .zero-val {
+            position: relative;
+            z-index: 2;
+            background: var(--gray50);
+            color: white;
+            padding: 0 4px;
+        }
+
+        .st-sign-red { color: var(--red-sign); }
+        .st-sign-blue { color: var(--blue-sign); }
+
+        @keyframes glowRed {
+            0%, 100% { box-shadow: inset 0 0 5px red; background: rgba(255,0,0,0.1); }
+            50% { box-shadow: inset 0 0 25px red; background: rgba(255,0,0,0.3); }
+        }
+        @keyframes glowBlue {
+            0%, 100% { box-shadow: inset 0 0 5px blue; background: rgba(0,0,255,0.1); }
+            50% { box-shadow: inset 0 0 25px blue; background: rgba(0,0,255,0.3); }
+        }
+        .glow-red { animation: glowRed 1.5s infinite; }
+        .glow-blue { animation: glowBlue 1.5s infinite; }
+
+        .final-solution {
+            font-size: 28px;
+            font-weight: bold;
+            color: #000;
+            text-align: center;
+            padding: 20px;
+            border: 4px solid var(--panel-border);
+            border-radius: 12px;
+            background: var(--page-bg);
+            margin-top: 10px;
+            width: 90%;
+        }
+
+        @media (max-width: 600px) {
+            .gray50-box { font-size: 18px; padding: 10px; }
+            .math-text { font-size: 20px; }
+            .sign-table { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">← Αρχική</a>
+
+    <div class="container">
+        
+        <div class="panel" id="step1">
+            <div class="panel-title">Τριώνυμο</div>
+            <div class="input-group">
+                <input type="text" id="trinomial-input" class="gray50-box" placeholder="π.χ. 2x²-5x+6" autocomplete="off" oninput="liveFormatInput(this)">
+                <select id="ineq-select" class="gray50-box" onchange="updateIneqColor()">
+                    <option value=">0">>0</option>
+                    <option value=">=0">≥0</option>
+                    <option value="<0"><0</option>
+                    <option value="<=0">≤0</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="processInput()">Λύνω την αντίστοιχη εξίσωση</button>
+        </div>
+
+        <div class="panel hidden" id="step2">
+            <div class="panel-title">Λύνω την αντίστοιχη εξίσωση</div>
+            <div class="math-eq-container">
+                <span id="display-trinomial" class="math-text"></span>
+                <span class="math-text white-text">=0</span>
+                <button class="btn btn-green" style="margin-top:0;" onclick="solveEquation()">επίλυση</button>
+            </div>
+            <div id="equation-solutions" class="solutions-box hidden"></div>
+            <button id="btn-sign-table" class="btn btn-primary hidden" onclick="showSignTable()">Πίνακας προσήμων</button>
+        </div>
+
+        <div class="panel hidden" id="step3">
+            <div class="panel-title">Πίνακας προσήμων</div>
+            <canvas id="graphCanvas" width="600" height="320"></canvas>
+            <div class="sign-table-wrapper" id="sign-table-container"></div>
+            <button id="btn-solve-ineq" class="btn btn-primary" onclick="solveInequality()">Λύση ανίσωσης</button>
+        </div>
+
+        <div class="panel hidden" id="step4">
+            <div class="panel-title">Λύση ανίσωσης</div>
+            <div id="final-answer" class="final-solution"></div>
+            <button class="btn btn-refresh" onclick="location.reload()">Νέα Επίλυση</button>
+        </div>
+
+    </div>
+
+    <div class="signature">Κώστας Κούδας</div>
+
+    <script>
+        let a, b, c, delta, x1, x2, numRoots = 0;
+        let rawTrinomial = "";
+        let ineqSymbol = "";
+
+        function liveFormatInput(input) {
+            input.value = input.value.replace(/x\^2/g, "x²");
+        }
+
+        function updateIneqColor() {
+            const select = document.getElementById("ineq-select");
+            const val = select.value;
+            select.style.color = (val.includes(">")) ? "var(--red-sign)" : "var(--blue-sign)";
+        }
+        updateIneqColor();
+
+        function formatMathDisplay(str) {
+            return str.replace(/x\^2/g, "x²");
+        }
+
+        function formatNum(num) {
+            return (Math.round(num * 10) / 10).toString();
+        }
+
+        function parseTrinomial(str) {
+            let s = str.replace(/x²/g, "x^2").replace(/\s+/g, '').replace(/-/g, '+-');
+            if (s.startsWith('+')) s = s.substring(1);
+            let ta = 0, tb = 0, tc = 0;
+            let terms = s.split('+');
+            terms.forEach(term => {
+                if (!term) return;
+                if (term.includes('x^2')) {
+                    let v = term.replace('x^2', '');
+                    ta = (v === '' || v === '+') ? 1 : (v === '-' ? -1 : parseFloat(v));
+                } else if (term.includes('x')) {
+                    let v = term.replace('x', '');
+                    tb = (v === '' || v === '+') ? 1 : (v === '-' ? -1 : parseFloat(v));
+                } else {
+                    tc = parseFloat(term);
+                }
+            });
+            return { a: ta, b: tb, c: tc };
+        }
+
+        function processInput() {
+            const inputVal = document.getElementById("trinomial-input").value;
+            if (!inputVal.includes("x^2") && !inputVal.includes("x²")) {
+                alert("Παρακαλώ εισάγετε ένα τριώνυμο με x².");
+                return;
+            }
+            rawTrinomial = inputVal;
+            ineqSymbol = document.getElementById("ineq-select").value;
+            const coeffs = parseTrinomial(inputVal);
+            a = coeffs.a; b = coeffs.b; c = coeffs.c;
+            if (a === 0) return alert("Το a δεν μπορεί να είναι 0.");
+
+            document.getElementById("step1").querySelector("button").classList.add("hidden");
+            document.getElementById("step2").classList.remove("hidden");
+            document.getElementById("display-trinomial").innerHTML = formatMathDisplay(rawTrinomial);
+        }
+
+        function solveEquation() {
+            delta = b * b - 4 * a * c;
+            const solBox = document.getElementById("equation-solutions");
+            if (delta > 0) {
+                numRoots = 2;
+                let r1 = (-b - Math.sqrt(delta)) / (2 * a);
+                let r2 = (-b + Math.sqrt(delta)) / (2 * a);
+                x1 = Math.min(r1, r2);
+                x2 = Math.max(r1, r2);
+                solBox.innerHTML = `x = ${formatNum(x1)} &nbsp; ή &nbsp; x = ${formatNum(x2)}`;
+            } else if (delta === 0) {
+                numRoots = 1;
+                x1 = -b / (2 * a);
+                solBox.innerHTML = `x = ${formatNum(x1)}`;
+            } else {
+                numRoots = 0;
+                solBox.innerHTML = "Η εξίσωση είναι ΑΔΥΝΑΤΗ";
+            }
+            solBox.classList.remove("hidden");
+            document.getElementById("step2").querySelector(".btn-green").classList.add("hidden");
+            document.getElementById("btn-sign-table").classList.remove("hidden");
+        }
+
+        function f(x) { return a * x * x + b * x + c; }
+
+        function drawGraph() {
+            const canvas = document.getElementById("graphCanvas");
+            const ctx = canvas.getContext("2d");
+            const W = canvas.width;
+            const H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            let xv = -b / (2 * a);
+            let xMin, xMax;
+            
+            if (numRoots === 2) {
+                let d = x2 - x1;
+                xMin = x1 - d/2; 
+                xMax = x2 + d/2;
+            } else if (numRoots === 1) {
+                xMin = x1 - 5; xMax = x1 + 5;
+            } else {
+                xMin = xv - 5; xMax = xv + 5;
+            }
+
+            let yv = f(xv);
+            let yMinE = Math.min(f(xMin), f(xMax), yv, 0);
+            let yMaxE = Math.max(f(xMin), f(xMax), yv, 0);
+            let pad = (yMaxE - yMinE) * 0.2 || 5;
+            let yMin = yMinE - pad;
+            let yMax = yMaxE + pad;
+
+            const px = x => ((x - xMin) / (xMax - xMin)) * W;
+            const py = y => (H - 40) - ((y - yMin) / (yMax - yMin)) * (H - 60);
+
+            // Άξονας x
+            ctx.beginPath();
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 2;
+            ctx.moveTo(0, py(0)); ctx.lineTo(W, py(0));
+            ctx.stroke();
+
+            // Άξονας y (αν είναι εντός ορίων)
+            if (xMin <= 0 && xMax >= 0) {
+                ctx.beginPath();
+                ctx.strokeStyle = "rgba(0,0,0,0.4)";
+                ctx.lineWidth = 1;
+                ctx.moveTo(px(0), 0); ctx.lineTo(px(0), H-40);
+                ctx.stroke();
+            }
+
+            // Συνάρτηση για σχεδιασμό κάθετης γραμμής με χρώμα και τιμή
+            const drawValueLine = (valX) => {
+                let valY = f(valX);
+                let pX = px(valX), pY = py(valY), pY0 = py(0);
+                
+                let color = valY > 0 ? "#ff3333" : (valY < 0 ? "#44aaff" : "black");
+                
+                ctx.beginPath();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.5;
+                ctx.moveTo(pX, pY0); ctx.lineTo(pX, pY);
+                ctx.stroke();
+                
+                // Τιμή y
+                ctx.fillStyle = color;
+                ctx.font = "bold 11px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText(formatNum(valY), pX, valY > 0 ? pY - 5 : pY + 12);
+
+                // Αρίθμηση άξονα x (τετμημένη)
+                ctx.fillStyle = "black";
+                ctx.font = "10px Arial";
+                ctx.fillText(formatNum(valX), pX, py(0) + 20);
+                ctx.beginPath();
+                ctx.strokeStyle = "black";
+                ctx.moveTo(pX, py(0)-3); ctx.lineTo(pX, py(0)+3);
+                ctx.stroke();
+            };
+
+            // Διανομή γραμμών και αρίθμησης
+            const distributeLines = (start, end, count) => {
+                let step = (end - start) / (count + 1);
+                for(let i=1; i<=count; i++){
+                    drawValueLine(start + i*step);
+                }
+            };
+            
+            distributeLines(xMin, xv, 8);
+            drawValueLine(xv); // Γραμμή Ακροτάτου
+            distributeLines(xv, xMax, 6);
+
+            // Παραβολή
+            ctx.beginPath();
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 3;
+            for(let i=0; i<=W; i++){
+                let x = xMin + (i/W)*(xMax-xMin);
+                let y = f(x);
+                if(i===0) ctx.moveTo(i, py(y)); else ctx.lineTo(i, py(y));
+            }
+            ctx.stroke();
+
+            // Ρίζες
+            const dot = (rx) => {
+                let cx = px(rx), cy = py(0);
+                ctx.beginPath(); ctx.arc(cx, cy, 4, 0, 7);
+                ctx.fillStyle = "white"; ctx.fill();
+                ctx.strokeStyle = "black"; ctx.lineWidth = 1; ctx.stroke();
+            };
+            if(numRoots > 0) dot(x1);
+            if(numRoots === 2) dot(x2);
+        }
+
+        function buildSignTable() {
+            const container = document.getElementById("sign-table-container");
+            let sA = a > 0 ? "+" : "-", cA = a > 0 ? "st-sign-red" : "st-sign-blue";
+            let sO = a > 0 ? "-" : "+", cO = a > 0 ? "st-sign-blue" : "st-sign-red";
+            let trinText = formatMathDisplay(rawTrinomial);
+            
+            let html = "";
+            if (numRoots === 2) {
+                html = `<div class="sign-table" style="grid-template-columns: 140px 1fr 40px 1fr 40px 1fr 60px;">
+                    <div class="st-border-r st-border-b">x</div>
+                    <div class="st-border-b" id="i-inf1">-∞</div>
+                    <div class="st-border-b" id="i-x1">${formatNum(x1)}</div>
+                    <div class="st-border-b" id="i-mid"></div>
+                    <div class="st-border-b" id="i-x2">${formatNum(x2)}</div>
+                    <div class="st-border-b" id="i-inf2">+∞</div>
+                    <div class="st-border-b"></div>
+                    <div class="st-border-r">${trinText}</div>
+                    <div class="${cA}" id="s-left">${sA}</div>
+                    <div class="zero-line" id="s-z1"><span class="zero-val">0</span></div>
+                    <div class="${cO}" id="s-mid">${sO}</div>
+                    <div class="zero-line" id="s-z2"><span class="zero-val">0</span></div>
+                    <div class="${cA}" id="s-right">${sA}</div>
+                    <div></div></div>`;
+            } else if (numRoots === 1) {
+                html = `<div class="sign-table" style="grid-template-columns: 140px 1fr 40px 1fr 60px;">
+                    <div class="st-border-r st-border-b">x</div>
+                    <div class="st-border-b" id="i-inf1">-∞</div>
+                    <div class="st-border-b" id="i-x1">${formatNum(x1)}</div>
+                    <div class="st-border-b" id="i-inf2">+∞</div>
+                    <div class="st-border-b"></div>
+                    <div class="st-border-r">${trinText}</div>
+                    <div class="${cA}" id="s-left">${sA}</div>
+                    <div class="zero-line" id="s-z1"><span class="zero-val">0</span></div>
+                    <div class="${cA}" id="s-right">${sA}</div>
+                    <div></div></div>`;
+            } else {
+                html = `<div class="sign-table" style="grid-template-columns: 140px 1fr 1fr 60px;">
+                    <div class="st-border-r st-border-b">x</div>
+                    <div class="st-border-b" id="i-inf1">-∞</div>
+                    <div class="st-border-b" id="i-inf2">+∞</div>
+                    <div class="st-border-b"></div>
+                    <div class="st-border-r">${trinText}</div>
+                    <div class="${cA} st-all-span" style="grid-column: 2 / span 2;" id="s-all">${sA}</div>
+                    <div></div></div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function showSignTable() {
+            document.getElementById("btn-sign-table").classList.add("hidden");
+            document.getElementById("step3").classList.remove("hidden");
+            drawGraph(); 
+            buildSignTable();
+        }
+
+        function solveInequality() {
+            document.getElementById("btn-solve-ineq").classList.add("hidden");
+            document.getElementById("step4").classList.remove("hidden");
+            let target = ineqSymbol.includes(">") ? "+" : "-";
+            let eq = ineqSymbol.includes("=");
+            let glow = (target === "+") ? "glow-red" : "glow-blue";
+            let ans = ""; let ids = [];
+            let sA = a > 0 ? "+" : "-";
+
+            if (numRoots === 2) {
+                if (target === sA) {
+                    ans = eq ? `x ∈ (-∞, ${formatNum(x1)}] ∪ [${formatNum(x2)}, +∞)` : `x ∈ (-∞, ${formatNum(x1)}) ∪ (${formatNum(x2)}, +∞)`;
+                    ids = eq ? ["s-left", "s-right", "i-inf1", "i-inf2", "i-x1", "i-x2", "s-z1", "s-z2"] : ["s-left", "s-right", "i-inf1", "i-inf2"];
+                } else {
+                    ans = eq ? `x ∈ [${formatNum(x1)}, ${formatNum(x2)}]` : `x ∈ (${formatNum(x1)}, ${formatNum(x2)})`;
+                    ids = eq ? ["s-mid", "i-mid", "i-x1", "i-x2", "s-z1", "s-z2"] : ["s-mid", "i-mid"];
+                }
+            } else if (numRoots === 1) {
+                if (target === sA) {
+                    ans = eq ? "x ∈ ℝ" : `x ∈ (-∞, ${formatNum(x1)}) ∪ (${formatNum(x1)}, +∞)`;
+                    ids = eq ? ["s-left", "s-right", "i-inf1", "i-inf2", "i-x1", "s-z1"] : ["s-left", "s-right", "i-inf1", "i-inf2"];
+                } else {
+                    ans = eq ? `x = ${formatNum(x1)}` : "η ανίσωση είναι ΑΔΥΝΑΤΗ";
+                    if(eq) ids = ["s-z1", "i-x1"];
+                }
+            } else {
+                if (target === sA) { ans = "x ∈ ℝ"; ids = ["s-all", "i-inf1", "i-inf2"]; }
+                else ans = "η ανίσωση είναι ΑΔΥΝΑΤΗ";
+            }
+
+            ids.forEach(id => { let el = document.getElementById(id); if(el) el.classList.add(glow); });
+            document.getElementById("final-answer").innerText = ans;
+        }
+    </script>
+</body>
+</html>

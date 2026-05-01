@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Περιοδικές Συναρτήσεις</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --panel-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --accent: #ef4444; /* Red for the user's graph */
+            --accent-hover: #dc2626;
+            --border: #333333;
+            --grid-line: #2a2a2a;
+            --axis-line: #666666;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header & Navigation */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .back-btn {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            text-align: center;
+            flex-grow: 1;
+            margin: 0 10px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            background-color: var(--bg-color);
+        }
+
+        .tab-btn {
+            background-color: var(--panel-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* Main Content Area */
+        .container {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            padding: 10px 20px;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (min-width: 900px) {
+            .container {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+        }
+
+        /* Canvas / Graph Section */
+        .graph-section {
+            flex-grow: 1;
+            background-color: var(--panel-bg);
+            border-radius: 12px;
+            padding: 15px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border);
+            min-height: 400px;
+        }
+
+        .canvas-container {
+            flex-grow: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 350px;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        .refresh-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background-color: rgba(255,255,255,0.25);
+        }
+
+        .refresh-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Controls Section */
+        .controls-section {
+            width: 100%;
+            background-color: var(--panel-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        @media (min-width: 900px) {
+            .controls-section {
+                width: 350px;
+                flex-shrink: 0;
+            }
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .stepper {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .stepper button {
+            background-color: transparent;
+            color: var(--text-main);
+            border: none;
+            padding: 12px 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .stepper button:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .stepper span {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .stepper-complex {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stepper-complex > span {
+            font-size: 1.1rem;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            text-align: center;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-buttons button {
+            flex: 1;
+        }
+
+        /* Formula Display */
+        .formula-display {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            font-size: 1.2rem;
+            text-align: center;
+            color: var(--accent);
+            font-family: 'Courier New', Courier, monospace;
+            transition: all 0.3s ease;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .formula-display.success {
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6);
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left-color: #ffffff;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Signature */
+        .signature {
+            text-align: right;
+            padding: 15px 20px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-style: italic;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="back-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Επιστροφή
+        </a>
+        <h1>Περιοδικές Συναρτήσεις</h1>
+        <div style="width: 100px;"></div> <!-- Spacer for flex alignment -->
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('simple')">Απλό</button>
+        <button class="tab-btn" onclick="switchTab('complex')">Σύνθετο</button>
+    </div>
+
+    <!-- SIMPLE TAB CONTENT -->
+    <div id="tab-simple" class="container">
+        <div class="graph-section">
+            <button class="refresh-btn" onclick="initSimple()" title="Ανανέωση">
+                <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+            </button>
+            <div class="canvas-container">
+                <canvas id="canvasSimple"></canvas>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <div class="action-buttons">
+                <button class="btn-primary" onclick="setSimpleType('sin')" id="btnSin">ημίτονο</button>
+                <button class="btn-primary" onclick="setSimpleType('cos')" id="btnCos" style="background-color: var(--panel-bg); border: 1px solid var(--border);">συνημίτονο</button>
+            </div>
+
+            <div id="simpleControls" class="hidden" style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
+                <div class="control-group">
+                    <label>Συντελεστής συνάρτησης (a)</label>
+                    <div class="stepper">
+                        <button onclick="changeSimple('a', -0.5)">-</button>
+                        <span id="valSimpleA">1.0</span>
+                        <button onclick="changeSimple('a', 0.5)">+</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Συντελεστής του x (ω)</label>
+                    <div class="stepper">
+                        <button onclick="changeSimple('w', -1)">-</button>
+                        <span id="valSimpleW">1</span>
+                        <button onclick="changeSimple('w', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="formula-display" id="formulaSimple">
+                    <!-- Formula will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMPLEX TAB CONTENT -->
+    <div id="tab-complex" class="container hidden">
+        <div class="graph-section">
+            <button class="refresh-btn" onclick="initComplex()" title="Ανανέωση">
+                <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+            </button>
+            <div class="canvas-container">
+                <canvas id="canvasComplex"></canvas>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <button class="btn-primary" id="btnModel" onclick="activateModeling()">Μοντελοποίηση</button>
+
+            <div id="complexControls" class="hidden" style="display: flex; flex-direction: column; gap: 10px;">
+                <div class="control-group">
+                    <label>κέντρο (β)</label>
+                    <div class="stepper">
+                        <button onclick="changeComplex('beta', -0.5)">-</button>
+                        <span id="valComplexBeta">0.0</span>
+                        <button onclick="changeComplex('beta', 0.5)">+</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label>πλάτος (a)</label>
+                    <div class="stepper">
+                        <button onclick="changeComplex('a', -0.5)">-</button>
+                        <span id="valComplexA">1.0</span>
+                        <button onclick="changeComplex('a', 0.5)">+</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>συχνότητα (ω = 2π/k)</label>
+                    <div class="stepper-complex">
+                        <span>2π /</span>
+                        <div class="stepper" style="flex-grow: 1;">
+                            <button onclick="changeComplex('k', -1)">-</button>
+                            <span id="valComplexK">1</span>
+                            <button onclick="changeComplex('k', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>μετατόπιση (φ)</label>
+                    <div class="stepper">
+                        <button onclick="changeComplex('phi', -1)">-</button>
+                        <span id="valComplexPhi">0</span>
+                        <button onclick="changeComplex('phi', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="formula-display" id="formulaComplex">
+                    <!-- Formula will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="signature">Κώστας Κούδας</div>
+
+    <script>
+        // --- GLOBAL VARIABLES & UTILS ---
+        let currentTab = 'simple';
+        
+        // --- MATHEMATICAL HELPERS ---
+        // Formats k * pi / denom nicely
+        function formatPiFraction(k, denom) {
+            if (k === 0) return "0";
+            let sign = k < 0 ? "-" : "";
+            k = Math.abs(k);
+            
+            // Greatest Common Divisor
+            let gcd = function(a, b) { return b ? gcd(b, a % b) : a; };
+            let divisor = gcd(k, denom);
+            let num = k / divisor;
+            let d = denom / divisor;
+            
+            let numStr = (num === 1) ? "π" : num + "π";
+            if (d === 1) return sign + numStr;
+            return sign + numStr + "/" + d;
+        }
+
+        // --- SIMPLE TAB LOGIC ---
+        const simple = {
+            canvas: null, ctx: null,
+            target: { type: 'sin', a: 1, w: 1, points: [] },
+            user: { active: false, type: 'sin', a: 1, w: 1 },
+            view: { minX: 0, maxX: 0, minY: -3.5, maxY: 3.5 }
+        };
+
+        function initSimple() {
+            simple.canvas = document.getElementById('canvasSimple');
+            simple.ctx = simple.canvas.getContext('2d');
+            
+            // Random target parameters
+            // a: non-zero multiples of 0.5 between -2 and 2
+            const possibleA = [-2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2];
+            simple.target.a = possibleA[Math.floor(Math.random() * possibleA.length)];
+            // w: positive integer 1 to 4
+            simple.target.w = Math.floor(Math.random() * 4) + 1;
+            simple.target.type = Math.random() > 0.5 ? 'sin' : 'cos';
+            
+            // Set view
+            let T = 2 * Math.PI / simple.target.w;
+            simple.view.minX = -T / 4;
+            simple.view.maxX = 2.5 * T; // Guarantees > 2T width
+            
+            // Generate Points with noise
+            simple.target.points = [];
+            let noiseLevel = Math.abs(simple.target.a) * 0.15; // Max 15% noise
+            let step = (simple.view.maxX - simple.view.minX) / 100; // 100 points
+            for (let x = simple.view.minX; x <= simple.view.maxX; x += step) {
+                let exactY = simple.target.type === 'sin' 
+                    ? simple.target.a * Math.sin(simple.target.w * x)
+                    : simple.target.a * Math.cos(simple.target.w * x);
+                let noiseY = exactY + (Math.random() - 0.5) * noiseLevel;
+                simple.target.points.push({x: x, y: noiseY});
+            }
+
+            // Reset User State
+            simple.user.active = false;
+            document.getElementById('simpleControls').classList.add('hidden');
+            document.getElementById('btnSin').style.backgroundColor = 'var(--panel-bg)';
+            document.getElementById('btnCos').style.backgroundColor = 'var(--panel-bg)';
+            document.getElementById('btnSin').style.borderColor = 'var(--border)';
+            document.getElementById('btnCos').style.borderColor = 'var(--border)';
+            
+            drawSimple();
+        }
+
+        function setSimpleType(type) {
+            simple.user.active = true;
+            simple.user.type = type;
+            simple.user.a = 1;
+            simple.user.w = 1;
+            
+            document.getElementById('simpleControls').classList.remove('hidden');
+            
+            if (type === 'sin') {
+                document.getElementById('btnSin').style.backgroundColor = 'var(--accent)';
+                document.getElementById('btnCos').style.backgroundColor = 'var(--panel-bg)';
+            } else {
+                document.getElementById('btnSin').style.backgroundColor = 'var(--panel-bg)';
+                document.getElementById('btnCos').style.backgroundColor = 'var(--accent)';
+            }
+            
+            updateSimpleUI();
+        }
+
+        function changeSimple(param, delta) {
+            if (param === 'a') {
+                simple.user.a += delta;
+                // Limit to prevent huge graphs
+                if (simple.user.a > 3) simple.user.a = 3;
+                if (simple.user.a < -3) simple.user.a = -3;
+            } else if (param === 'w') {
+                simple.user.w += delta;
+                if (simple.user.w < 1) simple.user.w = 1; // Positive ints only
+            }
+            updateSimpleUI();
+        }
+
+        function updateSimpleUI() {
+            document.getElementById('valSimpleA').innerText = simple.user.a.toFixed(1);
+            document.getElementById('valSimpleW').innerText = simple.user.w;
+            
+            let funcName = simple.user.type === 'sin' ? 'ημ' : 'συν';
+            let wStr = simple.user.w === 1 ? '' : simple.user.w;
+            let formula = `y = ${simple.user.a}·${funcName}(${wStr}x)`;
+            
+            let display = document.getElementById('formulaSimple');
+            display.innerText = formula;
+            
+            if (checkWin(simple.target, simple.user, true)) {
+                display.classList.add('success');
+            } else {
+                display.classList.remove('success');
+            }
+            
+            drawSimple();
+        }
+
+        // --- COMPLEX TAB LOGIC ---
+        const complex = {
+            canvas: null, ctx: null,
+            target: { m: 1, p: 0, k: 2, r: 1, points: [] }, // y = m*cos(2π/k * (x - r)) + p
+            user: { active: false, beta: 0, a: 1, k: 1, phi: 0 }, // y = a*cos(2π/k * (x - phi)) + beta
+            view: { minX: -1, maxX: 10, minY: -5.5, maxY: 5.5 }
+        };
+
+        function initComplex() {
+            complex.canvas = document.getElementById('canvasComplex');
+            complex.ctx = complex.canvas.getContext('2d');
+            
+            // Random target parameters
+            const possibleMP = [-2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2];
+            complex.target.m = possibleMP[Math.floor(Math.random() * possibleMP.length)];
+            const possibleP = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2];
+            complex.target.p = possibleP[Math.floor(Math.random() * possibleP.length)];
+            complex.target.k = Math.floor(Math.random() * 4) + 2; // k from 2 to 5
+            complex.target.r = Math.floor(Math.random() * 5) + 1; // r from 1 to 5
+            
+            let period = complex.target.k;
+            complex.view.maxX = Math.max(10, period * 2.5); // Ensure at least 2 periods
+            
+            // Generate Points with noise
+            complex.target.points = [];
+            let noiseLevel = Math.abs(complex.target.m) * 0.15;
+            let step = (complex.view.maxX - complex.view.minX) / 150;
+            for (let x = complex.view.minX; x <= complex.view.maxX; x += step) {
+                let n = 2 * Math.PI / complex.target.k;
+                let exactY = complex.target.m * Math.cos(n * (x - complex.target.r)) + complex.target.p;
+                let noiseY = exactY + (Math.random() - 0.5) * noiseLevel;
+                complex.target.points.push({x: x, y: noiseY});
+            }
+
+            // Reset User State
+            complex.user.active = false;
+            document.getElementById('complexControls').classList.add('hidden');
+            document.getElementById('btnModel').classList.remove('hidden');
+            
+            drawComplex();
+        }
+
+        function activateModeling() {
+            complex.user.active = true;
+            complex.user.beta = 0;
+            complex.user.a = 1;
+            complex.user.k = 1; // Default 2pi/1
+            complex.user.phi = 0;
+            
+            document.getElementById('btnModel').classList.add('hidden');
+            document.getElementById('complexControls').classList.remove('hidden');
+            
+            updateComplexUI();
+        }
+
+        function changeComplex(param, delta) {
+            if (param === 'beta') complex.user.beta += delta;
+            if (param === 'a') complex.user.a += delta;
+            if (param === 'k') {
+                complex.user.k += delta;
+                if (complex.user.k < 1) complex.user.k = 1;
+            }
+            if (param === 'phi') complex.user.phi += delta;
+            
+            updateComplexUI();
+        }
+
+        function updateComplexUI() {
+            document.getElementById('valComplexBeta').innerText = complex.user.beta.toFixed(1);
+            document.getElementById('valComplexA').innerText = complex.user.a.toFixed(1);
+            document.getElementById('valComplexK').innerText = complex.user.k;
+            document.getElementById('valComplexPhi').innerText = complex.user.phi;
+            
+            let phiStr = complex.user.phi === 0 ? '' : (complex.user.phi > 0 ? ` - ${complex.user.phi}` : ` + ${Math.abs(complex.user.phi)}`);
+            let betaStr = complex.user.beta === 0 ? '' : (complex.user.beta > 0 ? ` + ${complex.user.beta}` : ` - ${Math.abs(complex.user.beta)}`);
+            
+            let formula = `y = ${complex.user.a}·συν( (2π/${complex.user.k})·(x${phiStr}) )${betaStr}`;
+            
+            let display = document.getElementById('formulaComplex');
+            display.innerText = formula;
+            
+            if (checkWin(complex.target, complex.user, false)) {
+                display.classList.add('success');
+            } else {
+                display.classList.remove('success');
+            }
+            
+            drawComplex();
+        }
+
+        // --- COMMON LOGIC (Drawing & Checking) ---
+
+        // Win condition check using random sampling to avoid phase shift math complications
+        function checkWin(target, user, isSimple) {
+            if (!user.active) return false;
+            
+            let maxDiff = 0;
+            for(let i=0; i<20; i++) {
+                let x = Math.random() * 10;
+                let targetY, userY;
+                
+                if (isSimple) {
+                    targetY = target.type === 'sin' 
+                        ? target.a * Math.sin(target.w * x) : target.a * Math.cos(target.w * x);
+                    userY = user.type === 'sin' 
+                        ? user.a * Math.sin(user.w * x) : user.a * Math.cos(user.w * x);
+                } else {
+                    let nTarget = 2 * Math.PI / target.k;
+                    targetY = target.m * Math.cos(nTarget * (x - target.r)) + target.p;
+                    
+                    let nUser = 2 * Math.PI / user.k;
+                    userY = user.a * Math.cos(nUser * (x - user.phi)) + user.beta;
+                }
+                
+                maxDiff = Math.max(maxDiff, Math.abs(targetY - userY));
+            }
+            
+            return maxDiff < 0.05; // allow small floating point errors
+        }
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            
+            if (canvas.width !== rect.width * window.devicePixelRatio || canvas.height !== rect.height * window.devicePixelRatio) {
+                canvas.width = rect.width * window.devicePixelRatio;
+                canvas.height = rect.height * window.devicePixelRatio;
+                canvas.style.width = rect.width + 'px';
+                canvas.style.height = rect.height + 'px';
+                
+                const ctx = canvas.getContext('2d');
+                ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            }
+            return { w: rect.width, h: rect.height };
+        }
+
+        function drawAxesAndGrid(ctx, w, h, view, stepX, stepY, formatX, drawGrid = true) {
+            // Map logic to screen
+            const toX = (logX) => ((logX - view.minX) / (view.maxX - view.minX)) * w;
+            const toY = (logY) => h - ((logY - view.minY) / (view.maxY - view.minY)) * h;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Grid Lines
+            if (drawGrid) {
+                ctx.strokeStyle = '#2a2a2a';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                
+                // Vertical grid lines
+                let startX = Math.ceil(view.minX / stepX) * stepX;
+                for (let x = startX; x <= view.maxX; x += stepX) {
+                    let px = toX(x);
+                    ctx.moveTo(px, 0); ctx.lineTo(px, h);
+                }
+                
+                // Horizontal grid lines
+                let startY = Math.ceil(view.minY / stepY) * stepY;
+                for (let y = startY; y <= view.maxY; y += stepY) {
+                    let py = toY(y);
+                    ctx.moveTo(0, py); ctx.lineTo(w, py);
+                }
+                ctx.stroke();
+            }
+
+            // Axes
+            ctx.strokeStyle = '#666666';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            // X axis
+            let originY = toY(0);
+            if (originY > 0 && originY < h) {
+                ctx.moveTo(0, originY); ctx.lineTo(w, originY);
+            }
+            // Y axis
+            let originX = toX(0);
+            if (originX > 0 && originX < w) {
+                ctx.moveTo(originX, 0); ctx.lineTo(originX, h);
+            }
+            ctx.stroke();
+
+            // Labels
+            ctx.fillStyle = '#a0a0a0';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+
+            // X Labels
+            let startX = Math.ceil(view.minX / stepX) * stepX;
+            for (let x = startX; x <= view.maxX; x += stepX) {
+                if (Math.abs(x) < 0.01) continue; // Skip 0
+                let px = toX(x);
+                let label = formatX ? formatX(x) : parseFloat(x.toFixed(2)).toString();
+                
+                // Tick
+                ctx.beginPath();
+                ctx.moveTo(px, originY - 4);
+                ctx.lineTo(px, originY + 4);
+                ctx.stroke();
+                
+                ctx.fillText(label, px, originY + 8);
+            }
+
+            // Y Labels
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            let startY = Math.ceil(view.minY / stepY) * stepY;
+            for (let y = startY; y <= view.maxY; y += stepY) {
+                if (Math.abs(y) < 0.01) continue; // Skip 0
+                let py = toY(y);
+                
+                // Tick
+                ctx.beginPath();
+                ctx.moveTo(originX - 4, py);
+                ctx.lineTo(originX + 4, py);
+                ctx.stroke();
+                
+                ctx.fillText(parseFloat(y.toFixed(2)).toString(), originX - 8, py);
+            }
+            
+            // Origin label
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'top';
+            ctx.fillText('0', originX - 5, originY + 5);
+        }
+
+        function drawSimple() {
+            if (!simple.canvas) return;
+            const dims = resizeCanvas(simple.canvas);
+            const w = dims.w; const h = dims.h;
+            
+            // Steps: y=1, x=T/8 = pi/(4w)
+            let stepY = 1;
+            let stepXPiParts = 4 * simple.target.w; // Denominator of pi fraction
+            let stepX = Math.PI / stepXPiParts;
+            
+            const formatX = (x) => {
+                // x = k * pi / stepXPiParts
+                let k = Math.round(x / stepX);
+                return formatPiFraction(k, stepXPiParts);
+            };
+
+            drawAxesAndGrid(simple.ctx, w, h, simple.view, stepX, stepY, formatX, true);
+
+            const toX = (logX) => ((logX - simple.view.minX) / (simple.view.maxX - simple.view.minX)) * w;
+            const toY = (logY) => h - ((logY - simple.view.minY) / (simple.view.maxY - simple.view.minY)) * h;
+
+            // Draw Target Points
+            simple.ctx.fillStyle = '#ffffff';
+            simple.target.points.forEach(p => {
+                simple.ctx.beginPath();
+                simple.ctx.arc(toX(p.x), toY(p.y), 2.5, 0, Math.PI * 2);
+                simple.ctx.fill();
+            });
+
+            // Draw User Curve
+            if (simple.user.active) {
+                simple.ctx.strokeStyle = '#ef4444'; // Red
+                simple.ctx.lineWidth = 3;
+                simple.ctx.beginPath();
+                let first = true;
+                let step = (simple.view.maxX - simple.view.minX) / 200;
+                for (let x = simple.view.minX; x <= simple.view.maxX; x += step) {
+                    let y = simple.user.type === 'sin' 
+                        ? simple.user.a * Math.sin(simple.user.w * x)
+                        : simple.user.a * Math.cos(simple.user.w * x);
+                    
+                    let px = toX(x);
+                    let py = toY(y);
+                    if (first) { simple.ctx.moveTo(px, py); first = false; }
+                    else { simple.ctx.lineTo(px, py); }
+                }
+                simple.ctx.stroke();
+            }
+        }
+
+        function drawComplex() {
+            if (!complex.canvas) return;
+            const dims = resizeCanvas(complex.canvas);
+            const w = dims.w; const h = dims.h;
+            
+            // Steps: y=1, x=1
+            drawAxesAndGrid(complex.ctx, w, h, complex.view, 1, 1, null, true);
+
+            const toX = (logX) => ((logX - complex.view.minX) / (complex.view.maxX - complex.view.minX)) * w;
+            const toY = (logY) => h - ((logY - complex.view.minY) / (complex.view.maxY - complex.view.minY)) * h;
+
+            // Draw Target Points
+            complex.ctx.fillStyle = '#ffffff';
+            complex.target.points.forEach(p => {
+                complex.ctx.beginPath();
+                complex.ctx.arc(toX(p.x), toY(p.y), 2.5, 0, Math.PI * 2);
+                complex.ctx.fill();
+            });
+
+            // Draw User Curve
+            if (complex.user.active) {
+                complex.ctx.strokeStyle = '#ef4444'; // Red
+                complex.ctx.lineWidth = 3;
+                complex.ctx.beginPath();
+                let first = true;
+                let step = (complex.view.maxX - complex.view.minX) / 200;
+                let n = 2 * Math.PI / complex.user.k;
+                for (let x = complex.view.minX; x <= complex.view.maxX; x += step) {
+                    let y = complex.user.a * Math.cos(n * (x - complex.user.phi)) + complex.user.beta;
+                    
+                    let px = toX(x);
+                    let py = toY(y);
+                    if (first) { complex.ctx.moveTo(px, py); first = false; }
+                    else { complex.ctx.lineTo(px, py); }
+                }
+                complex.ctx.stroke();
+            }
+        }
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.container').forEach(cont => cont.classList.add('hidden'));
+            
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            
+            if (tabId === 'simple') drawSimple();
+            else drawComplex();
+        }
+
+        // Handle resize events
+        window.addEventListener('resize', () => {
+            if (currentTab === 'simple') drawSimple();
+            else drawComplex();
+        });
+
+        // Initialize on load
+        window.onload = () => {
+            initSimple();
+            initComplex();
+            // Ensure first tab is correctly rendered
+            drawSimple();
+        };
+
+    </script>
+</body>
+</html>

@@ -94,6 +94,12 @@
 
 [Εισαγωγή στις ακολουθίες](LykeioA/akoloythies.html)
 
+### Ανισώσεις
+
+#### Ανισώσεις 2ου βαθμού
+
+[Πώς λύνω μια ανίσωση 2ου βαθμού;](LykeioA/anis2deg.html)
+
 ### Συναρτήσεις
 
 [Η έννοια της συνάρτησης](LykeioA/function_machine.html)
@@ -117,6 +123,8 @@
 [Quiz: Κατανόηση του τριγωνομετρικού κύκλου](LykeioB/TrigonCyklos.html)
 
 [Quiz: Αναγωγή στο 1ο τεταρτημόριο](LykeioB/anagogiAtetartimorio.html)
+
+[προσδιορισμός τριγωνομετρικής συνάρτησης](LykeioB/trigFuncApp.html)
 
 [Quiz: Τριγωνομετρικές συναρτήσεις](LykeioB/TrigonomSynart.html)
 
