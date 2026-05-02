@@ -73,9 +73,27 @@ def parse_file(path):
         h1m = re.match(r'^# (.+)', line)
         h2m = re.match(r'^## (.+)', line)
         h3m = re.match(r'^### (.+)', line)
+        h4m = re.match(r'^#### (.+)', line)
         lkm = re.match(r'^\[([^\]]+)\]\(([^)]+)\)', line)
 
-        if h1m:
+        if h4m:
+            node = {'type': 'h4', 'label': h4m.group(1).strip(), 'children': []}
+            # h4 nests under h3 if present
+            found = False
+            if current_h2 and current_h2['children']:
+                for ch in reversed(current_h2['children']):
+                    if ch['type'] == 'h3':
+                        ch['children'].append(node)
+                        found = True
+                        break
+            if not found:
+                if current_h2:
+                    current_h2['children'].append(node)
+                elif current_h1:
+                    current_h1['children'].append(node)
+                else:
+                    nodes.append(node)
+        elif h1m:
             raw_label = h1m.group(1)
             folder_all = bool(re.search(r'<folder-all\s*/?\s*>', raw_label))
             folder_m   = re.search(r'<folder>([^<]+)</folder>', raw_label)
@@ -159,6 +177,19 @@ def render_h3(node):
 </li>'''
     return f'<li class="h3-item h3-leaf"><span class="leaf-label">◦ {node["label"]}</span></li>'
 
+
+def render_h4(node):
+    uid = new_uid()
+    inner = '\n'.join(render_node(c) for c in node['children'])
+    if node['children']:
+        return f"""<li class="h4-item">
+  <button class="toggle-btn h4-btn" onclick="toggleMenu('{uid}')">
+    <span class="arrow">▸</span>{node["label"]}
+  </button>
+  <ul id="{uid}" class="submenu">{inner}</ul>
+</li>"""
+    return f'<li class="h4-item h4-leaf"><span class="leaf-label">‣ {node["label"]}</span></li>'
+
 def render_h2(node):
     uid = new_uid()
     inner = '\n'.join(render_node(c) for c in node['children'])
@@ -207,6 +238,7 @@ def render_node(node):
     if t == 'h1':     return render_h1(node)
     if t == 'h2':     return render_h2(node)
     if t == 'h3':     return render_h3(node)
+    if t == 'h4':     return render_h4(node)
     if t == 'popup':  return render_popup(node)
     return ''
 
@@ -386,6 +418,15 @@ body::after{
 }
 .h3-btn:hover{background:rgba(56,189,248,.07);color:var(--accent3)}
 .h3-leaf .leaf-label{display:block;padding:7px 16px 7px 46px;font-size:.76rem;color:var(--text-muted)}
+.h4-btn{
+  width:100%;text-align:left;background:none;border:none;cursor:pointer;
+  font-family:var(--font-ui);font-size:.73rem;
+  color:var(--text-muted);padding:6px 16px 6px 60px;
+  display:flex;align-items:center;gap:5px;
+  transition:background var(--transition),color var(--transition);
+}
+.h4-btn:hover{background:rgba(126,184,201,.06);color:var(--accent3)}
+.h4-leaf .leaf-label{display:block;padding:6px 16px 6px 60px;font-size:.73rem;color:var(--text-muted)}
 .menu-link a{
   display:block;padding:7px 16px 7px 46px;
   color:var(--link);font-size:.81rem;text-decoration:none;position:relative;
@@ -462,6 +503,10 @@ body::after{
     opacity:1;
     pointer-events:auto;
     visibility:visible;
+  }
+  /* Padding at bottom so last items aren't hidden by mobile nav bar */
+  #sidebar{
+    padding-bottom:max(60px, env(safe-area-inset-bottom));
   }
   #search-input{width:140px}
 }

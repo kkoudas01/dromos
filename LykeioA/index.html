@@ -170,6 +170,15 @@ body::after{
 }
 .h3-btn:hover{background:rgba(56,189,248,.07);color:var(--accent3)}
 .h3-leaf .leaf-label{display:block;padding:7px 16px 7px 46px;font-size:.76rem;color:var(--text-muted)}
+.h4-btn{
+  width:100%;text-align:left;background:none;border:none;cursor:pointer;
+  font-family:var(--font-ui);font-size:.73rem;
+  color:var(--text-muted);padding:6px 16px 6px 60px;
+  display:flex;align-items:center;gap:5px;
+  transition:background var(--transition),color var(--transition);
+}
+.h4-btn:hover{background:rgba(126,184,201,.06);color:var(--accent3)}
+.h4-leaf .leaf-label{display:block;padding:6px 16px 6px 60px;font-size:.73rem;color:var(--text-muted)}
 .menu-link a{
   display:block;padding:7px 16px 7px 46px;
   color:var(--link);font-size:.81rem;text-decoration:none;position:relative;
@@ -246,6 +255,10 @@ body::after{
     opacity:1;
     pointer-events:auto;
     visibility:visible;
+  }
+  /* Padding at bottom so last items aren't hidden by mobile nav bar */
+  #sidebar{
+    padding-bottom:max(60px, env(safe-area-inset-bottom));
   }
   #search-input{width:140px}
 }
@@ -335,13 +348,14 @@ body::after{
   <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_11')">
     <span class="arrow">▸</span>Ανισώσεις
   </button>
-  <ul id="menu_11" class="submenu"><li class="menu-link"><a href="anis2deg.html" target="_blank" onclick="return openLink(event,'anis2deg.html')">Πώς λύνω μια ανίσωση 2ου βαθμού;</a></li></ul>
+  <ul id="menu_11" class="submenu"><li class="h4-item h4-leaf"><span class="leaf-label">‣ Ανισώσεις 2ου βαθμού</span></li>
+<li class="menu-link"><a href="anis2deg.html" target="_blank" onclick="return openLink(event,'anis2deg.html')">Πώς λύνω μια ανίσωση 2ου βαθμού;</a></li></ul>
 </li>
 <li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_12')">
+  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_13')">
     <span class="arrow">▸</span>Συναρτήσεις
   </button>
-  <ul id="menu_12" class="submenu"><li class="menu-link"><a href="function_machine.html" target="_blank" onclick="return openLink(event,'function_machine.html')">Η έννοια της συνάρτησης</a></li>
+  <ul id="menu_13" class="submenu"><li class="menu-link"><a href="function_machine.html" target="_blank" onclick="return openLink(event,'function_machine.html')">Η έννοια της συνάρτησης</a></li>
 <li class="menu-link"><a href="tmima_sinartisi.html" target="_blank" onclick="return openLink(event,'tmima_sinartisi.html')">Δίκλαδη συνάρτηση</a></li>
 <li class="menu-link"><a href="function_machine_graph.html" target="_blank" onclick="return openLink(event,'function_machine_graph.html')">Η γραφική παράσταση μιας συνάρτησης</a></li></ul>
 </li></ul>
