@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Τριγωνομετρικός Κύκλος</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --panel-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --text-muted: #aaaaaa;
+            --accent-cyan: #00ffff;
+            --accent-red: #ff4444;
+            --accent-green: #44ff44;
+            --border-color: #333333;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--panel-bg);
+        }
+
+        .back-btn {
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #555;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            color: var(--text-muted);
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent-cyan);
+            color: #000;
+            font-weight: bold;
+            border-color: var(--accent-cyan);
+        }
+
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 0 20px 20px 20px;
+            flex: 1;
+        }
+
+        .canvas-container {
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 1 / 1;
+            background-color: var(--panel-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            position: relative;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            display: block;
+        }
+
+        .controls {
+            background-color: var(--panel-bg);
+            padding: 25px;
+            border-radius: 12px;
+            min-width: 280px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        input[type="number"] {
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-size: 18px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .action-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background-color: #444;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        .result-text {
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 27px;
+            color: #fff;
+            text-align: center;
+        }
+
+        footer {
+            padding: 20px;
+            text-align: right;
+            color: #555;
+            font-style: italic;
+            font-size: 14px;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                flex-direction: column;
+                align-items: center;
+            }
+            .controls {
+                max-width: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <button class="back-btn" onclick="window.location.href='index.html'">← Επιστροφή</button>
+    </header>
+
+    <div class="tabs">
+        <button id="tab1Btn" class="tab-btn active">ημίτονο-συνημίτονο</button>
+        <button id="tab2Btn" class="tab-btn">εφαπτομένη-συνεφαπτομένη</button>
+    </div>
+
+    <main>
+        <div class="canvas-container" id="canvasContainer">
+            <canvas id="trigCanvas"></canvas>
+        </div>
+
+        <div class="controls">
+            <div class="input-group">
+                <label for="angleInput">Γωνία φ (μοίρες):</label>
+                <input type="number" id="angleInput" placeholder="π.χ. 45" autocomplete="off">
+            </div>
+
+            <div id="actionsTab1" class="action-btns">
+                <div class="action-row">
+                    <button id="sinBtn" class="action-btn" style="border-bottom: 3px solid var(--accent-green);">ημίτονο</button>
+                    <div id="sinOut" class="result-text" style="color: var(--accent-green);"></div>
+                </div>
+                <div class="action-row">
+                    <button id="cosBtn" class="action-btn" style="border-bottom: 3px solid var(--accent-red);">συνημίτονο</button>
+                    <div id="cosOut" class="result-text" style="color: var(--accent-red);"></div>
+                </div>
+            </div>
+
+            <div id="actionsTab2" class="action-btns" style="display: none;">
+                <div class="action-row">
+                    <button id="tanBtn" class="action-btn" style="border-bottom: 3px solid var(--accent-green);">εφαπτομένη</button>
+                    <div id="tanOut" class="result-text" style="color: var(--accent-green);"></div>
+                </div>
+                <div class="action-row">
+                    <button id="cotBtn" class="action-btn" style="border-bottom: 3px solid var(--accent-red);">συνεφαπτομένη</button>
+                    <div id="cotOut" class="result-text" style="color: var(--accent-red);"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        Κώστας Κούδας
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('trigCanvas');
+        const ctx = canvas.getContext('2d');
+        const canvasContainer = document.getElementById('canvasContainer');
+        
+        let currentTab = 1;
+        let phiDeg = null;
+        let anim = {
+            active: false,
+            type: '', 
+            progress: 0,
+            startTime: 0,
+            duration: 600
+        };
+
+        let W, H, CX, CY, scale, dpr;
+
+        function resizeCanvas() {
+            dpr = window.devicePixelRatio || 1;
+            const rect = canvasContainer.getBoundingClientRect();
+            W = rect.width * dpr;
+            H = rect.height * dpr;
+            canvas.width = W;
+            canvas.height = H;
+            
+            scale = W / 2.5;
+            CX = W / 2;
+            CY = H / 2;
+            
+            draw();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        const tx = (x) => CX + x * scale;
+        const ty = (y) => CY - y * scale;
+
+        function drawLine(x1, y1, x2, y2, color, w = 1, dash = []) {
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = w * dpr;
+            ctx.setLineDash(dash.map(d => d * dpr));
+            ctx.moveTo(tx(x1), ty(y1));
+            ctx.lineTo(tx(x2), ty(y2));
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawCircle(x, y, r, color, fill = false, glow = false) {
+            if (glow) {
+                ctx.shadowBlur = 15 * dpr;
+                ctx.shadowColor = color;
+            }
+            ctx.beginPath();
+            ctx.arc(tx(x), ty(y), r * scale, 0, 2 * Math.PI);
+            if (fill) {
+                ctx.fillStyle = color;
+                ctx.fill();
+            } else {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2 * dpr;
+                ctx.stroke();
+            }
+            ctx.shadowBlur = 0;
+        }
+
+        function drawText(txt, x, y, color, align = 'center', baseline = 'middle', bold = false, alpha = 1) {
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = color;
+            ctx.font = `${bold ? 'bold ' : ''}${13 * dpr}px sans-serif`;
+            ctx.textAlign = align;
+            ctx.textBaseline = baseline;
+            ctx.fillText(txt, tx(x), ty(y));
+            ctx.restore();
+        }
+
+        function drawGlowingText(txt, x, y, color, align, baseline) {
+            ctx.save();
+            
+            // Υπολογισμός μεγέθους κειμένου για το ημιδιαφανές πλαίσιο
+            ctx.font = `bold ${14 * dpr}px sans-serif`;
+            const metrics = ctx.measureText(txt);
+            const textWidth = metrics.width;
+            const textHeight = 14 * dpr;
+            
+            // Σχεδίαση ημιδιαφανούς φόντου (ορθογώνιο)
+            ctx.fillStyle = 'rgba(18, 18, 18, 0.8)'; // Σχεδόν μαύρο με διαφάνεια
+            let rectX = tx(x);
+            let rectY = ty(y);
+            
+            // Προσαρμογή θέσης ορθογωνίου βάσει ευθυγράμμισης
+            if (align === 'center') rectX -= (textWidth / 2 + 4);
+            else if (align === 'right') rectX -= (textWidth + 8);
+            else rectX -= 4;
+            
+            if (baseline === 'middle') rectY -= (textHeight / 2 + 2);
+            else if (baseline === 'top') rectY -= 2;
+            else rectY -= (textHeight + 2);
+
+            // Σχεδίαση πλαισίου με στρογγυλεμένες γωνίες (απλή προσέγγιση)
+            ctx.beginPath();
+            ctx.roundRect(rectX, rectY, textWidth + 8, textHeight + 4, 4 * dpr);
+            ctx.fill();
+
+            // Σχεδίαση κειμένου με λάμψη
+            ctx.shadowBlur = 10 * dpr;
+            ctx.shadowColor = color;
+            ctx.fillStyle = color;
+            ctx.textAlign = align;
+            ctx.textBaseline = baseline;
+            ctx.fillText(txt, tx(x), ty(y));
+            
+            ctx.restore();
+        }
+
+        function drawArrowHead(cx, cy, angleRad, color) {
+            let size = 12 * dpr;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(angleRad);
+            ctx.beginPath();
+            ctx.moveTo(0, 0); 
+            ctx.lineTo(-size, -size * 0.4); 
+            ctx.lineTo(-size * 0.7, 0); 
+            ctx.lineTo(-size, size * 0.4); 
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawSpiralArc(angleDeg) {
+            if (angleDeg === 0) return;
+            
+            let rad = angleDeg * Math.PI / 180;
+            let baseR = 0.22; 
+            let steps = Math.max(60, Math.floor(Math.abs(angleDeg) * 1.5));
+            
+            ctx.beginPath();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2 * dpr;
+            
+            let lastX, lastY, prevX, prevY;
+            
+            for(let i = 0; i <= steps; i++) {
+                let f = i / steps;
+                let currentRad = f * rad;
+                
+                let lap = Math.floor(Math.abs(currentRad) / (2 * Math.PI));
+                let currentR = baseR + (lap * 0.04);
+                
+                let x = currentR * Math.cos(currentRad);
+                let y = currentR * Math.sin(currentRad);
+                
+                if (i === 0) ctx.moveTo(tx(x), ty(y));
+                else ctx.lineTo(tx(x), ty(y));
+                
+                if (i === steps - 1) { prevX = x; prevY = y; }
+                if (i === steps) { lastX = x; lastY = y; }
+            }
+            ctx.stroke();
+            
+            let dx = tx(lastX) - tx(prevX);
+            let dy = ty(lastY) - ty(prevY);
+            let tangentAngle = Math.atan2(dy, dx);
+            drawArrowHead(tx(lastX), ty(lastY), tangentAngle, '#ffffff');
+
+            // Σχεδίαση της ετικέτας της γωνίας στη διχοτόμο
+            let midRad = rad / 2;
+            let lapCount = Math.floor(Math.abs(rad) / (2 * Math.PI));
+            let textR = baseR + (lapCount * 0.04) + 0.12; 
+            let txLabel = textR * Math.cos(midRad);
+            let tyLabel = textR * Math.sin(midRad);
+            drawText(`${angleDeg}°`, txLabel, tyLabel, '#ffffff', 'center', 'middle', true);
+        }
+
+        function drawAxes() {
+            drawCircle(0, 0, 1, '#00ffff');
+
+            drawText("0°", 1.05, 0.08, '#ffffff');
+            drawText("90°", 0.08, 1.05, '#ffffff', 'left');
+            drawText("180°", -1.05, 0.08, '#ffffff');
+            drawText("270°", -0.08, -1.05, '#ffffff', 'right');
+            drawText("360°", 1.05, -0.08, '#ffffff');
+
+            if (currentTab === 1) {
+                drawLine(-1.25, 0, 1.25, 0, '#ff4444', 2);
+                drawText("συν", 1.20, -0.1, '#ff4444', 'center', 'top', true);
+                drawLine(0, -1.25, 0, 1.25, '#44ff44', 2);
+                drawText("ημ", 0.1, 1.20, '#44ff44', 'left', 'middle', true);
+
+                for (let i = -6; i <= 6; i++) {
+                    if (i === 0) continue;
+                    let v = i * 0.2;
+                    drawLine(v, -0.02, v, 0.02, '#ff4444', 2);
+                    drawText(v.toFixed(1), v, -0.06, '#ff4444', 'center', 'top');
+                    drawLine(-0.02, v, 0.02, v, '#44ff44', 2);
+                    drawText(v.toFixed(1), -0.05, v, '#44ff44', 'right', 'middle');
+                }
+            } else {
+                drawLine(-1.25, 0, 1.25, 0, 'rgba(0, 255, 255, 0.4)', 1);
+                drawLine(0, -1.25, 0, 1.25, 'rgba(0, 255, 255, 0.4)', 1);
+
+                drawLine(1, -1.25, 1, 1.25, '#44ff44', 2);
+                drawText("εφ", 0.94, -1.1, '#44ff44', 'right', 'middle', true);
+
+                drawLine(-1.25, 1, 1.25, 1, '#ff4444', 2);
+                drawText("σφ", -1.1, 0.92, '#ff4444', 'center', 'top', true);
+
+                for (let i = -6; i <= 6; i++) {
+                    if (i === 0) continue;
+                    let v = i * 0.2;
+                    drawLine(v, -0.02, v, 0.02, 'rgba(0, 255, 255, 0.25)', 1);
+                    drawText(v.toFixed(1), v, -0.06, '#00ffff', 'center', 'top', false, 0.3);
+                    drawLine(-0.02, v, 0.02, v, 'rgba(0, 255, 255, 0.25)', 1);
+                    drawText(v.toFixed(1), -0.05, v, '#00ffff', 'right', 'middle', false, 0.3);
+                    
+                    drawLine(0.98, v, 1.02, v, '#44ff44', 2);
+                    drawText(v.toFixed(1), 1.06, v, '#44ff44', 'left', 'middle');
+                    
+                    drawLine(v, 0.98, v, 1.02, '#ff4444', 2);
+                    drawText(v.toFixed(1), v, 1.06, '#ff4444', 'center', 'bottom');
+                }
+            }
+        }
+
+        function drawState() {
+            if (phiDeg === null) return;
+            
+            let rad = phiDeg * Math.PI / 180;
+            let cos = Math.cos(rad);
+            let sin = Math.sin(rad);
+
+            drawLine(0, 0, cos, sin, '#ffffff', 2, [5, 5]);
+            drawSpiralArc(phiDeg);
+            drawCircle(cos, sin, 0.015, '#ffffff', true, true);
+
+            if (anim.active || anim.progress === 1) {
+                let p = anim.progress;
+                
+                if (anim.type === 'sin') {
+                    let currX = cos * (1 - p);
+                    drawLine(cos, sin, currX, sin, '#aaaaaa', 2, [3, 4]);
+                    if (p === 1) {
+                        drawCircle(0, sin, 0.02, '#44ff44', true, true);
+                        let align = cos >= 0 ? 'right' : 'left';
+                        drawGlowingText(sin.toFixed(2), (cos >= 0 ? -0.05 : 0.05), sin, '#44ff44', align, 'bottom');
+                    }
+                } 
+                else if (anim.type === 'cos') {
+                    let currY = sin * (1 - p);
+                    drawLine(cos, sin, cos, currY, '#aaaaaa', 2, [3, 4]);
+                    if (p === 1) {
+                        drawCircle(cos, 0, 0.02, '#ff4444', true, true);
+                        drawGlowingText(cos.toFixed(2), cos, (sin >= 0 ? -0.05 : 0.05), '#ff4444', 'center', (sin >= 0 ? 'top' : 'bottom'));
+                    }
+                }
+                else if (anim.type === 'tan') {
+                    let tan = Math.tan(rad);
+                    let currX = cos + p * (1 - cos);
+                    let currY = sin + p * (tan - sin);
+                    drawLine(cos, sin, currX, currY, '#aaaaaa', 2, [3, 4]);
+                    if (p === 1) {
+                        drawCircle(1, tan, 0.02, '#44ff44', true, true);
+                        drawGlowingText(tan.toFixed(2), 1.10, tan, '#44ff44', 'left', 'middle');
+                    }
+                }
+                else if (anim.type === 'cot') {
+                    let cot = 1 / Math.tan(rad);
+                    let currX = cos + p * (cot - cos);
+                    let currY = sin + p * (1 - sin);
+                    drawLine(cos, sin, currX, currY, '#aaaaaa', 2, [3, 4]);
+                    if (p === 1) {
+                        drawCircle(cot, 1, 0.02, '#ff4444', true, true);
+                        drawGlowingText(cot.toFixed(2), cot, 1.10, '#ff4444', 'center', 'bottom');
+                    }
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+            drawAxes();
+            drawState();
+        }
+
+        function animate(timestamp) {
+            if (!anim.active) return;
+            if (!anim.startTime) anim.startTime = timestamp;
+            let elapsed = timestamp - anim.startTime;
+            anim.progress = Math.min(elapsed / anim.duration, 1);
+            draw();
+            if (anim.progress < 1) requestAnimationFrame(animate);
+            else { anim.active = false; updateResultText(); }
+        }
+
+        function startAnimation(type) {
+            if (phiDeg === null) return;
+            let mod = Math.abs(phiDeg % 180);
+            if (type === 'tan' && mod === 90) {
+                document.getElementById('tanOut').innerText = `εφ(${phiDeg}°) = Μη ορισμένη`;
+                anim.type = type; anim.progress = 0; anim.active = false; draw(); return;
+            }
+            if (type === 'cot' && (mod === 0 || mod === 180)) {
+                document.getElementById('cotOut').innerText = `σφ(${phiDeg}°) = Μη ορισμένη`;
+                anim.type = type; anim.progress = 0; anim.active = false; draw(); return;
+            }
+            clearResults();
+            anim.type = type; anim.progress = 0; anim.startTime = 0; anim.active = true;
+            requestAnimationFrame(animate);
+        }
+
+        function updateResultText() {
+            if (phiDeg === null) return;
+            let rad = phiDeg * Math.PI / 180;
+            if (anim.type === 'sin') document.getElementById('sinOut').innerText = `ημ(${phiDeg}°) = ${Math.sin(rad).toFixed(3)}`;
+            else if (anim.type === 'cos') document.getElementById('cosOut').innerText = `συν(${phiDeg}°) = ${Math.cos(rad).toFixed(3)}`;
+            else if (anim.type === 'tan') document.getElementById('tanOut').innerText = `εφ(${phiDeg}°) = ${Math.tan(rad).toFixed(3)}`;
+            else if (anim.type === 'cot') document.getElementById('cotOut').innerText = `σφ(${phiDeg}°) = ${(1 / Math.tan(rad)).toFixed(3)}`;
+        }
+
+        function clearResults() {
+            document.getElementById('sinOut').innerText = '';
+            document.getElementById('cosOut').innerText = '';
+            document.getElementById('tanOut').innerText = '';
+            document.getElementById('cotOut').innerText = '';
+        }
+
+        document.getElementById('tab1Btn').addEventListener('click', () => {
+            currentTab = 1;
+            document.getElementById('tab1Btn').classList.add('active');
+            document.getElementById('tab2Btn').classList.remove('active');
+            document.getElementById('actionsTab1').style.display = 'flex';
+            document.getElementById('actionsTab2').style.display = 'none';
+            anim.active = false; draw();
+        });
+
+        document.getElementById('tab2Btn').addEventListener('click', () => {
+            currentTab = 2;
+            document.getElementById('tab2Btn').classList.add('active');
+            document.getElementById('tab1Btn').classList.remove('active');
+            document.getElementById('actionsTab2').style.display = 'flex';
+            document.getElementById('actionsTab1').style.display = 'none';
+            anim.active = false; draw();
+        });
+
+        document.getElementById('angleInput').addEventListener('input', (e) => {
+            phiDeg = e.target.value === '' ? null : parseFloat(e.target.value);
+            anim.active = false; clearResults(); draw();
+        });
+
+        document.getElementById('sinBtn').addEventListener('click', () => startAnimation('sin'));
+        document.getElementById('cosBtn').addEventListener('click', () => startAnimation('cos'));
+        document.getElementById('tanBtn').addEventListener('click', () => startAnimation('tan'));
+        document.getElementById('cotBtn').addEventListener('click', () => startAnimation('cot'));
+
+        resizeCanvas();
+    </script>
+</body>
+</html>
