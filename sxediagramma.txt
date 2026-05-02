@@ -13,9 +13,11 @@
 
 [Wolfram Alpha](https://www.wolframalpha.com/)
 
-## Άλγεβρα
+## Προγραμματισμός
 
 [Wolfram Cloud](https://www.wolframcloud.com/)
+
+## Άλγεβρα
 
 [Desmos](https://www.desmos.com/calculator?lang=el)
 
@@ -26,6 +28,8 @@
 [Geogebra-γεωμετρία επιπέδου](https://www.geogebra.org/geometry)
 
 [Geogebra-γεωμετρία χώρου](https://www.geogebra.org/3d)
+
+[Ο Ευκλείδης του Byrne](https://www.c82.net/euclid/el/)
 
 ## Φυσική
 
