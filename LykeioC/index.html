@@ -231,7 +231,6 @@ body::after{
 @media(max-width:700px){
   #menu-toggle{display:block}
   #sidebar{
-    /* fixed overlay — top αγκυρωμένο στο topbar, bottom στο κάτω μέρος οθόνης */
     position:fixed;
     top:56px;
     left:0;
@@ -239,13 +238,10 @@ body::after{
     width:var(--sidebar-w);
     max-width:90vw;
     z-index:200;
-    /* scroll με native touch kinetics */
     overflow-y:auto;
     overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
     overscroll-behavior-y:contain;
-    /* κρυμμένο με opacity+pointer-events αντί transform/left
-       ώστε να μην σπάει το overflow context */
     opacity:0;
     pointer-events:none;
     visibility:hidden;
@@ -256,7 +252,6 @@ body::after{
     pointer-events:auto;
     visibility:visible;
   }
-  /* Padding at bottom so last items aren't hidden by mobile nav bar */
   #sidebar{
     padding-bottom:max(60px, env(safe-area-inset-bottom));
   }
@@ -360,8 +355,11 @@ body::after{
   <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_12')">
     <span class="arrow">▸</span>Επαναληπτικά
   </button>
-  <ul id="menu_12" class="submenu"><li class="h4-item h4-leaf"><span class="leaf-label">‣ Flashcards</span></li>
-<li class="menu-link"><a href="flashcards/flashcards1.2.html" target="_blank" onclick="return openLink(event,'flashcards/flashcards1.2.html')">Κεφ. 1.2</a></li>
+  <ul id="menu_12" class="submenu"><li class="h4-item">
+  <button class="toggle-btn h4-btn" onclick="toggleMenu('menu_13')">
+    <span class="arrow">▸</span>Flashcards
+  </button>
+  <ul id="menu_13" class="submenu"><li class="menu-link"><a href="flashcards/flashcards1.2.html" target="_blank" onclick="return openLink(event,'flashcards/flashcards1.2.html')">Κεφ. 1.2</a></li>
 <li class="menu-link"><a href="flashcards/flashcards1.3.html" target="_blank" onclick="return openLink(event,'flashcards/flashcards1.3.html')">Κεφ. 1.3</a></li>
 <li class="menu-link"><a href="flashcards/flashcards1.4.html" target="_blank" onclick="return openLink(event,'flashcards/flashcards1.4.html')">Κεφ. 1.4</a></li>
 <li class="menu-link"><a href="flashcards/flashcards1.5.html" target="_blank" onclick="return openLink(event,'flashcards/flashcards1.5.html')">Κεφ. 1.5</a></li>
@@ -382,6 +380,7 @@ body::after{
 <li class="menu-link"><a href="flashcards/flashcards3.4.html" target="_blank" onclick="return openLink(event,'flashcards/flashcards3.4.html')">Κεφ. 3.4</a></li>
 <li class="menu-link"><a href="flashcards/flashcards3.5.html" target="_blank" onclick="return openLink(event,'flashcards/flashcards3.5.html')">Κεφ. 3.5</a></li>
 <li class="menu-link"><a href="flashcards/flashcards3.7.html" target="_blank" onclick="return openLink(event,'flashcards/flashcards3.7.html')">Κεφ. 3.7</a></li></ul>
+</li></ul>
 </li></ul>
 </li>
 <li class="h2-item">

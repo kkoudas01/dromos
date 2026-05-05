@@ -32,7 +32,7 @@ def parse_file(path):
     """
     Επιστρέφει (popup_node, nodes).
     Κάθε node είναι dict με:
-      type: 'popup'|'h1'|'h2'|'h3'|'link'|'hline'
+      type: 'popup'|'h1'|'h2'|'h3'|'h4'|'link'|'hline'
       label, url, body, children, folder, folder_all
     """
     with open(path, encoding='utf-8') as f:
@@ -54,6 +54,8 @@ def parse_file(path):
     nodes = []
     current_h1 = None
     current_h2 = None
+    current_h3 = None
+    current_h4 = None
 
     if popup_node:
         nodes.append(popup_node)
@@ -67,9 +69,11 @@ def parse_file(path):
             nodes.append({'type': 'hline'})
             current_h1 = None
             current_h2 = None
+            current_h3 = None
+            current_h4 = None
             continue
 
-        # ── h1: ищем тег folder / folder-all ──
+        # ── Matching patterns ──
         h1m = re.match(r'^# (.+)', line)
         h2m = re.match(r'^## (.+)', line)
         h3m = re.match(r'^### (.+)', line)
@@ -79,20 +83,16 @@ def parse_file(path):
         if h4m:
             node = {'type': 'h4', 'label': h4m.group(1).strip(), 'children': []}
             # h4 nests under h3 if present
-            found = False
-            if current_h2 and current_h2['children']:
-                for ch in reversed(current_h2['children']):
-                    if ch['type'] == 'h3':
-                        ch['children'].append(node)
-                        found = True
-                        break
-            if not found:
-                if current_h2:
-                    current_h2['children'].append(node)
-                elif current_h1:
-                    current_h1['children'].append(node)
-                else:
-                    nodes.append(node)
+            if current_h3:
+                current_h3['children'].append(node)
+            elif current_h2:
+                current_h2['children'].append(node)
+            elif current_h1:
+                current_h1['children'].append(node)
+            else:
+                nodes.append(node)
+            current_h4 = node
+
         elif h1m:
             raw_label = h1m.group(1)
             folder_all = bool(re.search(r'<folder-all\s*/?\s*>', raw_label))
@@ -108,6 +108,8 @@ def parse_file(path):
             nodes.append(node)
             current_h1 = node
             current_h2 = None
+            current_h3 = None
+            current_h4 = None
 
         elif h2m:
             node = {'type': 'h2', 'label': h2m.group(1).strip(), 'children': []}
@@ -116,6 +118,8 @@ def parse_file(path):
             else:
                 nodes.append(node)
             current_h2 = node
+            current_h3 = None
+            current_h4 = None
 
         elif h3m:
             node = {'type': 'h3', 'label': h3m.group(1).strip(), 'children': []}
@@ -125,21 +129,21 @@ def parse_file(path):
                 current_h1['children'].append(node)
             else:
                 nodes.append(node)
+            current_h3 = node
+            current_h4 = None
 
         elif lkm:
             node = {'type': 'link', 'label': lkm.group(1), 'url': lkm.group(2)}
-
-            def last_h3(parent):
-                if parent and parent['children'] and parent['children'][-1]['type'] == 'h3':
-                    return parent['children'][-1]
-                return None
-
-            if current_h2:
-                lh3 = last_h3(current_h2)
-                (lh3 if lh3 else current_h2)['children'].append(node)
+            
+            # Προσθέτουμε το link στο πιο κοντινό parent
+            if current_h4:
+                current_h4['children'].append(node)
+            elif current_h3:
+                current_h3['children'].append(node)
+            elif current_h2:
+                current_h2['children'].append(node)
             elif current_h1:
-                lh3 = last_h3(current_h1)
-                (lh3 if lh3 else current_h1)['children'].append(node)
+                current_h1['children'].append(node)
             else:
                 nodes.append(node)
 
@@ -182,12 +186,12 @@ def render_h4(node):
     uid = new_uid()
     inner = '\n'.join(render_node(c) for c in node['children'])
     if node['children']:
-        return f"""<li class="h4-item">
+        return f'''<li class="h4-item">
   <button class="toggle-btn h4-btn" onclick="toggleMenu('{uid}')">
     <span class="arrow">▸</span>{node["label"]}
   </button>
   <ul id="{uid}" class="submenu">{inner}</ul>
-</li>"""
+</li>'''
     return f'<li class="h4-item h4-leaf"><span class="leaf-label">‣ {node["label"]}</span></li>'
 
 def render_h2(node):
@@ -479,7 +483,6 @@ body::after{
 @media(max-width:700px){
   #menu-toggle{display:block}
   #sidebar{
-    /* fixed overlay — top αγκυρωμένο στο topbar, bottom στο κάτω μέρος οθόνης */
     position:fixed;
     top:56px;
     left:0;
@@ -487,13 +490,10 @@ body::after{
     width:var(--sidebar-w);
     max-width:90vw;
     z-index:200;
-    /* scroll με native touch kinetics */
     overflow-y:auto;
     overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
     overscroll-behavior-y:contain;
-    /* κρυμμένο με opacity+pointer-events αντί transform/left
-       ώστε να μην σπάει το overflow context */
     opacity:0;
     pointer-events:none;
     visibility:hidden;
@@ -504,7 +504,6 @@ body::after{
     pointer-events:auto;
     visibility:visible;
   }
-  /* Padding at bottom so last items aren't hidden by mobile nav bar */
   #sidebar{
     padding-bottom:max(60px, env(safe-area-inset-bottom));
   }
@@ -625,7 +624,6 @@ def build_page(sidebar_html, title='Δρόμος', back=False, bg_path='MyBackgr
 # ─────────────────────────────────────────────────────────────────────────────
 # MAIN
 # ─────────────────────────────────────────────────────────────────────────────
-
 
 import copy
 

@@ -231,7 +231,6 @@ body::after{
 @media(max-width:700px){
   #menu-toggle{display:block}
   #sidebar{
-    /* fixed overlay — top αγκυρωμένο στο topbar, bottom στο κάτω μέρος οθόνης */
     position:fixed;
     top:56px;
     left:0;
@@ -239,13 +238,10 @@ body::after{
     width:var(--sidebar-w);
     max-width:90vw;
     z-index:200;
-    /* scroll με native touch kinetics */
     overflow-y:auto;
     overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
     overscroll-behavior-y:contain;
-    /* κρυμμένο με opacity+pointer-events αντί transform/left
-       ώστε να μην σπάει το overflow context */
     opacity:0;
     pointer-events:none;
     visibility:hidden;
@@ -256,7 +252,6 @@ body::after{
     pointer-events:auto;
     visibility:visible;
   }
-  /* Padding at bottom so last items aren't hidden by mobile nav bar */
   #sidebar{
     padding-bottom:max(60px, env(safe-area-inset-bottom));
   }
@@ -342,15 +337,23 @@ body::after{
   <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_10')">
     <span class="arrow">▸</span>Εξισώσεις
   </button>
-  <ul id="menu_10" class="submenu"><li class="h4-item h4-leaf"><span class="leaf-label">‣ Εξισώσεις 2ου βαθμού</span></li>
-<li class="menu-link"><a href="quadratic_flowchart.html" target="_blank" onclick="return openLink(event,'quadratic_flowchart.html')">Διακρίνουσα</a></li></ul>
+  <ul id="menu_10" class="submenu"><li class="h4-item">
+  <button class="toggle-btn h4-btn" onclick="toggleMenu('menu_11')">
+    <span class="arrow">▸</span>Εξισώσεις 2ου βαθμού
+  </button>
+  <ul id="menu_11" class="submenu"><li class="menu-link"><a href="quadratic_flowchart.html" target="_blank" onclick="return openLink(event,'quadratic_flowchart.html')">Διακρίνουσα</a></li></ul>
+</li></ul>
 </li>
 <li class="h3-item">
   <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_12')">
     <span class="arrow">▸</span>Συναρτήσεις
   </button>
-  <ul id="menu_12" class="submenu"><li class="h4-item h4-leaf"><span class="leaf-label">‣ Γραμμικές συναρτήσεις</span></li>
-<li class="menu-link"><a href="linearReg.html" target="_blank" onclick="return openLink(event,'linearReg.html')">Βρες την ευθεία</a></li></ul>
+  <ul id="menu_12" class="submenu"><li class="h4-item">
+  <button class="toggle-btn h4-btn" onclick="toggleMenu('menu_13')">
+    <span class="arrow">▸</span>Γραμμικές συναρτήσεις
+  </button>
+  <ul id="menu_13" class="submenu"><li class="menu-link"><a href="linearReg.html" target="_blank" onclick="return openLink(event,'linearReg.html')">Βρες την ευθεία</a></li></ul>
+</li></ul>
 </li></ul>
 </li>
 <li class="h2-item">

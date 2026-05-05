@@ -101,6 +101,7 @@
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.6);
             position: relative;
+            overflow: hidden;
         }
 
         canvas {
@@ -108,6 +109,37 @@
             height: 100%;
             border-radius: 12px;
             display: block;
+            cursor: grab;
+            /* Αποτρέπει την κύλιση της σελίδας όταν ο χρήστης σέρνει τον καμβά */
+            touch-action: none;
+        }
+
+        canvas:active {
+            cursor: grabbing;
+        }
+
+        .reset-pan-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background-color: rgba(40, 40, 40, 0.8);
+            border: 1px solid #555;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 20px;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .reset-pan-btn:hover {
+            background-color: rgba(70, 70, 70, 0.9);
+            transform: scale(1.05);
         }
 
         .controls {
@@ -134,15 +166,47 @@
             color: var(--text-muted);
         }
 
+        .input-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .step-btn {
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 6px;
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .step-btn:hover {
+            background-color: #555;
+        }
+
+        .step-btn:active {
+            transform: scale(0.95);
+        }
+
         input[type="number"] {
             background-color: #2a2a2a;
             border: 1px solid #444;
             color: #fff;
-            padding: 12px 15px;
+            padding: 12px 10px;
             border-radius: 6px;
             font-size: 18px;
             outline: none;
             transition: border-color 0.2s;
+            flex: 1;
+            min-width: 0;
+            text-align: center;
         }
 
         input[type="number"]:focus {
@@ -223,12 +287,17 @@
     <main>
         <div class="canvas-container" id="canvasContainer">
             <canvas id="trigCanvas"></canvas>
+            <button id="resetPanBtn" class="reset-pan-btn" title="Επαναφορά στο κέντρο">⌂</button>
         </div>
 
         <div class="controls">
             <div class="input-group">
                 <label for="angleInput">Γωνία φ (μοίρες):</label>
-                <input type="number" id="angleInput" placeholder="π.χ. 45" autocomplete="off">
+                <div class="input-wrapper">
+                    <button class="step-btn" onclick="adjustAngle(-1)">-</button>
+                    <input type="number" id="angleInput" placeholder="π.χ. 45" autocomplete="off">
+                    <button class="step-btn" onclick="adjustAngle(1)">+</button>
+                </div>
             </div>
 
             <div id="actionsTab1" class="action-btns">
@@ -274,6 +343,13 @@
             duration: 600
         };
 
+        // Μεταβλητές για Panning (Σύρσιμο)
+        let offsetX = 0;
+        let offsetY = 0;
+        let isDragging = false;
+        let lastPanX = 0;
+        let lastPanY = 0;
+
         let W, H, CX, CY, scale, dpr;
 
         function resizeCanvas() {
@@ -284,7 +360,7 @@
             canvas.width = W;
             canvas.height = H;
             
-            scale = W / 2.5;
+            scale = W / 2.5; // Σταθερό zoom
             CX = W / 2;
             CY = H / 2;
             
@@ -293,8 +369,73 @@
 
         window.addEventListener('resize', resizeCanvas);
 
-        const tx = (x) => CX + x * scale;
-        const ty = (y) => CY - y * scale;
+        // Συντεταγμένες προσαρμοσμένες με το Panning
+        const tx = (x) => CX + offsetX + x * scale;
+        const ty = (y) => CY + offsetY - y * scale;
+
+        // Διαχείριση Σύρσιμου (Mouse)
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            lastPanX = e.clientX;
+            lastPanY = e.clientY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            let dx = (e.clientX - lastPanX) * dpr;
+            let dy = (e.clientY - lastPanY) * dpr;
+            offsetX += dx;
+            offsetY += dy;
+            lastPanX = e.clientX;
+            lastPanY = e.clientY;
+            draw();
+        });
+
+        window.addEventListener('mouseup', () => { isDragging = false; });
+        window.addEventListener('mouseleave', () => { isDragging = false; });
+
+        // Διαχείριση Σύρσιμου (Touch)
+        canvas.addEventListener('touchstart', (e) => {
+            if(e.touches.length === 1) {
+                isDragging = true;
+                lastPanX = e.touches[0].clientX;
+                lastPanY = e.touches[0].clientY;
+            }
+        }, {passive: false});
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (!isDragging || e.touches.length !== 1) return;
+            e.preventDefault(); // Αποτρέπει το scroll της σελίδας
+            let dx = (e.touches[0].clientX - lastPanX) * dpr;
+            let dy = (e.touches[0].clientY - lastPanY) * dpr;
+            offsetX += dx;
+            offsetY += dy;
+            lastPanX = e.touches[0].clientX;
+            lastPanY = e.touches[0].clientY;
+            draw();
+        }, {passive: false});
+
+        canvas.addEventListener('touchend', () => { isDragging = false; });
+
+        // Επαναφορά Panning
+        document.getElementById('resetPanBtn').addEventListener('click', () => {
+            offsetX = 0;
+            offsetY = 0;
+            draw();
+        });
+
+        // Βοηθητική: Προσαρμογή γωνίας από τα κουμπιά - / +
+        function adjustAngle(delta) {
+            let input = document.getElementById('angleInput');
+            let val = parseFloat(input.value);
+            if (isNaN(val)) val = 0;
+            val += delta;
+            input.value = val;
+            phiDeg = val;
+            anim.active = false; clearResults(); draw();
+        }
+
+        // --- Σχεδίαση ---
 
         function drawLine(x1, y1, x2, y2, color, w = 1, dash = []) {
             ctx.beginPath();
@@ -339,18 +480,15 @@
         function drawGlowingText(txt, x, y, color, align, baseline) {
             ctx.save();
             
-            // Υπολογισμός μεγέθους κειμένου για το ημιδιαφανές πλαίσιο
             ctx.font = `bold ${14 * dpr}px sans-serif`;
             const metrics = ctx.measureText(txt);
             const textWidth = metrics.width;
             const textHeight = 14 * dpr;
             
-            // Σχεδίαση ημιδιαφανούς φόντου (ορθογώνιο)
-            ctx.fillStyle = 'rgba(18, 18, 18, 0.8)'; // Σχεδόν μαύρο με διαφάνεια
+            ctx.fillStyle = 'rgba(18, 18, 18, 0.85)'; 
             let rectX = tx(x);
             let rectY = ty(y);
             
-            // Προσαρμογή θέσης ορθογωνίου βάσει ευθυγράμμισης
             if (align === 'center') rectX -= (textWidth / 2 + 4);
             else if (align === 'right') rectX -= (textWidth + 8);
             else rectX -= 4;
@@ -359,12 +497,10 @@
             else if (baseline === 'top') rectY -= 2;
             else rectY -= (textHeight + 2);
 
-            // Σχεδίαση πλαισίου με στρογγυλεμένες γωνίες (απλή προσέγγιση)
             ctx.beginPath();
             ctx.roundRect(rectX, rectY, textWidth + 8, textHeight + 4, 4 * dpr);
             ctx.fill();
 
-            // Σχεδίαση κειμένου με λάμψη
             ctx.shadowBlur = 10 * dpr;
             ctx.shadowColor = color;
             ctx.fillStyle = color;
@@ -427,7 +563,6 @@
             let tangentAngle = Math.atan2(dy, dx);
             drawArrowHead(tx(lastX), ty(lastY), tangentAngle, '#ffffff');
 
-            // Σχεδίαση της ετικέτας της γωνίας στη διχοτόμο
             let midRad = rad / 2;
             let lapCount = Math.floor(Math.abs(rad) / (2 * Math.PI));
             let textR = baseR + (lapCount * 0.04) + 0.12; 
@@ -437,6 +572,12 @@
         }
 
         function drawAxes() {
+            // Υπολογισμός των ορίων της οθόνης σε μαθηματικές συντεταγμένες για άπειρους άξονες
+            let vMinX = (0 - CX - offsetX) / scale;
+            let vMaxX = (W - CX - offsetX) / scale;
+            let vMinY = (CY + offsetY - H) / scale;
+            let vMaxY = (CY + offsetY) / scale;
+
             drawCircle(0, 0, 1, '#00ffff');
 
             drawText("0°", 1.05, 0.08, '#ffffff');
@@ -445,43 +586,57 @@
             drawText("270°", -0.08, -1.05, '#ffffff', 'right');
             drawText("360°", 1.05, -0.08, '#ffffff');
 
+            let startX = Math.floor(vMinX / 0.2);
+            let endX = Math.ceil(vMaxX / 0.2);
+            let startY = Math.floor(vMinY / 0.2);
+            let endY = Math.ceil(vMaxY / 0.2);
+
             if (currentTab === 1) {
-                drawLine(-1.25, 0, 1.25, 0, '#ff4444', 2);
+                drawLine(vMinX, 0, vMaxX, 0, '#ff4444', 2);
                 drawText("συν", 1.20, -0.1, '#ff4444', 'center', 'top', true);
-                drawLine(0, -1.25, 0, 1.25, '#44ff44', 2);
+                
+                drawLine(0, vMinY, 0, vMaxY, '#44ff44', 2);
                 drawText("ημ", 0.1, 1.20, '#44ff44', 'left', 'middle', true);
 
-                for (let i = -6; i <= 6; i++) {
+                for (let i = startX; i <= endX; i++) {
                     if (i === 0) continue;
                     let v = i * 0.2;
                     drawLine(v, -0.02, v, 0.02, '#ff4444', 2);
                     drawText(v.toFixed(1), v, -0.06, '#ff4444', 'center', 'top');
+                }
+                for (let i = startY; i <= endY; i++) {
+                    if (i === 0) continue;
+                    let v = i * 0.2;
                     drawLine(-0.02, v, 0.02, v, '#44ff44', 2);
                     drawText(v.toFixed(1), -0.05, v, '#44ff44', 'right', 'middle');
                 }
             } else {
-                drawLine(-1.25, 0, 1.25, 0, 'rgba(0, 255, 255, 0.4)', 1);
-                drawLine(0, -1.25, 0, 1.25, 'rgba(0, 255, 255, 0.4)', 1);
+                drawLine(vMinX, 0, vMaxX, 0, 'rgba(0, 255, 255, 0.4)', 1);
+                drawLine(0, vMinY, 0, vMaxY, 'rgba(0, 255, 255, 0.4)', 1);
 
-                drawLine(1, -1.25, 1, 1.25, '#44ff44', 2);
+                drawLine(1, vMinY, 1, vMaxY, '#44ff44', 2);
                 drawText("εφ", 0.94, -1.1, '#44ff44', 'right', 'middle', true);
 
-                drawLine(-1.25, 1, 1.25, 1, '#ff4444', 2);
+                drawLine(vMinX, 1, vMaxX, 1, '#ff4444', 2);
                 drawText("σφ", -1.1, 0.92, '#ff4444', 'center', 'top', true);
 
-                for (let i = -6; i <= 6; i++) {
+                for (let i = startX; i <= endX; i++) {
                     if (i === 0) continue;
                     let v = i * 0.2;
                     drawLine(v, -0.02, v, 0.02, 'rgba(0, 255, 255, 0.25)', 1);
                     drawText(v.toFixed(1), v, -0.06, '#00ffff', 'center', 'top', false, 0.3);
+                    
+                    drawLine(v, 0.98, v, 1.02, '#ff4444', 2);
+                    drawText(v.toFixed(1), v, 1.06, '#ff4444', 'center', 'bottom');
+                }
+                for (let i = startY; i <= endY; i++) {
+                    if (i === 0) continue;
+                    let v = i * 0.2;
                     drawLine(-0.02, v, 0.02, v, 'rgba(0, 255, 255, 0.25)', 1);
                     drawText(v.toFixed(1), -0.05, v, '#00ffff', 'right', 'middle', false, 0.3);
                     
                     drawLine(0.98, v, 1.02, v, '#44ff44', 2);
                     drawText(v.toFixed(1), 1.06, v, '#44ff44', 'left', 'middle');
-                    
-                    drawLine(v, 0.98, v, 1.02, '#ff4444', 2);
-                    drawText(v.toFixed(1), v, 1.06, '#ff4444', 'center', 'bottom');
                 }
             }
         }

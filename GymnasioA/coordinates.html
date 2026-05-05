@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Σύστημα Συντεταγμένων - Στρατιωτική Επιχείρηση</title>
+    <style>
+        :root {
+            --bg-color: #0a140a;
+            --panel-bg: #122412;
+            --panel-border: #2a4d2a;
+            --text-color: #7bb57b;
+            --text-bright: #a3e8a3;
+            --grid-line: #1c361c;
+            --axis-line: #32a852;
+            --btn-green: #2e7d32;
+            --btn-green-hover: #388e3c;
+            --btn-red: #c62828;
+            --btn-red-hover: #d32f2f;
+            --accent: #558b2f;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            width: 100%;
+            padding: 10px 20px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .btn-back {
+            background-color: var(--panel-bg);
+            color: var(--text-bright);
+            border: 1px solid var(--panel-border);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.3s;
+        }
+
+        .btn-back:hover {
+            background-color: var(--accent);
+            color: #fff;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .canvas-container {
+            background-color: var(--panel-bg);
+            border: 2px solid var(--panel-border);
+            border-radius: 4px;
+            padding: 10px;
+            box-shadow: 0 0 15px rgba(50, 168, 82, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        canvas {
+            background-color: #050a05;
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--grid-line);
+        }
+
+        .controls-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            min-width: 300px;
+        }
+
+        /* Dynamic Inputs System */
+        .input-system {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            padding: 15px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .circle-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            transition: 0.2s;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+        }
+        
+        .circle-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .circle-green { background-color: #4caf50; }
+        .circle-green:hover:not(:disabled) { background-color: #66bb6a; box-shadow: 0 0 10px #4caf50; }
+        
+        .circle-red { background-color: #f44336; }
+        .circle-red:hover:not(:disabled) { background-color: #ef5350; box-shadow: 0 0 10px #f44336; }
+
+        .coord-inputs {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            color: var(--text-bright);
+        }
+
+        .coord-inputs input {
+            width: 40px;
+            background: #050a05;
+            border: 1px solid var(--panel-border);
+            color: var(--text-bright);
+            text-align: center;
+            font-family: inherit;
+            font-size: 16px;
+            padding: 4px;
+            margin: 0 5px;
+            -moz-appearance: textfield;
+        }
+
+        .coord-inputs input::-webkit-outer-spin-button,
+        .coord-inputs input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .coord-inputs input:disabled {
+            color: #5a8a5a;
+            border-color: #1a2e1a;
+        }
+
+        /* D-Pad Controls */
+        .dpad-system {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            padding: 20px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dpad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 40px);
+            grid-template-rows: repeat(3, 40px);
+            gap: 5px;
+            justify-items: center;
+            align-items: center;
+        }
+
+        .dpad-btn {
+            width: 36px;
+            height: 36px;
+            background-color: #1a2e1a;
+            border: 1px solid var(--panel-border);
+            color: var(--text-bright);
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 4px;
+            transition: 0.1s;
+        }
+
+        .dpad-btn:active:not(:disabled) {
+            background-color: var(--accent);
+            transform: scale(0.95);
+        }
+
+        .dpad-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .dpad-up { grid-column: 2; grid-row: 1; }
+        .dpad-left { grid-column: 1; grid-row: 2; }
+        .dpad-right { grid-column: 3; grid-row: 2; }
+        .dpad-down { grid-column: 2; grid-row: 3; }
+        .dpad-center { grid-column: 2; grid-row: 2; width: 30px; height: 30px; }
+
+        .blink {
+            animation: blinking 1s infinite;
+        }
+
+        @keyframes blinking {
+            0% { opacity: 1; box-shadow: 0 0 15px var(--btn-green); }
+            50% { opacity: 0.4; box-shadow: none; }
+            100% { opacity: 1; box-shadow: 0 0 15px var(--btn-green); }
+        }
+
+        /* Game Buttons */
+        .game-buttons-panel {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-game {
+            background-color: #1a2e1a;
+            color: var(--text-bright);
+            border: 2px solid var(--btn-red);
+            padding: 12px 24px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-game::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(198, 40, 40, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-game:hover {
+            background-color: rgba(198, 40, 40, 0.2);
+            box-shadow: 0 0 10px rgba(198, 40, 40, 0.5);
+        }
+
+        .btn-game:hover::before {
+            left: 100%;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: var(--panel-bg);
+            border: 2px solid var(--btn-red);
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            max-width: 95vw;
+            max-height: 95vh;
+            overflow-y: auto;
+            box-shadow: 0 0 30px rgba(198, 40, 40, 0.3);
+        }
+
+        .modal-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 10px;
+        }
+
+        .modal-title {
+            color: #ff5252;
+            font-size: 20px;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            color: var(--text-bright);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        .btn-close:hover { color: #ff5252; }
+
+        .game-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-refresh {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--text-color);
+            color: var(--text-bright);
+            padding: 6px 12px;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        .btn-refresh:hover {
+            background-color: var(--text-color);
+            color: #000;
+        }
+
+        .mission-text {
+            color: #ffeb3b;
+            font-size: 16px;
+            margin: 5px 0;
+            text-align: center;
+            min-height: 24px;
+        }
+
+        /* Signature */
+        .signature {
+            position: fixed;
+            bottom: 10px;
+            right: 15px;
+            font-size: 12px;
+            color: #4a6b4a;
+            pointer-events: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; align-items: center; }
+            .controls-panel { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <a href="index.html" class="btn-back">◀ Επιστροφή</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Main Canvas -->
+        <div class="canvas-container">
+            <canvas id="mainCanvas" width="550" height="550"></canvas>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-panel">
+            <!-- Dynamic Input System -->
+            <div class="input-system" id="inputRowsContainer">
+                <div style="font-size: 14px; margin-bottom: 5px; color: #8bc34a;">Χειροκίνητη Εισαγωγή:</div>
+                <!-- Rows will be added here -->
+            </div>
+
+            <!-- D-Pad System -->
+            <div class="dpad-system">
+                <div style="font-size: 14px; color: #8bc34a;">Πλοήγηση Ραντάρ:</div>
+                <div class="dpad-grid">
+                    <button class="dpad-btn dpad-up" id="dp-up" disabled>▲</button>
+                    <button class="dpad-btn dpad-left" id="dp-left" disabled>◀</button>
+                    <button class="circle-btn circle-green dpad-center" id="dp-center"></button>
+                    <button class="dpad-btn dpad-right" id="dp-right" disabled>▶</button>
+                    <button class="dpad-btn dpad-down" id="dp-down" disabled>▼</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Buttons -->
+    <div class="game-buttons-panel">
+        <button class="btn-game" onclick="openBattleship()">Ναυμαχία</button>
+        <button class="btn-game" onclick="openSubmarine()">Πόλεμος Υποβρυχίων</button>
+    </div>
+
+    <!-- Signature -->
+    <div class="signature">Κώστας Κούδας</div>
+
+    <!-- Modal: Battleship -->
+    <div class="modal-overlay" id="modal-battleship">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Ναυμαχία</h2>
+                <button class="btn-close" onclick="closeModals()">✖</button>
+            </div>
+            <div class="mission-text" id="bs-mission">Στόχος: Εντοπίστηκε άγνωστο σκάφος!</div>
+            <canvas id="bsCanvas" width="440" height="440"></canvas>
+            <div class="game-controls">
+                <div class="input-row">
+                    <button class="circle-btn circle-red" id="bs-fire-btn"></button>
+                    <div class="coord-inputs">
+                        ( <input type="number" id="bs-x" step="1" min="-5" max="5"> , 
+                          <input type="number" id="bs-y" step="1" min="-5" max="5"> )
+                    </div>
+                </div>
+                <button class="btn-refresh" onclick="initBattleship()">Ανανέωση</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Submarine War -->
+    <div class="modal-overlay" id="modal-sub">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Πόλεμος Υποβρυχίων</h2>
+                <button class="btn-close" onclick="closeModals()">✖</button>
+            </div>
+            <canvas id="subCanvas" width="440" height="440"></canvas>
+            <div class="mission-text" id="sub-mission">Στόχος: (?, ?)</div>
+            <div class="game-controls">
+                <div class="dpad-grid">
+                    <button class="dpad-btn dpad-up" id="sub-up">▲</button>
+                    <button class="dpad-btn dpad-left" id="sub-left">◀</button>
+                    <button class="circle-btn circle-red dpad-center" id="sub-fire"></button>
+                    <button class="dpad-btn dpad-right" id="sub-right">▶</button>
+                    <button class="dpad-btn dpad-down" id="sub-down">▼</button>
+                </div>
+                <button class="btn-refresh" onclick="initSubmarine()">Ανανέωση</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Core Utilities ---
+        const UNIT_SCALE = 11; // Grid is from -5.5 to 5.5, so 11 units total
+
+        function drawGridBase(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            const step = width / UNIT_SCALE;
+            const cx = width / 2;
+            const cy = height / 2;
+
+            // Minor grid lines
+            ctx.strokeStyle = '#1c361c';
+            ctx.lineWidth = 1;
+            for (let i = -5; i <= 5; i++) {
+                const px = cx + i * step;
+                const py = cy + i * step;
+                ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, height); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(width, py); ctx.stroke();
+            }
+
+            // Axes
+            ctx.strokeStyle = '#32a852';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, height); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(width, cy); ctx.stroke();
+
+            // Arrows on axes
+            ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx - 5, 10); ctx.lineTo(cx + 5, 10); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(width, cy); ctx.lineTo(width - 10, cy - 5); ctx.lineTo(width - 10, cy + 5); ctx.fill();
+
+            // Numbers
+            ctx.fillStyle = '#7bb57b';
+            ctx.font = '12px Courier New';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            for (let i = -5; i <= 5; i++) {
+                if (i !== 0) {
+                    ctx.fillText(i, cx + i * step, cy + 12);
+                    ctx.fillText(i, cx - 12, cy - i * step);
+                }
+            }
+            ctx.fillText("0", cx - 10, cy + 12);
+            ctx.fillText("x", width - 15, cy - 15);
+            ctx.fillText("y", cx + 15, 15);
+        }
+
+        function toPixel(val, size) {
+            const step = size / UNIT_SCALE;
+            return size / 2 + val * step;
+        }
+
+        function drawPoint(ctx, size, x, y, color = '#a3e8a3', label = null) {
+            const px = toPixel(x, size);
+            const py = toPixel(-y, size); // -y because canvas Y goes down
+            
+            ctx.beginPath();
+            ctx.arc(px, py, 4, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 8;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            if (label) {
+                ctx.fillStyle = color;
+                ctx.font = '14px Courier New';
+                ctx.textAlign = 'left';
+                ctx.fillText(`(${x},${y})`, px + 8, py - 8);
+            }
+        }
+
+        // --- Random Target Logic (for games) ---
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function getTargetForLevel(level) {
+            let x, y;
+            switch(level) {
+                case 0: // x>0, y>0, x!=y
+                case 6:
+                    do { x = getRandomInt(1, 5); y = getRandomInt(1, 5); } while(x === y);
+                    break;
+                case 1: // x<0, y>0
+                    x = getRandomInt(-5, -1); y = getRandomInt(1, 5);
+                    break;
+                case 2: // x<0, y<0, x!=y
+                    do { x = getRandomInt(-5, -1); y = getRandomInt(-5, -1); } while(x === y);
+                    break;
+                case 3: // x>0, y<0
+                    x = getRandomInt(1, 5); y = getRandomInt(-5, -1);
+                    break;
+                case 4: // (x,0), x>0
+                    x = getRandomInt(1, 5); y = 0;
+                    break;
+                case 5: // (0,y), y>0
+                    x = 0; y = getRandomInt(1, 5);
+                    break;
+                case 7: // (x,0), x<0
+                    x = getRandomInt(-5, -1); y = 0;
+                    break;
+                case 8: // (0,y), y<0
+                    x = 0; y = getRandomInt(-5, -1);
+                    break;
+                case 9: // (0,0)
+                    x = 0; y = 0;
+                    break;
+                default:
+                    x = 0; y = 0;
+            }
+            return {x, y};
+        }
+
+        // --- Main Canvas Logic ---
+        const mainCanvas = document.getElementById('mainCanvas');
+        const mainCtx = mainCanvas.getContext('2d');
+        const mainSize = mainCanvas.width;
+        let staticPoints = []; // from input fields
+        
+        // D-Pad state
+        let dpadActive = false;
+        let dpadPoint = null; // {x, y}
+        let dpadPointsList = []; // locked points
+
+        function renderMain() {
+            drawGridBase(mainCtx, mainSize, mainSize);
+            
+            // Draw input points
+            staticPoints.forEach(pt => drawPoint(mainCtx, mainSize, pt.x, pt.y, '#00ff00'));
+            
+            // Draw locked dpad points
+            dpadPointsList.forEach(pt => drawPoint(mainCtx, mainSize, pt.x, pt.y, '#ffeb3b', true));
+
+            // Draw current active dpad point
+            if (dpadActive && dpadPoint) {
+                // Pulse effect
+                const t = Date.now() / 200;
+                const radius = 4 + Math.sin(t) * 1.5;
+                const px = toPixel(dpadPoint.x, mainSize);
+                const py = toPixel(-dpadPoint.y, mainSize);
+                
+                mainCtx.beginPath();
+                mainCtx.arc(px, py, radius, 0, Math.PI * 2);
+                mainCtx.fillStyle = '#ffeb3b';
+                mainCtx.fill();
+                
+                mainCtx.fillStyle = '#ffeb3b';
+                mainCtx.font = 'bold 14px Courier New';
+                mainCtx.textAlign = 'left';
+                mainCtx.fillText(`(${dpadPoint.x},${dpadPoint.y})`, px + 8, py - 8);
+            }
+        }
+
+        // Feature 1: Input Rows
+        const inputContainer = document.getElementById('inputRowsContainer');
+        function createInputRow() {
+            const row = document.createElement('div');
+            row.className = 'input-row';
+            
+            const btn = document.createElement('button');
+            btn.className = 'circle-btn circle-green';
+            
+            const inputsDiv = document.createElement('div');
+            inputsDiv.className = 'coord-inputs';
+            inputsDiv.innerHTML = `( <input type="number" class="ix" step="1" min="-5" max="5"> , <input type="number" class="iy" step="1" min="-5" max="5"> )`;
+            
+            row.appendChild(btn);
+            row.appendChild(inputsDiv);
+            inputContainer.appendChild(row);
+
+            const xIn = inputsDiv.querySelector('.ix');
+            const yIn = inputsDiv.querySelector('.iy');
+
+            btn.onclick = () => {
+                const xv = parseFloat(xIn.value);
+                const yv = parseFloat(yIn.value);
+                
+                if (isNaN(xv) || isNaN(yv)) return;
+                
+                // Limit to grid bounds roughly
+                const x = Math.max(-5, Math.min(5, Math.round(xv)));
+                const y = Math.max(-5, Math.min(5, Math.round(yv)));
+                
+                // Lock current
+                xIn.value = x; yIn.value = y;
+                xIn.disabled = true; yIn.disabled = true;
+                btn.disabled = true;
+                
+                staticPoints.push({x, y});
+                createInputRow(); // Add new row below
+            };
+        }
+        createInputRow(); // init first row
+
+        // Feature 2: D-pad controls
+        const dpCenter = document.getElementById('dp-center');
+        const dpBtns = ['up', 'down', 'left', 'right'].map(d => document.getElementById(`dp-${d}`));
+        
+        function setDpadBtns(enabled) {
+            dpBtns.forEach(btn => btn.disabled = !enabled);
+        }
+
+        dpCenter.onclick = () => {
+            if (!dpadActive) {
+                // Activate
+                dpadActive = true;
+                dpCenter.classList.add('blink');
+                dpadPoint = {x: 0, y: 0};
+                setDpadBtns(true);
+            } else {
+                // Lock current and deactivate
+                dpadActive = false;
+                dpCenter.classList.remove('blink');
+                if (dpadPoint) {
+                    dpadPointsList.push({...dpadPoint});
+                }
+                dpadPoint = null;
+                setDpadBtns(false);
+            }
+        };
+
+        document.getElementById('dp-up').onclick = () => { if(dpadPoint && dpadPoint.y < 5) dpadPoint.y++; };
+        document.getElementById('dp-down').onclick = () => { if(dpadPoint && dpadPoint.y > -5) dpadPoint.y--; };
+        document.getElementById('dp-left').onclick = () => { if(dpadPoint && dpadPoint.x > -5) dpadPoint.x--; };
+        document.getElementById('dp-right').onclick = () => { if(dpadPoint && dpadPoint.x < 5) dpadPoint.x++; };
+
+
+        // --- Battleship Game ---
+        const bsCanvas = document.getElementById('bsCanvas');
+        const bsCtx = bsCanvas.getContext('2d');
+        const bsSize = bsCanvas.width;
+        
+        let bsLevel = 0;
+        let bsTarget = null;
+        let bsProj = null; // {x, y, tx, ty, active}
+        let bsEffects = []; // {x, y, r, maxR, type, alpha}
+        let bsAnimating = false;
+
+        function initBattleship() {
+            bsLevel = 0;
+            startBsLevel();
+            document.getElementById('bs-mission').innerText = "Στόχος: Εντοπίστηκε άγνωστο σκάφος!";
+            document.getElementById('bs-mission').style.color = "#ffeb3b";
+        }
+
+        function startBsLevel() {
+            if (bsLevel > 9) {
+                document.getElementById('bs-mission').innerText = "ΝΙΚΗ! Όλοι οι στόχοι καταστράφηκαν!";
+                document.getElementById('bs-mission').style.color = "#4caf50";
+                bsTarget = null;
+                return;
+            }
+            bsTarget = getTargetForLevel(bsLevel);
+            bsProj = null;
+            bsEffects = [];
+            bsAnimating = false;
+            document.getElementById('bs-x').value = '';
+            document.getElementById('bs-y').value = '';
+            document.getElementById('bs-fire-btn').disabled = false;
+        }
+
+        function drawShip(ctx, size, x, y) {
+            const px = toPixel(x, size);
+            const py = toPixel(-y, size);
+            const w = size / UNIT_SCALE * 0.6; // fits within 0.5 logical units
+            const h = w * 0.5;
+
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.fillStyle = '#607d8b';
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 1;
+            
+            // simple boat shape
+            ctx.beginPath();
+            ctx.moveTo(-w/2, -h/2);
+            ctx.lineTo(w/2 - h, -h/2);
+            ctx.lineTo(w/2, 0);
+            ctx.lineTo(w/2 - h, h/2);
+            ctx.lineTo(-w/2, h/2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // bridge
+            ctx.fillStyle = '#455a64';
+            ctx.fillRect(-w/4, -h/4, w/3, h/2);
+            
+            ctx.restore();
+        }
+
+        function drawEffects(ctx, size, effects) {
+            for (let i = effects.length - 1; i >= 0; i--) {
+                const e = effects[i];
+                const px = toPixel(e.x, size);
+                const py = toPixel(-e.y, size);
+
+                if (e.type === 'explosion') {
+                    ctx.beginPath();
+                    ctx.arc(px, py, e.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 87, 34, ${e.alpha})`;
+                    ctx.fill();
+                    ctx.strokeStyle = `rgba(255, 235, 59, ${e.alpha})`;
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    
+                    e.r += 1.5;
+                    e.alpha -= 0.02;
+                } else { // splash
+                    // Δημιουργία πολλαπλών δακτυλίων για ρεαλιστικό κυματισμό
+                    for (let ring = 0; ring < 3; ring++) {
+                        const ringR = Math.max(0, e.r - ring * 10);
+                        if (ringR > 0) {
+                            ctx.beginPath();
+                            ctx.arc(px, py, ringR, 0, Math.PI * 2);
+                            ctx.strokeStyle = `rgba(100, 200, 255, ${e.alpha * Math.max(0, 1 - ring * 0.3)})`;
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                        }
+                    }
+                    e.r += 1.0;
+                    e.alpha -= 0.015;
+                }
+
+                if (e.alpha <= 0) effects.splice(i, 1);
+            }
+        }
+
+        function renderBattleship() {
+            drawGridBase(bsCtx, bsSize, bsSize);
+            
+            if (bsTarget && !bsEffects.some(e => e.type === 'explosion' && e.alpha > 0.5)) {
+                drawShip(bsCtx, bsSize, bsTarget.x, bsTarget.y);
+            }
+
+            if (bsProj && bsProj.active) {
+                drawPoint(bsCtx, bsSize, bsProj.x, bsProj.y, '#ffeb3b');
+                // Move logic L-shape
+                const speed = 0.2;
+                if (Math.abs(bsProj.x - bsProj.tx) > 0.01) {
+                    bsProj.x += Math.sign(bsProj.tx - bsProj.x) * Math.min(speed, Math.abs(bsProj.tx - bsProj.x));
+                } else if (Math.abs(bsProj.y - bsProj.ty) > 0.01) {
+                    bsProj.y += Math.sign(bsProj.ty - bsProj.y) * Math.min(speed, Math.abs(bsProj.ty - bsProj.y));
+                } else {
+                    // Arrived
+                    bsProj.active = false;
+                    bsAnimating = false;
+                    if (bsProj.tx === bsTarget.x && bsProj.ty === bsTarget.y) {
+                        // Hit
+                        bsEffects.push({x: bsTarget.x, y: bsTarget.y, r: 5, maxR: 40, type: 'explosion', alpha: 1});
+                        setTimeout(() => {
+                            bsLevel++;
+                            startBsLevel();
+                        }, 1500);
+                    } else {
+                        // Miss
+                        bsEffects.push({x: bsProj.tx, y: bsProj.ty, r: 2, maxR: 20, type: 'splash', alpha: 1});
+                        document.getElementById('bs-fire-btn').disabled = false;
+                    }
+                }
+            }
+
+            drawEffects(bsCtx, bsSize, bsEffects);
+        }
+
+        document.getElementById('bs-fire-btn').onclick = () => {
+            if (bsAnimating || !bsTarget) return;
+            const x = parseInt(document.getElementById('bs-x').value);
+            const y = parseInt(document.getElementById('bs-y').value);
+            if (isNaN(x) || isNaN(y)) return;
+            
+            bsProj = {x: 0, y: 0, tx: x, ty: y, active: true};
+            bsAnimating = true;
+            document.getElementById('bs-fire-btn').disabled = true;
+        };
+
+
+        // --- Submarine War Game ---
+        const subCanvas = document.getElementById('subCanvas');
+        const subCtx = subCanvas.getContext('2d');
+        const subSize = subCanvas.width;
+
+        let subLevel = 0;
+        let subTarget = null;
+        let subPos = {x: 0, y: 0};
+        let subEffects = [];
+
+        function initSubmarine() {
+            subLevel = 0;
+            subPos = {x: 0, y: 0};
+            subEffects = [];
+            startSubLevel();
+        }
+
+        function startSubLevel() {
+            if (subLevel > 9) {
+                document.getElementById('sub-mission').innerText = "ΝΙΚΗ! Περιοχή Ασφαλής.";
+                document.getElementById('sub-mission').style.color = "#4caf50";
+                subTarget = null;
+                return;
+            }
+            subTarget = getTargetForLevel(subLevel);
+            document.getElementById('sub-mission').innerText = `Στόχος: (${subTarget.x}, ${subTarget.y})`;
+            document.getElementById('sub-mission').style.color = "#ff3333";
+        }
+
+        function renderSubmarine() {
+            drawGridBase(subCtx, subSize, subSize);
+            
+            // Draw player submarine (white point)
+            drawPoint(subCtx, subSize, subPos.x, subPos.y, '#ffffff');
+
+            drawEffects(subCtx, subSize, subEffects);
+        }
+
+        // Submarine controls
+        document.getElementById('sub-up').onclick = () => { if(subPos.y < 5) subPos.y++; };
+        document.getElementById('sub-down').onclick = () => { if(subPos.y > -5) subPos.y--; };
+        document.getElementById('sub-left').onclick = () => { if(subPos.x > -5) subPos.x--; };
+        document.getElementById('sub-right').onclick = () => { if(subPos.x < 5) subPos.x++; };
+
+        document.getElementById('sub-fire').onclick = () => {
+            if (!subTarget) return;
+            
+            if (subPos.x === subTarget.x && subPos.y === subTarget.y) {
+                // Hit
+                subEffects.push({x: subPos.x, y: subPos.y, r: 5, type: 'explosion', alpha: 1});
+                setTimeout(() => {
+                    subLevel++;
+                    subPos = {x: 0, y: 0};
+                    startSubLevel();
+                }, 1000);
+            } else {
+                // Miss
+                subEffects.push({x: subPos.x, y: subPos.y, r: 2, type: 'splash', alpha: 1});
+            }
+        };
+
+
+        // --- Global Animation Loop & Modals ---
+        let bsModalOpen = false;
+        let subModalOpen = false;
+
+        function openBattleship() {
+            document.getElementById('modal-battleship').classList.add('active');
+            bsModalOpen = true;
+            initBattleship();
+        }
+
+        function openSubmarine() {
+            document.getElementById('modal-sub').classList.add('active');
+            subModalOpen = true;
+            initSubmarine();
+        }
+
+        function closeModals() {
+            document.getElementById('modal-battleship').classList.remove('active');
+            document.getElementById('modal-sub').classList.remove('active');
+            bsModalOpen = false;
+            subModalOpen = false;
+        }
+
+        function gameLoop() {
+            renderMain();
+            if (bsModalOpen) renderBattleship();
+            if (subModalOpen) renderSubmarine();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Start loop
+        requestAnimationFrame(gameLoop);
+
+    </script>
+</body>
+</html>
