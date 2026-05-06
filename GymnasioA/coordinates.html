@@ -6,18 +6,18 @@
     <title>Σύστημα Συντεταγμένων - Στρατιωτική Επιχείρηση</title>
     <style>
         :root {
-            --bg-color: #0a140a;
-            --panel-bg: #122412;
-            --panel-border: #2a4d2a;
-            --text-color: #7bb57b;
-            --text-bright: #a3e8a3;
-            --grid-line: #1c361c;
-            --axis-line: #32a852;
-            --btn-green: #2e7d32;
-            --btn-green-hover: #388e3c;
-            --btn-red: #c62828;
-            --btn-red-hover: #d32f2f;
-            --accent: #558b2f;
+            --bg-color: #050a14;
+            --panel-bg: #0a111a;
+            --panel-border: #1a2c40;
+            --text-color: #7a94b0;
+            --text-bright: #d1e3f5;
+            --grid-line: #121f2e;
+            --axis-line: #3b5f85;
+            --btn-green: #2980b9;
+            --btn-green-hover: #3498db;
+            --btn-red: #c0392b;
+            --btn-red-hover: #e74c3c;
+            --accent: #2c3e50;
         }
 
         body {
@@ -82,14 +82,14 @@
             border: 2px solid var(--panel-border);
             border-radius: 4px;
             padding: 10px;
-            box-shadow: 0 0 15px rgba(50, 168, 82, 0.1);
+            box-shadow: 0 0 15px rgba(59, 95, 133, 0.1);
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         canvas {
-            background-color: #050a05;
+            background-color: #02050a;
             max-width: 100%;
             height: auto;
             border: 1px solid var(--grid-line);
@@ -139,11 +139,11 @@
             cursor: not-allowed;
         }
 
-        .circle-green { background-color: #4caf50; }
-        .circle-green:hover:not(:disabled) { background-color: #66bb6a; box-shadow: 0 0 10px #4caf50; }
+        .circle-green { background-color: #2980b9; }
+        .circle-green:hover:not(:disabled) { background-color: #3498db; box-shadow: 0 0 10px #2980b9; }
         
-        .circle-red { background-color: #f44336; }
-        .circle-red:hover:not(:disabled) { background-color: #ef5350; box-shadow: 0 0 10px #f44336; }
+        .circle-red { background-color: #c0392b; }
+        .circle-red:hover:not(:disabled) { background-color: #e74c3c; box-shadow: 0 0 10px #c0392b; }
 
         .coord-inputs {
             display: flex;
@@ -154,7 +154,7 @@
 
         .coord-inputs input {
             width: 40px;
-            background: #050a05;
+            background: #02050a;
             border: 1px solid var(--panel-border);
             color: var(--text-bright);
             text-align: center;
@@ -172,8 +172,8 @@
         }
 
         .coord-inputs input:disabled {
-            color: #5a8a5a;
-            border-color: #1a2e1a;
+            color: #5b7999;
+            border-color: #121f2e;
         }
 
         /* D-Pad Controls */
@@ -200,7 +200,7 @@
         .dpad-btn {
             width: 36px;
             height: 36px;
-            background-color: #1a2e1a;
+            background-color: #121f2e;
             border: 1px solid var(--panel-border);
             color: var(--text-bright);
             cursor: pointer;
@@ -233,9 +233,9 @@
         }
 
         @keyframes blinking {
-            0% { opacity: 1; box-shadow: 0 0 15px var(--btn-green); }
+            0% { opacity: 1; box-shadow: 0 0 15px var(--btn-green-hover); }
             50% { opacity: 0.4; box-shadow: none; }
-            100% { opacity: 1; box-shadow: 0 0 15px var(--btn-green); }
+            100% { opacity: 1; box-shadow: 0 0 15px var(--btn-green-hover); }
         }
 
         /* Game Buttons */
@@ -248,7 +248,7 @@
         }
 
         .btn-game {
-            background-color: #1a2e1a;
+            background-color: #121f2e;
             color: var(--text-bright);
             border: 2px solid var(--btn-red);
             padding: 12px 24px;
@@ -381,7 +381,7 @@
             bottom: 10px;
             right: 15px;
             font-size: 12px;
-            color: #4a6b4a;
+            color: #3b5f85;
             pointer-events: none;
         }
 
@@ -410,13 +410,13 @@
         <div class="controls-panel">
             <!-- Dynamic Input System -->
             <div class="input-system" id="inputRowsContainer">
-                <div style="font-size: 14px; margin-bottom: 5px; color: #8bc34a;">Χειροκίνητη Εισαγωγή:</div>
+                <div style="font-size: 14px; margin-bottom: 5px; color: #7a94b0;">Χειροκίνητη Εισαγωγή:</div>
                 <!-- Rows will be added here -->
             </div>
 
             <!-- D-Pad System -->
             <div class="dpad-system">
-                <div style="font-size: 14px; color: #8bc34a;">Πλοήγηση Ραντάρ:</div>
+                <div style="font-size: 14px; color: #7a94b0;">Πλοήγηση Ραντάρ:</div>
                 <div class="dpad-grid">
                     <button class="dpad-btn dpad-up" id="dp-up" disabled>▲</button>
                     <button class="dpad-btn dpad-left" id="dp-left" disabled>◀</button>
@@ -492,7 +492,7 @@
             const cy = height / 2;
 
             // Minor grid lines
-            ctx.strokeStyle = '#1c361c';
+            ctx.strokeStyle = '#121f2e';
             ctx.lineWidth = 1;
             for (let i = -5; i <= 5; i++) {
                 const px = cx + i * step;
@@ -502,7 +502,7 @@
             }
 
             // Axes
-            ctx.strokeStyle = '#32a852';
+            ctx.strokeStyle = '#3b5f85';
             ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, height); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(width, cy); ctx.stroke();
@@ -512,7 +512,7 @@
             ctx.beginPath(); ctx.moveTo(width, cy); ctx.lineTo(width - 10, cy - 5); ctx.lineTo(width - 10, cy + 5); ctx.fill();
 
             // Numbers
-            ctx.fillStyle = '#7bb57b';
+            ctx.fillStyle = '#7a94b0';
             ctx.font = '12px Courier New';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -532,7 +532,7 @@
             return size / 2 + val * step;
         }
 
-        function drawPoint(ctx, size, x, y, color = '#a3e8a3', label = null) {
+        function drawPoint(ctx, size, x, y, color = '#d1e3f5', label = null) {
             const px = toPixel(x, size);
             const py = toPixel(-y, size); // -y because canvas Y goes down
             
@@ -610,10 +610,10 @@
             drawGridBase(mainCtx, mainSize, mainSize);
             
             // Draw input points
-            staticPoints.forEach(pt => drawPoint(mainCtx, mainSize, pt.x, pt.y, '#00ff00'));
+            staticPoints.forEach(pt => drawPoint(mainCtx, mainSize, pt.x, pt.y, '#00e5ff'));
             
             // Draw locked dpad points
-            dpadPointsList.forEach(pt => drawPoint(mainCtx, mainSize, pt.x, pt.y, '#ffeb3b', true));
+            dpadPointsList.forEach(pt => drawPoint(mainCtx, mainSize, pt.x, pt.y, '#ffb703', true));
 
             // Draw current active dpad point
             if (dpadActive && dpadPoint) {
@@ -625,10 +625,10 @@
                 
                 mainCtx.beginPath();
                 mainCtx.arc(px, py, radius, 0, Math.PI * 2);
-                mainCtx.fillStyle = '#ffeb3b';
+                mainCtx.fillStyle = '#ffb703';
                 mainCtx.fill();
                 
-                mainCtx.fillStyle = '#ffeb3b';
+                mainCtx.fillStyle = '#ffb703';
                 mainCtx.font = 'bold 14px Courier New';
                 mainCtx.textAlign = 'left';
                 mainCtx.fillText(`(${dpadPoint.x},${dpadPoint.y})`, px + 8, py - 8);
@@ -724,13 +724,13 @@
             bsLevel = 0;
             startBsLevel();
             document.getElementById('bs-mission').innerText = "Στόχος: Εντοπίστηκε άγνωστο σκάφος!";
-            document.getElementById('bs-mission').style.color = "#ffeb3b";
+            document.getElementById('bs-mission').style.color = "#ffb703";
         }
 
         function startBsLevel() {
             if (bsLevel > 9) {
                 document.getElementById('bs-mission').innerText = "ΝΙΚΗ! Όλοι οι στόχοι καταστράφηκαν!";
-                document.getElementById('bs-mission').style.color = "#4caf50";
+                document.getElementById('bs-mission').style.color = "#3498db";
                 bsTarget = null;
                 return;
             }
@@ -751,8 +751,8 @@
 
             ctx.save();
             ctx.translate(px, py);
-            ctx.fillStyle = '#607d8b';
-            ctx.strokeStyle = '#263238';
+            ctx.fillStyle = '#4a5b6e';
+            ctx.strokeStyle = '#1a222e';
             ctx.lineWidth = 1;
             
             // simple boat shape
@@ -767,7 +767,7 @@
             ctx.stroke();
             
             // bridge
-            ctx.fillStyle = '#455a64';
+            ctx.fillStyle = '#2d3b4d';
             ctx.fillRect(-w/4, -h/4, w/3, h/2);
             
             ctx.restore();
@@ -780,8 +780,23 @@
                 const py = toPixel(-e.y, size);
 
                 if (e.type === 'explosion') {
+                    // Angular starburst explosion (αναγνωρίσιμη έκρηξη)
                     ctx.beginPath();
-                    ctx.arc(px, py, e.r, 0, Math.PI * 2);
+                    const spikes = 10;
+                    const outerR = e.r;
+                    const innerR = e.r * 0.4;
+                    const rot = e.r * 0.1; // ελαφριά περιστροφή κατά την ανάπτυξη
+                    
+                    for (let j = 0; j < spikes * 2; j++) {
+                        const angle = (j * Math.PI) / spikes + rot;
+                        const rad = j % 2 === 0 ? outerR : innerR;
+                        const rx = px + Math.cos(angle) * rad;
+                        const ry = py + Math.sin(angle) * rad;
+                        if (j === 0) ctx.moveTo(rx, ry);
+                        else ctx.lineTo(rx, ry);
+                    }
+                    ctx.closePath();
+                    
                     ctx.fillStyle = `rgba(255, 87, 34, ${e.alpha})`;
                     ctx.fill();
                     ctx.strokeStyle = `rgba(255, 235, 59, ${e.alpha})`;
@@ -818,7 +833,7 @@
             }
 
             if (bsProj && bsProj.active) {
-                drawPoint(bsCtx, bsSize, bsProj.x, bsProj.y, '#ffeb3b');
+                drawPoint(bsCtx, bsSize, bsProj.x, bsProj.y, '#ffb703');
                 // Move logic L-shape
                 const speed = 0.2;
                 if (Math.abs(bsProj.x - bsProj.tx) > 0.01) {
@@ -879,13 +894,13 @@
         function startSubLevel() {
             if (subLevel > 9) {
                 document.getElementById('sub-mission').innerText = "ΝΙΚΗ! Περιοχή Ασφαλής.";
-                document.getElementById('sub-mission').style.color = "#4caf50";
+                document.getElementById('sub-mission').style.color = "#3498db";
                 subTarget = null;
                 return;
             }
             subTarget = getTargetForLevel(subLevel);
             document.getElementById('sub-mission').innerText = `Στόχος: (${subTarget.x}, ${subTarget.y})`;
-            document.getElementById('sub-mission').style.color = "#ff3333";
+            document.getElementById('sub-mission').style.color = "#e74c3c";
         }
 
         function renderSubmarine() {
