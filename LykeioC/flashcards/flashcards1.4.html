@@ -437,6 +437,25 @@
                 { letter: "Β", text: "Αν η $f$ είναι ορισμένη στο $x_0$, τότε υπάρχει το $\\lim\\limits_{x \\to x_0} f(x)$.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Μια συνάρτηση μπορεί να ορίζεται στο $x_0$ αλλά να έχει διαφορετικά πλευρικά όρια (άλμα) ή να μην έχει καθόλου πλευρικά όρια." },
                 { letter: "Γ", text: "Τίποτα από τα παραπάνω.", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Η ύπαρξη του ορίου και ο ορισμός της συνάρτησης στο $x_0$ είναι δύο εντελώς ανεξάρτητα γεγονότα." }
             ]
+        },
+        { // 20
+            text: "Το $\\lim\\limits_{x \\to x_0} f(x)$ ισούται με:",
+            options: [
+                { letter: "Α", text: "$\\lim\\limits_{h \\to 0} f(x+h)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν $h \\to 0$, τότε $x+h \\to x$, ενώ θέλουμε το όρισμα της $f$ να τείνει στο $x_0$, όπως και στο αρχικό όριο." },
+                { letter: "Β", text: "$\\lim\\limits_{h \\to x_0} f(x_0+h)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν $h \\to x_0$, τότε $x_0+h \\to 2x_0$, ενώ θέλουμε το όρισμα της $f$ να τείνει στο $x_0$, όπως και στο αρχικό όριο." },
+                { letter: "Γ", text: "$\\lim\\limits_{h \\to 0} f(x_0+h)$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αν $h \\to 0$, τότε $x_0+h \\to x$, όπως και το όρισμα της $f$ στο αρχικό όριο." },
+                { letter: "Δ", text: "$\\lim\\limits_{h \\to 0} f(h-x_0)$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν $h \\to 0$, τότε $h-x_0 \\to -x_0$, ενώ θέλουμε το όρισμα της $f$ να τείνει στο $x_0$, όπως και στο αρχικό όριο." },
+                { letter: "Ε", text: "κανένα από τα παραπάνω.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Υπάρχουν διάφοροι τρόποι να κάνουμε τό όρισμα της $f$ να τείνει στο $x_0$, πέραν του να γράψουμε $x\\to x_0$. Π.χ. μπορούμε να έχουμε $k\\to1$ και τότε $k\\cdot x_0\\to x_0$. Ή μπορούμε να έχουμε $h\\to 0$ και τότε $h+ x_0\\to x_0$." }
+            ]
+        },
+        { // 21
+            text: "Ισχύει $\\lim\\limits_{x \\to x_0} f(x)=\\ell\\Leftrightarrow$...",
+            options: [
+                { letter: "Α", text: "$\\lim\\limits_{x \\to x_0} \\left( f(x) +\\ell\\right)=0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν $f(x)\\to \\ell$, τότε $f(x)+\\ell\\to 2\\ell$. Βλ. και αιτιολόγηση σωστής απάντησης." },
+                { letter: "Β", text: "$\\lim\\limits_{x \\to x_0} f(x+\\ell)=0$", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong> Αν $x \\to x_0$, τότε $x+\\ell \\to x_0+\\ell$, άρα εξαιτάζουμε έτσι ένα τελείως διαφορετικό όριο σε σχέση με αυτό που είχαμε. Βλ. αιτιολόγηση σωστής απάντησης." },
+                { letter: "Γ", text: "$\\lim\\limits_{x \\to x_0} \\left( f(x) -\\ell\\right)=0$", isCorrect: true, feedback: "<strong>✅ Σωστό.</strong> Αν $f(x)\\to \\ell$, τότε και $f(x)-\\ell\\to 0$. Με άλλα λόγια, αν $f(x)\\to \\ell$ για $x$ κοντά στο $x_0$ θα είναι και $f(x)$ κοντά στο $\\ell$. Επομένως και το $f(x)-\\ell$ θα είναι κοντά στο $0$. Με την ίδια συλλογιστική, αν $f(x)-\\ell\\to 0$, τότε και $f(x)\\to \\ell$." },
+                { letter: "Δ", text: "κανένα από τα παραπάνω.", isCorrect: false, feedback: "<strong>❌ Λάθος.</strong>  Βλ. αιτιολόγηση σωστής απάντησης." }
+            ]
         }
     ];
 
