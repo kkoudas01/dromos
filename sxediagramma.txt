@@ -67,6 +67,12 @@
 
 [Εξισώσεις 1ου βαθμού](GymnasioB/exisoseis1batmou.html)
 
+## Γεωμετρία
+
+### Τριγωνομετρία
+
+[Εισαγωγή στους τριγωνομετρικούς αριθμούς](GymnasioB/trigonomIntro.html)
+
 # Γ Γυμνασίου <folder>GymnasioC</folder>
 
 ## Άλγεβρα

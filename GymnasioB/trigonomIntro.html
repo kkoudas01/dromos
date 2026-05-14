@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Τριγωνομετρικές Συναρτήσεις</title>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --surface: #16213e;
+            --surface2: #0f3460;
+            --text: #e0e0e0;
+            --text2: #b0b0b0;
+            --accent: #e94560;
+            --accent2: #f7b731;
+            --accent3: #45b7d1;
+            --border: #2a2a4a;
+            --btn-bg: #1a3a5c;
+            --btn-hover: #1f4d7a;
+            --input-bg: #111827;
+            --fraction-color: #f0c060;
+            --blink-color: #ff6b6b;
+            --tab-active: #e94560;
+            --tab-inactive: #2a3050;
+            --success: #2ecc71;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'DejaVu Sans', 'Noto Sans', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 750px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .back-btn {
+            background: var(--btn-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 0.9em;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .back-btn:hover {
+            background: var(--btn-hover);
+            border-color: var(--accent3);
+        }
+        .back-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .input-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .input-area label {
+            font-size: 1em;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+        }
+        .input-area input {
+            width: 90px;
+            padding: 10px 12px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text);
+            text-align: center;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        .input-area input:focus {
+            outline: none;
+            border-color: var(--accent3);
+            box-shadow: 0 0 0 3px rgba(69, 183, 209, 0.2);
+        }
+
+        .svg-container {
+            background: var(--surface);
+            border-radius: 14px;
+            border: 2px solid var(--border);
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4/3;
+            max-height: 360px;
+            cursor: default;
+        }
+        .svg-container svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .clickable-side {
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+        .clickable-side:hover {
+            opacity: 0.5;
+        }
+
+        #refreshIcon {
+            cursor: pointer;
+        }
+        #refreshIcon .hover-bg {
+            transition: stroke 0.2s;
+        }
+        #refreshIcon:hover .hover-bg {
+            stroke: rgba(255,255,255,0.8);
+        }
+
+        .tabs-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+        }
+        .tab-btn {
+            padding: 10px 18px;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            background: var(--tab-inactive);
+            color: var(--text2);
+            transition: all 0.25s;
+            white-space: nowrap;
+            font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+        .tab-btn.active {
+            background: var(--tab-active);
+            color: #fff;
+            border-color: #ff6b8a;
+            box-shadow: 0 0 15px rgba(233, 68, 96, 0.4);
+        }
+        .tab-btn:hover:not(.active) {
+            background: #3a3f60;
+            color: #fff;
+            border-color: #555;
+        }
+
+        .fraction-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            min-height: 70px;
+            padding: 10px;
+            background: var(--surface);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .fraction-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 70px;
+        }
+        .fraction-num,
+        .fraction-den {
+            padding: 6px 14px;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--fraction-color);
+            text-align: center;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            border-radius: 4px;
+        }
+        .fraction-num.filled,
+        .fraction-den.filled {
+            background: rgba(240, 192, 96, 0.1);
+        }
+        .fraction-line {
+            width: 50px;
+            height: 3px;
+            background: var(--fraction-color);
+            border-radius: 2px;
+            margin: 3px 0;
+        }
+        .equals-sign {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: var(--blink-color);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            display: none;
+            animation: none;
+            user-select: none;
+        }
+        .equals-sign.visible {
+            display: inline-block;
+        }
+        .equals-sign.blinking {
+            animation: blinkAnim 0.7s ease-in-out infinite;
+        }
+        @keyframes blinkAnim {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.15; }
+        }
+        .decimal-result {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--success);
+            min-width: 60px;
+            text-align: center;
+            display: none;
+            line-height: 1.4;
+        }
+        .decimal-result.visible {
+            display: inline-block !important;
+        }
+
+        .buttons-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        .action-btn {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 2px solid var(--accent3);
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            background: var(--btn-bg);
+            color: var(--text);
+            transition: all 0.25s;
+            font-family: inherit;
+            white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+        .action-btn:hover {
+            background: var(--btn-hover);
+            border-color: #5cc8e0;
+            box-shadow: 0 0 12px rgba(69, 183, 209, 0.3);
+        }
+        .action-btn.exercise-btn {
+            border-color: var(--accent2);
+            background: #2a2510;
+        }
+        .action-btn.exercise-btn:hover {
+            background: #3a3520;
+            border-color: #f9c940;
+            box-shadow: 0 0 12px rgba(247, 183, 49, 0.3);
+        }
+
+        .calculator-toggle {
+            background: var(--btn-bg);
+            color: var(--text2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.2s;
+            font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+        .calculator-toggle:hover {
+            color: #fff;
+            border-color: var(--accent3);
+        }
+        .calculator-panel {
+            display: none;
+            background: var(--surface2);
+            border-radius: 12px;
+            padding: 14px;
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+        .calculator-panel.open {
+            display: flex;
+        }
+        .calculator-panel input {
+            width: 70px;
+            padding: 8px 10px;
+            font-size: 0.95em;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text);
+            text-align: center;
+            font-family: inherit;
+        }
+        .calculator-panel .calc-result {
+            font-size: 0.9em;
+            color: var(--accent2);
+            font-weight: 600;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .calculator-panel .calc-result span {
+            background: var(--bg);
+            padding: 4px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .signature {
+            text-align: right;
+            font-size: 0.75em;
+            color: #555;
+            margin-top: 5px;
+            font-style: italic;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 500px) {
+            .tab-btn { padding: 8px 12px; font-size: 0.78em; border-radius: 16px; }
+            .action-btn { padding: 8px 14px; font-size: 0.82em; border-radius: 20px; }
+            .fraction-num, .fraction-den { font-size: 0.95em; padding: 4px 10px; }
+            .fraction-line { width: 36px; }
+            .equals-sign { font-size: 1.3em; }
+            .svg-container { max-height: 260px; }
+            .top-bar { gap: 5px; }
+            .back-btn { padding: 6px 10px; font-size: 0.78em; }
+            .input-area input { width: 65px; padding: 8px 8px; font-size: 0.95em; }
+        }
+        @media (max-width: 360px) {
+            .tab-btn { padding: 6px 9px; font-size: 0.7em; border-radius: 14px; }
+            .action-btn { padding: 6px 10px; font-size: 0.75em; }
+            .svg-container { max-height: 200px; }
+            .fraction-display { gap: 5px; padding: 6px; }
+            .fraction-num, .fraction-den { font-size: 0.8em; min-height: 22px; }
+            .fraction-line { width: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container" id="mainContainer">
+        <div class="top-bar">
+            <a href="index.html" class="back-btn" title="Επιστροφή στην αρχική σελίδα" aria-label="Επιστροφή">
+                <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                Αρχική
+            </a>
+            <button class="calculator-toggle" id="calcToggle" title="Υπολογισμός τριγωνομετρικών τιμών" aria-label="Αριθμομηχανή">🧮 Υπολογιστής</button>
+        </div>
+
+        <div class="input-area">
+            <label for="angleInput">Γωνία φ (οξεία):</label>
+            <input type="number" id="angleInput" value="45" min="1" max="89" step="0.1" title="Εισάγετε οξεία γωνία σε μοίρες (1-89)">
+            <span class="unit">° (μοίρες)</span>
+        </div>
+
+        <div class="calculator-panel" id="calcPanel">
+            <label style="color:var(--text2);font-size:0.85em;">Γωνία:</label>
+            <input type="number" id="calcAngleInput" value="45" min="0" max="90" step="0.1">
+            <span style="color:var(--text2);font-size:0.8em;">°</span>
+            <div class="calc-result" id="calcResult">
+                <span>ημ: <strong id="calcSin">0.707</strong></span>
+                <span>συν: <strong id="calcCos">0.707</strong></span>
+                <span>εφ: <strong id="calcTan">1.000</strong></span>
+            </div>
+        </div>
+
+        <div class="svg-container" id="svgContainer">
+            <svg id="mainSvg" viewBox="0 0 400 310" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+
+        <div class="tabs-container" id="tabsContainer">
+            <button class="tab-btn active" data-tab="tangent">📐 Εφαπτομένη</button>
+            <button class="tab-btn" data-tab="sine">📏 Ημίτονο</button>
+            <button class="tab-btn" data-tab="cosine">📏 Συνημίτονο</button>
+            <button class="tab-btn" data-tab="mixed">🎲 Τουρλού</button>
+        </div>
+
+        <div class="fraction-display" id="fractionDisplay">
+            <div class="fraction-wrapper">
+                <div class="fraction-num" id="fracNum">απέναντι κάθετη</div>
+                <div class="fraction-line"></div>
+                <div class="fraction-den" id="fracDen">προσκείμενη κάθετη</div>
+            </div>
+            <span class="equals-sign" id="equalsSign" title="Πατήστε για να δείτε το αποτέλεσμα">=</span>
+            <span class="decimal-result" id="decimalResult"></span>
+        </div>
+
+        <div class="buttons-area">
+            <button class="action-btn exercise-btn" id="exerciseBtn" title="Άσκηση - Πατήστε για εναλλαγή τύπων ασκήσεων">📝 Άσκηση</button>
+        </div>
+
+        <div class="signature">Κώστας Κούδας</div>
+    </div>
+
+    <script>
+        (function() {
+            // DOM references
+            const angleInput = document.getElementById('angleInput');
+            const mainSvg = document.getElementById('mainSvg');
+            const fractionDisplay = document.getElementById('fractionDisplay');
+            const fracNum = document.getElementById('fracNum');
+            const fracDen = document.getElementById('fracDen');
+            const equalsSign = document.getElementById('equalsSign');
+            const decimalResult = document.getElementById('decimalResult');
+            const exerciseBtn = document.getElementById('exerciseBtn');
+            const calcToggle = document.getElementById('calcToggle');
+            const calcPanel = document.getElementById('calcPanel');
+            const calcAngleInput = document.getElementById('calcAngleInput');
+            const calcSin = document.getElementById('calcSin');
+            const calcCos = document.getElementById('calcCos');
+            const calcTan = document.getElementById('calcTan');
+            const tabBtns = document.querySelectorAll('.tab-btn');
+
+            // State
+            const state = {
+                phi: 45,
+                currentTab: 'tangent',
+                triangle: {
+                    hypotenuse: 180,
+                    adjacent: 0,
+                    opposite: 0,
+                    C: { x: 70, y: 250 },
+                    A: { x: 0, y: 250 },
+                    B: { x: 70, y: 0 },
+                    rotation: 0,
+                },
+                fraction: {
+                    numValue: null,
+                    denValue: null,
+                    numLabel: '',
+                    denLabel: '',
+                },
+                exerciseMode: false,
+                exerciseCounter: 0,
+                exerciseHidden: '',
+                exerciseGivenValues: {},
+                mixedPressCount: 0,
+                mixedUsedTabs: [],
+                mixedUsedTypes: [],
+                mixedLastType: null,
+                mixedSourceTab: null,
+                sideLabelsVisible: {},
+                resultRevealed: false,
+            };
+
+            const COLORS = {
+                opposite: '#2ecc71',
+                adjacent: '#45b7d1',
+                hypotenuse: '#e94560',
+                phi: '#f0c060',
+                rightAngle: '#ffffff',
+            };
+
+            function toRad(deg) { return deg * Math.PI / 180; }
+            function toDeg(rad) { return rad * 180 / Math.PI; }
+            function roundTo(val, decimals) {
+                const factor = Math.pow(10, decimals);
+                return Math.round(val * factor) / factor;
+            }
+            function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+            function randFloat(min, max) { return Math.random() * (max - min) + min; }
+            function randChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+            function computeTriangle(phiDeg, hypotenuse) {
+                const phiRad = toRad(phiDeg);
+                const adj = hypotenuse * Math.cos(phiRad);
+                const opp = hypotenuse * Math.sin(phiRad);
+                const C = { x: 70, y: 250 };
+                const A = { x: 70 + adj, y: 250 };
+                const B = { x: 70, y: 250 - opp };
+                return { hypotenuse, adjacent: adj, opposite: opp, C, A, B, phiDeg, phiRad };
+            }
+
+            function renderSVG(tri, options = {}) {
+                const {
+                    showOppositeLabel = null,
+                    showAdjacentLabel = null,
+                    showHypotenuseLabel = null,
+                    showPhiLabel = true,
+                    hiddenSide = null,
+                    exerciseGiven = {},
+                    rotation = 0,
+                } = options;
+
+                const { C, A, B, adjacent, opposite, hypotenuse, phiDeg } = tri;
+                const centroidX = (C.x + A.x + B.x) / 3;
+                const centroidY = (C.y + A.y + B.y) / 3;
+
+                const hiddenColors = {
+                    opposite: COLORS.opposite,
+                    adjacent: COLORS.adjacent,
+                    hypotenuse: COLORS.hypotenuse,
+                    phi: COLORS.phi,
+                };
+
+                let svgContent = `<rect x="0" y="0" width="400" height="310" fill="var(--surface)" rx="8" ry="8" opacity="0.3"/>`;
+                svgContent += `<g transform="rotate(${rotation}, ${centroidX}, ${centroidY})">`;
+
+                svgContent += `<polygon points="${C.x},${C.y} ${A.x},${A.y} ${B.x},${B.y}" fill="rgba(69,183,209,0.12)" stroke="none"/>`;
+
+                svgContent += `<line x1="${C.x}" y1="${C.y}" x2="${A.x}" y2="${A.y}" stroke="${COLORS.adjacent}" stroke-width="3" stroke-linecap="round"/>`;
+                svgContent += `<line x1="${C.x}" y1="${C.y}" x2="${B.x}" y2="${B.y}" stroke="${COLORS.opposite}" stroke-width="3" stroke-linecap="round"/>`;
+                svgContent += `<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="${COLORS.hypotenuse}" stroke-width="3" stroke-linecap="round"/>`;
+
+                svgContent += `<line x1="${C.x}" y1="${C.y}" x2="${A.x}" y2="${A.y}" stroke="transparent" stroke-width="28" fill="none" class="clickable-side" data-side="adjacent" pointer-events="stroke"/>`;
+                svgContent += `<line x1="${C.x}" y1="${C.y}" x2="${B.x}" y2="${B.y}" stroke="transparent" stroke-width="28" fill="none" class="clickable-side" data-side="opposite" pointer-events="stroke"/>`;
+                svgContent += `<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="transparent" stroke-width="28" fill="none" class="clickable-side" data-side="hypotenuse" pointer-events="stroke"/>`;
+
+                const sqSize = 13;
+                svgContent += `<polyline points="${C.x+sqSize},${C.y} ${C.x+sqSize},${C.y-sqSize} ${C.x},${C.y-sqSize}" fill="none" stroke="${COLORS.rightAngle}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+                const arcRadius = 22;
+                const startAngle = Math.PI;
+                const endAngle = Math.PI + tri.phiRad;
+                const arcStartX = A.x + arcRadius * Math.cos(startAngle);
+                const arcStartY = A.y + arcRadius * Math.sin(startAngle);
+                const arcEndX = A.x + arcRadius * Math.cos(endAngle);
+                const arcEndY = A.y + arcRadius * Math.sin(endAngle);
+                svgContent += `<path d="M ${arcStartX},${arcStartY} A ${arcRadius},${arcRadius} 0 0 1 ${arcEndX},${arcEndY}" fill="none" stroke="${COLORS.phi}" stroke-width="2.5" stroke-linecap="round"/>`;
+
+                if (showPhiLabel && hiddenSide !== 'phi') {
+                    const labelAngle = Math.PI + tri.phiRad / 2;
+                    const labelDist = arcRadius + 16;
+                    const labelX = A.x + labelDist * Math.cos(labelAngle);
+                    const labelY = A.y + labelDist * Math.sin(labelAngle);
+                    const phiDisplay = exerciseGiven.phiOverride;
+                    const phiText = phiDisplay !== undefined ? String(phiDisplay) : (Math.round(phiDeg) === phiDeg ? Math.round(phiDeg) + '°' : roundTo(phiDeg, 1) + '°');
+                    svgContent += `<text x="${labelX}" y="${labelY}" text-anchor="middle" fill="${COLORS.phi}" font-size="15" font-weight="600">φ=${phiText}</text>`;
+                } else if (hiddenSide === 'phi') {
+                    const labelAngle = Math.PI + tri.phiRad / 2;
+                    const labelDist = arcRadius + 16;
+                    const labelX = A.x + labelDist * Math.cos(labelAngle);
+                    const labelY = A.y + labelDist * Math.sin(labelAngle);
+                    svgContent += `<text x="${labelX}" y="${labelY}" text-anchor="middle" fill="${hiddenColors.phi}" font-size="18" font-weight="700">x</text>`;
+                }
+
+                const oppMidX = (C.x + B.x) / 2 - 28;
+                const oppMidY = (C.y + B.y) / 2;
+                if (showOppositeLabel !== null && hiddenSide !== 'opposite') {
+                    svgContent += `<text x="${oppMidX}" y="${oppMidY}" text-anchor="end" fill="${COLORS.opposite}" font-size="14" font-weight="600">${showOppositeLabel}</text>`;
+                } else if (hiddenSide === 'opposite') {
+                    svgContent += `<text x="${oppMidX}" y="${oppMidY}" text-anchor="end" fill="${hiddenColors.opposite}" font-size="18" font-weight="700">x</text>`;
+                }
+
+                const adjMidX = (C.x + A.x) / 2;
+                const adjMidY = (C.y + A.y) / 2 + 22;
+                if (showAdjacentLabel !== null && hiddenSide !== 'adjacent') {
+                    svgContent += `<text x="${adjMidX}" y="${adjMidY}" text-anchor="middle" fill="${COLORS.adjacent}" font-size="14" font-weight="600">${showAdjacentLabel}</text>`;
+                } else if (hiddenSide === 'adjacent') {
+                    svgContent += `<text x="${adjMidX}" y="${adjMidY}" text-anchor="middle" fill="${hiddenColors.adjacent}" font-size="18" font-weight="700">x</text>`;
+                }
+
+                const hypMidX = (A.x + B.x) / 2 + 18;
+                const hypMidY = (A.y + B.y) / 2 - 10;
+                if (showHypotenuseLabel !== null && hiddenSide !== 'hypotenuse') {
+                    svgContent += `<text x="${hypMidX}" y="${hypMidY}" text-anchor="start" fill="${COLORS.hypotenuse}" font-size="14" font-weight="600">${showHypotenuseLabel}</text>`;
+                } else if (hiddenSide === 'hypotenuse') {
+                    svgContent += `<text x="${hypMidX}" y="${hypMidY}" text-anchor="start" fill="${hiddenColors.hypotenuse}" font-size="18" font-weight="700">x</text>`;
+                }
+
+                svgContent += `<circle cx="${C.x}" cy="${C.y}" r="3.5" fill="${COLORS.rightAngle}" opacity="0.7"/>`;
+                svgContent += `<circle cx="${A.x}" cy="${A.y}" r="3.5" fill="${COLORS.phi}" opacity="0.8"/>`;
+                svgContent += `<circle cx="${B.x}" cy="${B.y}" r="3.5" fill="${COLORS.opposite}" opacity="0.8"/>`;
+
+                svgContent += `</g>`;
+
+                svgContent += `
+                    <g id="refreshIcon" transform="translate(365,40)">
+                        <circle cx="0" cy="0" r="22" fill="transparent" stroke="none" pointer-events="all"/>
+                        <circle cx="0" cy="0" r="18" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" class="hover-bg"/>
+                        <text x="0" y="6" text-anchor="middle" font-size="22" fill="#ccc">🔄</text>
+                    </g>`;
+
+                mainSvg.innerHTML = svgContent;
+
+                const clickableSides = mainSvg.querySelectorAll('.clickable-side');
+                for (let i = 0; i < clickableSides.length; i++) {
+                    const el = clickableSides[i];
+                    el.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        handleSideClick(this.getAttribute('data-side'));
+                    });
+                    el.addEventListener('touchend', function(e) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        handleSideClick(this.getAttribute('data-side'));
+                    });
+                }
+
+                const refreshIcon = document.getElementById('refreshIcon');
+                if (refreshIcon) {
+                    refreshIcon.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        handleRefresh();
+                    });
+                    refreshIcon.addEventListener('touchend', function(e) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        handleRefresh();
+                    });
+                }
+            }
+
+            function handleSideClick(side) {
+                if (state.exerciseMode) return;
+                if (state.resultRevealed) return;
+                const tri = state.triangle;
+                let value = null;
+                if (side === 'opposite') value = roundTo(tri.opposite, 2);
+                else if (side === 'adjacent') value = roundTo(tri.adjacent, 2);
+                else if (side === 'hypotenuse') value = roundTo(tri.hypotenuse, 2);
+                if (value === null) return;
+
+                const tab = state.currentTab;
+                let isNum = false, isDen = false;
+                const sourceTab = tab === 'mixed' ? (state.mixedSourceTab || 'tangent') : tab;
+
+                if (sourceTab === 'tangent') {
+                    if (side === 'opposite') isNum = true;
+                    if (side === 'adjacent') isDen = true;
+                } else if (sourceTab === 'sine') {
+                    if (side === 'opposite') isNum = true;
+                    if (side === 'hypotenuse') isDen = true;
+                } else if (sourceTab === 'cosine') {
+                    if (side === 'adjacent') isNum = true;
+                    if (side === 'hypotenuse') isDen = true;
+                }
+
+                if (isNum) {
+                    state.fraction.numValue = value;
+                    state.fraction.numLabel = String(value);
+                    state.sideLabelsVisible[side] = String(value);
+                }
+                if (isDen) {
+                    state.fraction.denValue = value;
+                    state.fraction.denLabel = String(value);
+                    state.sideLabelsVisible[side] = String(value);
+                }
+                if (!isNum && !isDen) return;
+
+                updateFractionDisplay();
+                refreshSVGWithLabels();
+                checkFractionComplete();
+            }
+
+            function updateFractionDisplay() {
+                const sourceTab = state.currentTab === 'mixed' ? (state.mixedSourceTab || 'tangent') : state.currentTab;
+                if (sourceTab === 'tangent') {
+                    fracNum.textContent = state.fraction.numValue !== null ? state.fraction.numLabel : 'απέναντι κάθετη';
+                    fracDen.textContent = state.fraction.denValue !== null ? state.fraction.denLabel : 'προσκείμενη κάθετη';
+                } else if (sourceTab === 'sine') {
+                    fracNum.textContent = state.fraction.numValue !== null ? state.fraction.numLabel : 'απέναντι κάθετη';
+                    fracDen.textContent = state.fraction.denValue !== null ? state.fraction.denLabel : 'υποτείνουσα';
+                } else if (sourceTab === 'cosine') {
+                    fracNum.textContent = state.fraction.numValue !== null ? state.fraction.numLabel : 'προσκείμενη κάθετη';
+                    fracDen.textContent = state.fraction.denValue !== null ? state.fraction.denLabel : 'υποτείνουσα';
+                }
+                if (state.fraction.numValue !== null) fracNum.classList.add('filled');
+                else fracNum.classList.remove('filled');
+                if (state.fraction.denValue !== null) fracDen.classList.add('filled');
+                else fracDen.classList.remove('filled');
+            }
+
+            function checkFractionComplete() {
+                if (state.fraction.numValue !== null && state.fraction.denValue !== null) {
+                    equalsSign.classList.add('visible', 'blinking');
+                    equalsSign.style.display = 'inline-block';
+                    decimalResult.classList.remove('visible');
+                    decimalResult.textContent = '';
+                    decimalResult.style.display = 'none';
+                    state.resultRevealed = false;
+                } else {
+                    equalsSign.classList.remove('visible', 'blinking');
+                    equalsSign.style.display = 'none';
+                    decimalResult.classList.remove('visible');
+                    decimalResult.textContent = '';
+                    decimalResult.style.display = 'none';
+                    state.resultRevealed = false;
+                }
+            }
+
+            function refreshSVGWithLabels() {
+                const tri = state.triangle;
+                renderSVG(tri, {
+                    showOppositeLabel: state.sideLabelsVisible['opposite'] || null,
+                    showAdjacentLabel: state.sideLabelsVisible['adjacent'] || null,
+                    showHypotenuseLabel: state.sideLabelsVisible['hypotenuse'] || null,
+                    showPhiLabel: !(state.exerciseMode && state.exerciseHidden === 'phi'),
+                    hiddenSide: state.exerciseMode ? state.exerciseHidden : null,
+                    exerciseGiven: state.exerciseGivenValues,
+                    rotation: tri.rotation || 0,
+                });
+            }
+
+            function resetFraction() {
+                state.fraction.numValue = null;
+                state.fraction.denValue = null;
+                state.fraction.numLabel = '';
+                state.fraction.denLabel = '';
+                state.sideLabelsVisible = {};
+                state.resultRevealed = false;
+                equalsSign.classList.remove('visible', 'blinking');
+                equalsSign.style.display = 'none';
+                decimalResult.classList.remove('visible');
+                decimalResult.textContent = '';
+                decimalResult.style.display = 'none';
+                updateFractionDisplay();
+            }
+
+            function setFractionVisibility(visible) {
+                fractionDisplay.style.display = visible ? '' : 'none';
+                if (!visible) {
+                    equalsSign.style.display = 'none';
+                    decimalResult.style.display = 'none';
+                }
+            }
+
+            function handleRefresh() {
+                if (state.currentTab === 'mixed') {
+                    handleMixedRefresh();
+                    return;
+                }
+                state.exerciseMode = false;
+                state.exerciseCounter = 0;
+                state.exerciseHidden = '';
+                state.exerciseGivenValues = {};
+                resetFraction();
+                setFractionVisibility(true);
+                const tri = computeTriangle(state.phi, randFloat(130, 210));
+                tri.rotation = randFloat(-25, 25);
+                state.triangle = tri;
+                renderSVG(tri, { showPhiLabel: true, rotation: tri.rotation });
+            }
+
+            function handleExercise() {
+                if (state.currentTab === 'mixed') {
+                    handleMixedRefresh();
+                    return;
+                }
+                state.exerciseMode = true;
+                state.exerciseCounter = (state.exerciseCounter % 3) + 1;
+                resetFraction();
+                state.sideLabelsVisible = {};
+                state.resultRevealed = false;
+                setFractionVisibility(false);
+                const phiDeg = state.phi;
+                const phiRad = toRad(phiDeg);
+                let tri;
+                let hiddenSide = '';
+                let givenValues = {};
+                const tab = state.currentTab;
+
+                if (tab === 'tangent') {
+                    if (state.exerciseCounter === 1) {
+                        const adj = randFloat(50, 180);
+                        const opp = adj * Math.tan(phiRad);
+                        const hyp = Math.sqrt(adj * adj + opp * opp);
+                        tri = computeTriangle(phiDeg, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'opposite';
+                        givenValues = { adjacent: roundTo(adj, 2), phi: phiDeg };
+                    } else if (state.exerciseCounter === 2) {
+                        const opp = randFloat(50, 180);
+                        const adj = opp / Math.tan(phiRad);
+                        const hyp = Math.sqrt(adj * adj + opp * opp);
+                        tri = computeTriangle(phiDeg, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'adjacent';
+                        givenValues = { opposite: roundTo(opp, 2), phi: phiDeg };
+                    } else {
+                        const adj = randFloat(60, 170);
+                        const opp = randFloat(50, 160);
+                        const hyp = Math.sqrt(adj * adj + opp * opp);
+                        const computedPhi = toDeg(Math.atan2(opp, adj));
+                        tri = computeTriangle(computedPhi, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'phi';
+                        givenValues = { opposite: roundTo(opp, 2), adjacent: roundTo(adj, 2) };
+                    }
+                } else if (tab === 'sine') {
+                    if (state.exerciseCounter === 1) {
+                        const hyp = randFloat(100, 200);
+                        const opp = hyp * Math.sin(phiRad);
+                        const adj = hyp * Math.cos(phiRad);
+                        tri = computeTriangle(phiDeg, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'opposite';
+                        givenValues = { hypotenuse: roundTo(hyp, 2), phi: phiDeg };
+                    } else if (state.exerciseCounter === 2) {
+                        const opp = randFloat(50, 160);
+                        const hyp = opp / Math.sin(phiRad);
+                        const adj = hyp * Math.cos(phiRad);
+                        tri = computeTriangle(phiDeg, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'hypotenuse';
+                        givenValues = { opposite: roundTo(opp, 2), phi: phiDeg };
+                    } else {
+                        const opp = randFloat(50, 140);
+                        const hyp = randFloat(opp + 10, 210);
+                        const adj = Math.sqrt(Math.max(0, hyp * hyp - opp * opp));
+                        const computedPhi = toDeg(Math.asin(opp / hyp));
+                        tri = computeTriangle(computedPhi, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'phi';
+                        givenValues = { opposite: roundTo(opp, 2), hypotenuse: roundTo(hyp, 2) };
+                    }
+                } else if (tab === 'cosine') {
+                    if (state.exerciseCounter === 1) {
+                        const hyp = randFloat(100, 200);
+                        const adj = hyp * Math.cos(phiRad);
+                        const opp = hyp * Math.sin(phiRad);
+                        tri = computeTriangle(phiDeg, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'adjacent';
+                        givenValues = { hypotenuse: roundTo(hyp, 2), phi: phiDeg };
+                    } else if (state.exerciseCounter === 2) {
+                        const adj = randFloat(50, 170);
+                        const hyp = adj / Math.cos(phiRad);
+                        const opp = hyp * Math.sin(phiRad);
+                        tri = computeTriangle(phiDeg, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'hypotenuse';
+                        givenValues = { adjacent: roundTo(adj, 2), phi: phiDeg };
+                    } else {
+                        const adj = randFloat(50, 150);
+                        const hyp = randFloat(adj + 10, 210);
+                        const opp = Math.sqrt(Math.max(0, hyp * hyp - adj * adj));
+                        const computedPhi = toDeg(Math.acos(adj / hyp));
+                        tri = computeTriangle(computedPhi, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'phi';
+                        givenValues = { adjacent: roundTo(adj, 2), hypotenuse: roundTo(hyp, 2) };
+                    }
+                }
+                tri.rotation = randFloat(-25, 25);
+                state.triangle = tri;
+                state.exerciseHidden = hiddenSide;
+                state.exerciseGivenValues = givenValues;
+                if (hiddenSide === 'phi') {
+                    state.phi = tri.phiDeg;
+                    angleInput.value = roundTo(tri.phiDeg, 1);
+                }
+                renderSVG(tri, {
+                    showOppositeLabel: (hiddenSide !== 'opposite' && givenValues.opposite !== undefined) ? String(givenValues.opposite) : null,
+                    showAdjacentLabel: (hiddenSide !== 'adjacent' && givenValues.adjacent !== undefined) ? String(givenValues.adjacent) : null,
+                    showHypotenuseLabel: (hiddenSide !== 'hypotenuse' && givenValues.hypotenuse !== undefined) ? String(givenValues.hypotenuse) : null,
+                    showPhiLabel: hiddenSide !== 'phi',
+                    hiddenSide,
+                    exerciseGiven: givenValues,
+                    rotation: tri.rotation,
+                });
+                updateFractionDisplay();
+            }
+
+            function handleMixedRefresh() {
+                const allTabs = ['tangent', 'sine', 'cosine'];
+                const allTypes = [1, 2, 3];
+                state.mixedPressCount++;
+                const pressNum = ((state.mixedPressCount - 1) % 7) + 1;
+                let chosenTab, chosenType;
+
+                if (pressNum === 1) {
+                    state.mixedUsedTabs = [];
+                    state.mixedUsedTypes = [];
+                    state.mixedLastType = null;
+                    chosenTab = randChoice(allTabs);
+                    chosenType = randChoice(allTypes);
+                    state.mixedUsedTabs = [chosenTab];
+                    state.mixedUsedTypes = [chosenType];
+                    state.mixedLastType = chosenType;
+                } else if (pressNum <= 3) {
+                    const remaining = allTabs.filter(t => !state.mixedUsedTabs.includes(t));
+                    chosenTab = randChoice(remaining.length ? remaining : allTabs);
+                    chosenType = randChoice(allTypes);
+                    if (!state.mixedUsedTabs.includes(chosenTab)) state.mixedUsedTabs.push(chosenTab);
+                    state.mixedUsedTypes.push(chosenType);
+                    state.mixedLastType = chosenType;
+                } else if (pressNum === 4) {
+                    const remaining = allTabs.filter(t => !state.mixedUsedTabs.includes(t));
+                    chosenTab = randChoice(remaining.length ? remaining : allTabs);
+                    chosenType = randChoice(allTypes);
+                    if (!state.mixedUsedTabs.includes(chosenTab)) state.mixedUsedTabs.push(chosenTab);
+                    state.mixedUsedTypes.push(chosenType);
+                    state.mixedLastType = chosenType;
+                } else if (pressNum === 5) {
+                    state.mixedUsedTabs = [];
+                    state.mixedUsedTypes = [];
+                    chosenType = randChoice(allTypes.filter(t => t !== state.mixedLastType));
+                    if (!chosenType) chosenType = randChoice(allTypes);
+                    chosenTab = randChoice(allTabs);
+                    state.mixedUsedTabs = [chosenTab];
+                    state.mixedUsedTypes = [chosenType];
+                    state.mixedLastType = chosenType;
+                } else if (pressNum === 6) {
+                    const remaining = allTabs.filter(t => !state.mixedUsedTabs.includes(t));
+                    chosenTab = randChoice(remaining.length ? remaining : allTabs);
+                    chosenType = randChoice(allTypes.filter(t => t !== state.mixedLastType));
+                    if (!chosenType) chosenType = randChoice(allTypes);
+                    if (!state.mixedUsedTabs.includes(chosenTab)) state.mixedUsedTabs.push(chosenTab);
+                    state.mixedUsedTypes.push(chosenType);
+                    state.mixedLastType = chosenType;
+                } else if (pressNum === 7) {
+                    const remaining = allTabs.filter(t => !state.mixedUsedTabs.includes(t));
+                    chosenTab = randChoice(remaining.length ? remaining : allTabs);
+                    chosenType = randChoice(allTypes.filter(t => t !== state.mixedLastType));
+                    if (!chosenType) chosenType = randChoice(allTypes);
+                    if (!state.mixedUsedTabs.includes(chosenTab)) state.mixedUsedTabs.push(chosenTab);
+                    state.mixedUsedTypes.push(chosenType);
+                    state.mixedLastType = chosenType;
+                }
+                state.mixedSourceTab = chosenTab;
+                generateMixedExercise(chosenTab, chosenType);
+            }
+
+            function generateMixedExercise(sourceTab, exerciseType) {
+                state.exerciseMode = true;
+                state.exerciseCounter = exerciseType;
+                resetFraction();
+                state.sideLabelsVisible = {};
+                state.resultRevealed = false;
+                setFractionVisibility(false);
+                const phiDeg = randInt(10, 80);
+                const phiRad = toRad(phiDeg);
+                let tri;
+                let hiddenSide = '';
+                let givenValues = {};
+
+                if (sourceTab === 'tangent') {
+                    if (exerciseType === 1) {
+                        const adj = randFloat(50, 180);
+                        const opp = adj * Math.tan(phiRad);
+                        const hyp = Math.sqrt(adj * adj + opp * opp);
+                        tri = computeTriangle(phiDeg, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'opposite';
+                        givenValues = { adjacent: roundTo(adj, 2), phi: phiDeg };
+                    } else if (exerciseType === 2) {
+                        const opp = randFloat(50, 180);
+                        const adj = opp / Math.tan(phiRad);
+                        const hyp = Math.sqrt(adj * adj + opp * opp);
+                        tri = computeTriangle(phiDeg, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'adjacent';
+                        givenValues = { opposite: roundTo(opp, 2), phi: phiDeg };
+                    } else {
+                        const adj = randFloat(60, 170);
+                        const opp = randFloat(50, 160);
+                        const hyp = Math.sqrt(adj * adj + opp * opp);
+                        const computedPhi = toDeg(Math.atan2(opp, adj));
+                        tri = computeTriangle(computedPhi, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'phi';
+                        givenValues = { opposite: roundTo(opp, 2), adjacent: roundTo(adj, 2) };
+                    }
+                } else if (sourceTab === 'sine') {
+                    if (exerciseType === 1) {
+                        const hyp = randFloat(100, 200);
+                        const opp = hyp * Math.sin(phiRad);
+                        const adj = hyp * Math.cos(phiRad);
+                        tri = computeTriangle(phiDeg, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'opposite';
+                        givenValues = { hypotenuse: roundTo(hyp, 2), phi: phiDeg };
+                    } else if (exerciseType === 2) {
+                        const opp = randFloat(50, 160);
+                        const hyp = opp / Math.sin(phiRad);
+                        const adj = hyp * Math.cos(phiRad);
+                        tri = computeTriangle(phiDeg, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'hypotenuse';
+                        givenValues = { opposite: roundTo(opp, 2), phi: phiDeg };
+                    } else {
+                        const opp = randFloat(50, 140);
+                        const hyp = randFloat(opp + 10, 210);
+                        const adj = Math.sqrt(Math.max(0, hyp * hyp - opp * opp));
+                        const computedPhi = toDeg(Math.asin(opp / hyp));
+                        tri = computeTriangle(computedPhi, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'phi';
+                        givenValues = { opposite: roundTo(opp, 2), hypotenuse: roundTo(hyp, 2) };
+                    }
+                } else if (sourceTab === 'cosine') {
+                    if (exerciseType === 1) {
+                        const hyp = randFloat(100, 200);
+                        const adj = hyp * Math.cos(phiRad);
+                        const opp = hyp * Math.sin(phiRad);
+                        tri = computeTriangle(phiDeg, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'adjacent';
+                        givenValues = { hypotenuse: roundTo(hyp, 2), phi: phiDeg };
+                    } else if (exerciseType === 2) {
+                        const adj = randFloat(50, 170);
+                        const hyp = adj / Math.cos(phiRad);
+                        const opp = hyp * Math.sin(phiRad);
+                        tri = computeTriangle(phiDeg, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'hypotenuse';
+                        givenValues = { adjacent: roundTo(adj, 2), phi: phiDeg };
+                    } else {
+                        const adj = randFloat(50, 150);
+                        const hyp = randFloat(adj + 10, 210);
+                        const opp = Math.sqrt(Math.max(0, hyp * hyp - adj * adj));
+                        const computedPhi = toDeg(Math.acos(adj / hyp));
+                        tri = computeTriangle(computedPhi, hyp);
+                        tri.adjacent = adj; tri.opposite = opp; tri.hypotenuse = hyp;
+                        tri.C = { x: 70, y: 250 }; tri.A = { x: 70 + adj, y: 250 }; tri.B = { x: 70, y: 250 - opp };
+                        hiddenSide = 'phi';
+                        givenValues = { adjacent: roundTo(adj, 2), hypotenuse: roundTo(hyp, 2) };
+                    }
+                }
+                tri.rotation = randFloat(-25, 25);
+                state.triangle = tri;
+                state.exerciseHidden = hiddenSide;
+                state.exerciseGivenValues = givenValues;
+                state.phi = tri.phiDeg;
+                angleInput.value = roundTo(tri.phiDeg, 1);
+                renderSVG(tri, {
+                    showOppositeLabel: (hiddenSide !== 'opposite' && givenValues.opposite !== undefined) ? String(givenValues.opposite) : null,
+                    showAdjacentLabel: (hiddenSide !== 'adjacent' && givenValues.adjacent !== undefined) ? String(givenValues.adjacent) : null,
+                    showHypotenuseLabel: (hiddenSide !== 'hypotenuse' && givenValues.hypotenuse !== undefined) ? String(givenValues.hypotenuse) : null,
+                    showPhiLabel: hiddenSide !== 'phi',
+                    hiddenSide,
+                    exerciseGiven: givenValues,
+                    rotation: tri.rotation,
+                });
+                updateFractionDisplay();
+            }
+
+            function switchTab(tab) {
+                state.currentTab = tab;
+                state.exerciseMode = false;
+                state.exerciseCounter = 0;
+                state.exerciseHidden = '';
+                state.exerciseGivenValues = {};
+                state.mixedPressCount = 0;
+                state.mixedUsedTabs = [];
+                state.mixedUsedTypes = [];
+                state.mixedLastType = null;
+                state.mixedSourceTab = null;
+                resetFraction();
+                setFractionVisibility(tab !== 'mixed');
+
+                for (let i = 0; i < tabBtns.length; i++) {
+                    tabBtns[i].classList.remove('active');
+                }
+                const activeBtn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+                if (activeBtn) activeBtn.classList.add('active');
+
+                if (tab === 'mixed') {
+                    handleMixedRefresh();
+                    return;
+                }
+                const tri = computeTriangle(state.phi, randFloat(130, 210));
+                tri.rotation = randFloat(-25, 25);
+                state.triangle = tri;
+                renderSVG(tri, { showPhiLabel: true, rotation: tri.rotation });
+                updateFractionDisplay();
+            }
+
+            function addTouchAndClick(el, handler) {
+                el.addEventListener('click', handler);
+                el.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    handler(e);
+                });
+            }
+
+            for (let i = 0; i < tabBtns.length; i++) {
+                addTouchAndClick(tabBtns[i], function() {
+                    switchTab(tabBtns[i].getAttribute('data-tab'));
+                });
+            }
+
+            addTouchAndClick(exerciseBtn, handleExercise);
+
+            // Dedicated equals handler with guaranteed visibility fix
+            function equalsHandler(e) {
+                e.stopPropagation();
+                if (state.fraction.numValue === null || state.fraction.denValue === null || state.resultRevealed) return;
+                const result = state.fraction.numValue / state.fraction.denValue;
+                decimalResult.textContent = roundTo(result, 3);
+                decimalResult.classList.add('visible');
+                decimalResult.style.display = 'inline-block';
+                equalsSign.classList.remove('blinking');
+                state.resultRevealed = true;
+            }
+            equalsSign.addEventListener('click', equalsHandler);
+            equalsSign.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                equalsHandler(e);
+            });
+
+            addTouchAndClick(calcToggle, function() {
+                calcPanel.classList.toggle('open');
+                if (calcPanel.classList.contains('open')) updateCalculator();
+            });
+
+            calcAngleInput.addEventListener('input', updateCalculator);
+            calcAngleInput.addEventListener('change', function() {
+                let v = parseFloat(this.value);
+                if (isNaN(v) || v < 0) v = 0;
+                if (v > 90) v = 90;
+                this.value = roundTo(v, 1);
+                updateCalculator();
+            });
+
+            function updateCalculator() {
+                let val = parseFloat(calcAngleInput.value);
+                if (isNaN(val) || val < 0) val = 0;
+                if (val > 90) val = 90;
+                const rad = toRad(val);
+                calcSin.textContent = roundTo(Math.sin(rad), 3);
+                calcCos.textContent = roundTo(Math.cos(rad), 3);
+                calcTan.textContent = val === 90 ? '∞' : roundTo(Math.tan(rad), 3);
+            }
+
+            angleInput.addEventListener('input', function() {
+                let val = parseFloat(this.value);
+                if (isNaN(val) || val < 1) val = 1;
+                if (val > 89) val = 89;
+                state.phi = val;
+                state.exerciseMode = false;
+                state.exerciseCounter = 0;
+                state.exerciseHidden = '';
+                state.exerciseGivenValues = {};
+                if (state.currentTab === 'mixed') {
+                    state.currentTab = 'tangent';
+                    for (let i = 0; i < tabBtns.length; i++) tabBtns[i].classList.remove('active');
+                    const tb = document.querySelector('.tab-btn[data-tab="tangent"]');
+                    if (tb) tb.classList.add('active');
+                    state.mixedPressCount = 0;
+                }
+                resetFraction();
+                setFractionVisibility(true);
+                const tri = computeTriangle(val, randFloat(130, 210));
+                tri.rotation = randFloat(-25, 25);
+                state.triangle = tri;
+                renderSVG(tri, { showPhiLabel: true, rotation: tri.rotation });
+                updateFractionDisplay();
+            });
+
+            angleInput.addEventListener('change', function() {
+                let val = parseFloat(this.value);
+                if (isNaN(val) || val < 1) { val = 45; this.value = 45; }
+                if (val > 89) { val = 89; this.value = 89; }
+                this.value = roundTo(val, 1);
+            });
+
+            function init() {
+                const tri = computeTriangle(45, 180);
+                tri.rotation = 0;
+                state.triangle = tri;
+                state.phi = 45;
+                state.currentTab = 'tangent';
+                setFractionVisibility(true);
+                renderSVG(tri, { showPhiLabel: true, rotation: 0 });
+                updateFractionDisplay();
+                updateCalculator();
+            }
+            init();
+        })();
+    </script>
+</body>
+</html>
