@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0, viewport-fit=cover">
+  <title>Μονάδες Μέτρησης</title>
+  <style>
+    :root {
+      --bg: #12161f;
+      --surface: #1b222c;
+      --surface2: #242d3a;
+      --text: #e0e4ec;
+      --text-secondary: #a0a8b8;
+      --accent: #f0a040;
+      --accent2: #5da0e0;
+      --success: #4caf84;
+      --error: #e0556a;
+      --warning: #f0c040;
+      --border: #3a4455;
+      --step-bg: #1f2937;
+      --step-hover: #2a3648;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --transition: 0.2s ease;
+      --margin: 20px;
+      --circle-radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 1rem;
+      line-height: 1.5;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 750px;
+      background: var(--surface);
+      border-radius: 1.5rem;
+      padding: 1.25rem 1rem 2.5rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      margin-top: 0.5rem;
+      position: relative;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .home-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--surface2); border: 2px solid var(--border);
+      color: var(--text); font-size: 1.4rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; text-decoration: none; transition: all var(--transition);
+      flex-shrink: 0;
+    }
+    .home-btn:hover, .home-btn:focus-visible {
+      background: var(--accent); color: #12161f; border-color: var(--accent);
+      outline: none;
+    }
+    .tabs-nav {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      justify-content: center; flex: 1;
+    }
+    .tab-btn {
+      background: var(--surface2); border: 2px solid var(--border);
+      color: var(--text-secondary); padding: 0.55rem 1rem;
+      border-radius: 2rem; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: all var(--transition);
+      white-space: nowrap; letter-spacing: 0.02em;
+    }
+    .tab-btn:hover { background: var(--step-hover); color: var(--text); border-color: var(--text-secondary); }
+    .tab-btn.active {
+      background: var(--accent); color: #12161f; border-color: var(--accent);
+      font-weight: 700; box-shadow: 0 0 14px rgba(240,160,64,0.35);
+    }
+
+    .direction-sign {
+      text-align: center; font-size: 0.85rem; color: var(--accent2);
+      background: var(--surface2); padding: 0.45rem 0.8rem;
+      border-radius: 2rem; margin: 0 auto 1rem; display: block;
+      width: fit-content; max-width: 100%; border: 1px dashed var(--border);
+      letter-spacing: 0.03em;
+    }
+
+    .staircase-wrapper {
+      position: relative; margin: 0 auto 1rem;
+      width: 100%; min-height: 300px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .staircase-container {
+      position: relative; width: 100%;
+      height: 320px; overflow: visible;
+    }
+    .staircase-svg {
+      position: absolute; top:0; left:0; width:100%; height:100%;
+      pointer-events: none; z-index: 3; overflow: visible;
+    }
+    .staircase-steps {
+      position: relative; width: 100%; height: 100%;
+    }
+    .step-unit {
+      position: absolute;
+      background: var(--step-bg);
+      border: 2px solid var(--border);
+      border-radius: 0.7rem;
+      padding: 0.55rem 1.1rem;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+      letter-spacing: 0.04em;
+      transform: translate(-50%, -50%);
+    }
+    .step-unit:hover { background: var(--step-hover); border-color: var(--text-secondary); }
+    .step-unit.blink { animation: stepBlink 0.9s ease-in-out infinite; }
+    .step-unit.selected-glow {
+      border-color: var(--accent); background: #3a2c1a;
+      box-shadow: 0 0 18px rgba(240,160,64,0.5); color: #fff; font-weight: 800;
+    }
+    .step-unit.dimmed { opacity: 0.35; pointer-events: none; border-color: transparent; }
+
+    @keyframes stepBlink {
+      0%,100% { opacity:1; border-color:var(--accent); box-shadow:0 0 8px rgba(240,160,64,0.3); }
+      50% { opacity:0.45; border-color:var(--border); box-shadow:none; }
+    }
+
+    .arrow-group { transition: opacity var(--transition); }
+    .arrow-group.dimmed { opacity: 0.2; }
+    .arrow-group.blink { animation: arrowBlink 0.8s ease-in-out infinite; }
+    .arrow-group.highlight { opacity:1; filter:drop-shadow(0 0 6px var(--accent)); }
+    @keyframes arrowBlink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+    .arrow-path {
+      stroke: #8899aa; stroke-width: 2.8; fill: none; stroke-linecap: round;
+    }
+    .arrow-path.highlight-line { stroke: var(--accent); stroke-width: 3.5; filter:drop-shadow(0 0 5px var(--accent)); }
+    .arrow-head { fill: #8899aa; }
+    .arrow-label {
+      fill: #c0c8d4; font-size: 13px; font-weight: 700;
+      text-anchor: middle; dominant-baseline: central;
+      pointer-events: none; paint-order: stroke;
+      stroke: var(--bg); stroke-width: 2.5px;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .example-area {
+      text-align: center; min-height: 60px; margin:0.5rem 0 0.8rem;
+      display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+      gap:0.5rem; font-size:1.2rem; font-weight:700;
+    }
+    .example-value { color:var(--accent); font-size:1.3rem; }
+    .eq-sign {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:44px; height:44px; border-radius:50%; background:var(--surface2);
+      border:2px solid var(--border); color:var(--text);
+      font-size:1.3rem; font-weight:800; cursor:pointer;
+      transition:all var(--transition);
+    }
+    .eq-sign.blink { animation:eqBlink 0.7s infinite; border-color:var(--error); color:var(--error); }
+    .eq-sign.stable { border-color:var(--accent); color:var(--accent); box-shadow:0 0 10px rgba(240,160,64,0.4); }
+    @keyframes eqBlink { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(1.08);} }
+    .operation-text { color:var(--accent2); font-size:1.1rem; }
+    .result-text { color:var(--success); font-size:1.3rem; font-weight:800; }
+
+    .action-btns { display:flex; gap:0.8rem; justify-content:center; flex-wrap:wrap; margin-top:0.3rem; }
+    .btn {
+      padding:0.7rem 1.2rem; border-radius:2.5rem; font-size:0.95rem; font-weight:700;
+      cursor:pointer; border:2px solid transparent; transition:all var(--transition);
+      letter-spacing:0.04em; min-width:100px;
+    }
+    .btn-example { background:var(--accent2); color:#12161f; border-color:var(--accent2); }
+    .btn-example:hover { background:#6db5f0; box-shadow:0 4px 16px rgba(93,160,224,0.4); }
+    .btn-quiz1 { background:var(--accent); color:#12161f; border-color:var(--accent); }
+    .btn-quiz1:hover { background:#f5b550; box-shadow:0 4px 16px rgba(240,160,64,0.4); }
+    .btn-quiz2 { background:#6c5ce7; color:#fff; border-color:#6c5ce7; }
+    .btn-quiz2:hover { background:#7d6ef0; box-shadow:0 4px 16px rgba(108,92,231,0.4); }
+
+    .signature {
+      position:fixed; bottom:0.6rem; right:1rem; font-size:0.75rem;
+      color:#4a5568; letter-spacing:0.05em; font-style:italic;
+      z-index:5; pointer-events:none;
+    }
+
+    .quiz-overlay {
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.75); z-index:100;
+      display:flex; align-items:center; justify-content:center;
+      padding:1rem;
+    }
+    .quiz-popup {
+      background:var(--surface); border-radius:1.5rem; padding:1.5rem 1.2rem;
+      width:100%; max-width:500px; max-height:85vh; overflow-y:auto;
+      box-shadow:0 12px 40px rgba(0,0,0,0.6); border:2px solid var(--border);
+    }
+    .quiz-popup-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; }
+    .quiz-close-btn,.quiz-refresh-btn {
+      width:40px; height:40px; border-radius:50%; background:var(--surface2);
+      border:2px solid var(--border); color:var(--text); font-size:1.2rem;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition:all var(--transition);
+    }
+    .quiz-close-btn:hover,.quiz-refresh-btn:hover { background:var(--error); border-color:var(--error); color:#fff; }
+    .quiz-refresh-btn:hover { background:var(--accent2); border-color:var(--accent2); }
+    .quiz-question {
+      text-align:center; font-size:1.3rem; font-weight:700; margin:1rem 0;
+      display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:0.5rem;
+    }
+    .quiz-value { color:var(--accent); font-size:1.4rem; }
+    .quiz-op-btn {
+      width:48px; height:48px; border-radius:50%; background:var(--surface2);
+      border:2px solid var(--border); color:var(--text); font-size:1.4rem;
+      font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition:all var(--transition);
+    }
+    .quiz-op-btn.selected-op { background:var(--accent); color:#12161f; border-color:var(--accent); }
+    .quiz-input {
+      width:110px; height:48px; background:var(--bg); border:2px solid var(--border);
+      border-radius:0.7rem; color:var(--text); font-size:1.2rem; text-align:center;
+      font-weight:700; outline:none;
+    }
+    .quiz-input:focus { border-color:var(--accent2); }
+    .quiz-target-unit {
+      color:var(--accent2); font-size:1.2rem; font-weight:700; cursor:pointer;
+      padding:0.5rem 0.8rem; border-radius:0.7rem; background:var(--surface2);
+      border:2px solid var(--border);
+    }
+    .quiz-target-unit.blink { animation: stepBlink 0.8s infinite; border-color:var(--accent2); }
+    .quiz-result-item { padding:0.5rem 0.7rem; margin:0.35rem 0; border-radius:0.5rem; font-weight:600; font-size:0.95rem; }
+    .quiz-result-item.correct { color:var(--success); background:rgba(76,175,132,0.15); }
+    .quiz-result-item.wrong { color:var(--error); background:rgba(224,85,106,0.15); }
+    .quiz-result-item.warning { color:var(--warning); background:rgba(240,192,64,0.15); }
+    .hidden { display:none !important; }
+
+    @media (max-width: 500px) {
+      .main-container { padding:0.8rem 0.5rem 2rem; }
+      .tab-btn { padding:0.4rem 0.7rem; font-size:0.78rem; }
+      .step-unit { padding:0.45rem 0.8rem; font-size:0.85rem; }
+      .btn { padding:0.6rem 1rem; font-size:0.85rem; min-width:80px; }
+      .example-area { font-size:1rem; }
+      .quiz-question { font-size:1rem; }
+      .quiz-input { width:90px; font-size:1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <div class="top-bar">
+      <a href="index.html" class="home-btn" title="Αρχική σελίδα">⌂</a>
+      <nav class="tabs-nav" id="tabsNav"></nav>
+    </div>
+    <div class="direction-sign" id="directionSign">Για να κινηθείς ανάποδα στα βέλη, κάνε διαίρεση</div>
+    <div class="staircase-wrapper">
+      <div class="staircase-container" id="staircaseContainer">
+        <svg class="staircase-svg" id="staircaseSvg"></svg>
+        <div class="staircase-steps" id="staircaseSteps"></div>
+      </div>
+    </div>
+    <div class="example-area" id="exampleArea"></div>
+    <div class="action-btns">
+      <button class="btn btn-example" id="btnExample">Παράδειγμα</button>
+      <button class="btn btn-quiz1" id="btnQuiz1">Quiz 1</button>
+      <button class="btn btn-quiz2" id="btnQuiz2">Quiz 2</button>
+    </div>
+  </div>
+  <div class="quiz-overlay hidden" id="quizOverlay">
+    <div class="quiz-popup" id="quizPopup"></div>
+  </div>
+  <div class="signature">Κώστας Κούδας</div>
+
+  <script>
+    (function() {
+      const categories = {
+        'Μήκος': {
+          units: ['mm', 'cm', 'dm', 'm', 'km'],
+          edges: [
+            { from:4, to:3, label:'•1000', factor:1000 },
+            { from:3, to:2, label:'•10', factor:10 },
+            { from:3, to:1, label:'•100', factor:100 },
+            { from:3, to:0, label:'•1000', factor:1000 },
+            { from:2, to:1, label:'•10', factor:10 },
+            { from:1, to:0, label:'•10', factor:10 }
+          ]
+        },
+        'Εμβαδόν': {
+          units: ['mm²','cm²','dm²','m²','στρ.','km²'],
+          edges: [
+            { from:5, to:3, label:'•1000²', factor:1000000 },
+            { from:5, to:4, label:'•1000', factor:1000 },
+            { from:4, to:3, label:'•1000', factor:1000 },
+            { from:3, to:2, label:'•10²', factor:100 },
+            { from:3, to:1, label:'•100²', factor:10000 },
+            { from:3, to:0, label:'•1000²', factor:1000000 },
+            { from:2, to:1, label:'•10²', factor:100 },
+            { from:1, to:0, label:'•10²', factor:100 }
+          ]
+        },
+        'Όγκος': {
+          units: ['mm³','cm³ (ml)','dm³ (lt)','m³','km³'],
+          edges: [
+            { from:4, to:3, label:'•1000³', factor:1000000000 },
+            { from:3, to:2, label:'•10³', factor:1000 },
+            { from:3, to:1, label:'•100³', factor:1000000 },
+            { from:3, to:0, label:'•1000³', factor:1000000000 },
+            { from:2, to:1, label:'•10³', factor:1000 },
+            { from:1, to:0, label:'•10³', factor:1000 }
+          ]
+        },
+        'Μάζα': {
+          units: ['gr','kg','tn'],
+          edges: [
+            { from:2, to:1, label:'•1000', factor:1000 },
+            { from:1, to:0, label:'•1000', factor:1000 }
+          ]
+        },
+        'Χρόνος': {
+          units: ['sec','min','h'],
+          edges: [
+            { from:2, to:1, label:'•60', factor:60 },
+            { from:1, to:0, label:'•60', factor:60 },
+            { from:2, to:0, label:'•3600', factor:3600 }
+          ]
+        }
+      };
+
+      let activeCategory = 'Μήκος';
+      let exampleState = { active:false, phase:'idle', firstUnitIdx:null, secondUnitIdx:null, randomValue:null, conversionPath:null, firstEqClicked:false };
+      let quizState = { active:false, type:null, pairs:[], currentPairIdx:0, results:[], selectedOp:null, userValue:'', randomValue:null, fromIdx:null, toIdx:null, expectedResult:null, expectedLabel:null, expectedOp:null };
+
+      const tabsNav = document.getElementById('tabsNav');
+      const staircaseSteps = document.getElementById('staircaseSteps');
+      const staircaseSvg = document.getElementById('staircaseSvg');
+      const staircaseContainer = document.getElementById('staircaseContainer');
+      const exampleArea = document.getElementById('exampleArea');
+      const btnExample = document.getElementById('btnExample');
+      const btnQuiz1 = document.getElementById('btnQuiz1');
+      const btnQuiz2 = document.getElementById('btnQuiz2');
+      const quizOverlay = document.getElementById('quizOverlay');
+      const quizPopup = document.getElementById('quizPopup');
+
+      const CIRCLE_RADIUS = 12;
+
+      function getRandomValue(cat) {
+        if (cat === 'Χρόνος') { const k = Math.floor(Math.random()*250)+28; return Math.round(k*3.6*100)/100; }
+        return Math.round((Math.random()*900+100)*100)/100;
+      }
+      function buildGraph(units, edges) {
+        const g = {}; units.forEach((_,i)=>g[i]=[]);
+        edges.forEach((e,i)=>{ g[e.from].push({to:e.to, factor:e.factor, edgeIdx:i, reversed:false}); g[e.to].push({to:e.from, factor:1/e.factor, edgeIdx:i, reversed:true}); });
+        return g;
+      }
+      function findPath(g, a, b) {
+        if(a===b) return {factor:1, pathEdges:[]};
+        const vis=new Set(); const q=[{node:a, factor:1, pathEdges:[]}]; vis.add(a);
+        while(q.length){ const c=q.shift(); for(const e of g[c.node]){ if(vis.has(e.to)) continue; const nf=c.factor*e.factor; const np=[...c.pathEdges,{edgeIdx:e.edgeIdx, reversed:e.reversed}]; if(e.to===b) return {factor:nf, pathEdges:np}; vis.add(e.to); q.push({node:e.to, factor:nf, pathEdges:np}); } }
+        return null;
+      }
+      function getConversion(units, edges, from, to) {
+        const g=buildGraph(units,edges); const r=findPath(g,from,to);
+        if(!r) return null; const f=r.factor; return {factor:f, displayFactor:f>=1?f:1/f, isMultiplication:f>=1, pathEdges:r.pathEdges};
+      }
+
+      function renderTabs() {
+        tabsNav.innerHTML='';
+        Object.keys(categories).forEach(c=>{ const b=document.createElement('button'); b.className='tab-btn'+(c===activeCategory?' active':''); b.textContent=c; b.onclick=()=>switchCategory(c); tabsNav.appendChild(b); });
+      }
+      function switchCategory(cat) {
+        if(exampleState.active) resetExample();
+        activeCategory=cat; renderTabs(); renderStaircase(); exampleArea.innerHTML='';
+      }
+
+      function positionSteps() {
+        const container = staircaseContainer;
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        const margin = 40;
+        const unitsCount = categories[activeCategory].units.length;
+        const divs = staircaseSteps.querySelectorAll('.step-unit');
+        const maxSteps = unitsCount - 1;
+        const availableWidth = containerWidth - 2 * margin;
+        const availableHeight = containerHeight - 2 * margin;
+        const stepX = maxSteps > 0 ? availableWidth / maxSteps : 0;
+        const stepY = maxSteps > 0 ? availableHeight / maxSteps : 0;
+
+        divs.forEach(div => {
+          const idx = parseInt(div.dataset.index);
+          const x = margin + idx * stepX;
+          const y = containerHeight - margin - idx * stepY;
+          div.style.left = x + 'px';
+          div.style.top = y + 'px';
+        });
+      }
+
+      function renderStaircase() {
+        const cat = categories[activeCategory];
+        const units = cat.units;
+        staircaseSteps.innerHTML = '';
+        for (let i = 0; i < units.length; i++) {
+          const div = document.createElement('div');
+          div.className = 'step-unit';
+          div.textContent = units[i];
+          div.dataset.index = i;
+          div.addEventListener('click', () => onStepClick(i, div));
+          staircaseSteps.appendChild(div);
+        }
+        requestAnimationFrame(() => {
+          positionSteps();
+          requestAnimationFrame(drawArrows);
+        });
+      }
+
+      function drawArrows() {
+        const cat = categories[activeCategory];
+        const svg = staircaseSvg;
+        const container = staircaseContainer;
+        const containerRect = container.getBoundingClientRect();
+        const w = containerRect.width;
+        const h = containerRect.height;
+        svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+        svg.style.width = w + 'px';
+        svg.style.height = h + 'px';
+        svg.innerHTML = '';
+
+        const stepDivs = staircaseSteps.querySelectorAll('.step-unit');
+        const positions = [];
+        stepDivs.forEach(div => {
+          const rect = div.getBoundingClientRect();
+          positions.push({
+            cx: rect.left - containerRect.left + rect.width / 2,
+            cy: rect.top - containerRect.top + rect.height / 2
+          });
+        });
+
+        let centerX = 0, centerY = 0;
+        positions.forEach(p => { centerX += p.cx; centerY += p.cy; });
+        centerX /= positions.length;
+        centerY /= positions.length;
+
+        const adj = {};
+        positions.forEach((_, idx) => { adj[idx] = []; });
+        cat.edges.forEach((edge, edgeIdx) => {
+          adj[edge.from].push({ to: edge.to, edgeIdx });
+          adj[edge.to].push({ to: edge.from, edgeIdx });
+        });
+
+        const referenceAngle = {};
+        for (let i = 0; i < positions.length; i++) {
+          const dx = centerX - positions[i].cx;
+          const dy = centerY - positions[i].cy;
+          referenceAngle[i] = Math.atan2(dy, dx);
+        }
+
+        const nodeAngles = {};
+        for (const node in adj) {
+          const neighbors = adj[node];
+          const count = neighbors.length;
+          if (count === 0) continue;
+          const ref = referenceAngle[node];
+          const spread = Math.PI / 3;
+          const startAngle = ref - spread / 2;
+          neighbors.forEach((neighbor, i) => {
+            const angle = startAngle + (i * spread) / (count - 1 || 1);
+            if (!nodeAngles[node]) nodeAngles[node] = {};
+            nodeAngles[node][neighbor.edgeIdx] = angle;
+          });
+        }
+
+        const sortedEdges = [...cat.edges].sort((a, b) => Math.abs(a.from - a.to) - Math.abs(b.from - b.to));
+
+        sortedEdges.forEach((edge) => {
+          const edgeIdx = cat.edges.indexOf(edge);
+          const fromPos = positions[edge.from];
+          const toPos = positions[edge.to];
+          if (!fromPos || !toPos) return;
+
+          const fromAngle = nodeAngles[edge.from]?.[edgeIdx] ?? 0;
+          const toAngle = nodeAngles[edge.to]?.[edgeIdx] ?? Math.PI;
+
+          const startX = fromPos.cx + CIRCLE_RADIUS * Math.cos(fromAngle);
+          const startY = fromPos.cy + CIRCLE_RADIUS * Math.sin(fromAngle);
+          const endX = toPos.cx + CIRCLE_RADIUS * Math.cos(toAngle);
+          const endY = toPos.cy + CIRCLE_RADIUS * Math.sin(toAngle);
+
+          const dx = endX - startX;
+          const dy = endY - startY;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < 1) return;
+
+          const midX = (startX + endX) / 2;
+          const midY = (startY + endY) / 2;
+          const r = dist / 2;
+
+          const startAngleArc = Math.atan2(startY - midY, startX - midX);
+          const endAngleArc = Math.atan2(endY - midY, endX - midX);
+          const sweepFlag = 0;
+
+          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.classList.add('arrow-group');
+          g.dataset.edgeIdx = edgeIdx;
+
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          const d = `M ${startX} ${startY} A ${r} ${r} 0 0 ${sweepFlag} ${endX} ${endY}`;
+          path.setAttribute('d', d);
+          path.classList.add('arrow-path');
+          g.appendChild(path);
+
+          const perpX = -dy / dist, perpY = dx / dist;
+          const testX1 = midX + r * perpX, testY1 = midY + r * perpY;
+          const testX2 = midX - r * perpX, testY2 = midY - r * perpY;
+          let labelX = testY1 < testY2 ? testX1 : testX2;
+          let labelY = testY1 < testY2 ? testY1 : testY2;
+          const dirX = labelX - midX, dirY = labelY - midY;
+          const len = Math.sqrt(dirX*dirX + dirY*dirY);
+          labelX += (dirX / len) * 8;
+          labelY += (dirY / len) * 8;
+
+          const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          label.setAttribute('x', labelX);
+          label.setAttribute('y', labelY);
+          label.classList.add('arrow-label');
+          label.textContent = edge.label;
+          g.appendChild(label);
+
+          const tangentAngle = endAngleArc + (sweepFlag ? Math.PI/2 : -Math.PI/2);
+          const headLength = 12, headWidth = 6;
+          const tipX = endX, tipY = endY;
+          const baseX = tipX - headLength * Math.cos(tangentAngle);
+          const baseY = tipY - headLength * Math.sin(tangentAngle);
+          const leftX = baseX - headWidth * Math.sin(tangentAngle);
+          const leftY = baseY + headWidth * Math.cos(tangentAngle);
+          const rightX = baseX + headWidth * Math.sin(tangentAngle);
+          const rightY = baseY - headWidth * Math.cos(tangentAngle);
+
+          const head = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          head.setAttribute('points', `${tipX},${tipY} ${leftX},${leftY} ${rightX},${rightY}`);
+          head.classList.add('arrow-head');
+          g.appendChild(head);
+
+          svg.appendChild(g);
+        });
+      }
+
+      window.addEventListener('resize', () => {
+        clearTimeout(window._rt);
+        window._rt = setTimeout(() => { if (!quizState.active) { positionSteps(); drawArrows(); } }, 200);
+      });
+
+      function onStepClick(idx, div) {
+        if (!exampleState.active) return;
+        const ph = exampleState.phase;
+        if (ph === 'selecting_first') {
+          exampleState.firstUnitIdx = idx; exampleState.phase = 'first_selected';
+          document.querySelectorAll('.step-unit').forEach(s => s.classList.remove('blink'));
+          div.classList.add('selected-glow');
+          const val = getRandomValue(activeCategory); exampleState.randomValue = val;
+          exampleArea.innerHTML = `<span class="example-value">${val.toFixed(2)} ${categories[activeCategory].units[idx]}</span>`;
+          document.querySelectorAll('.step-unit').forEach(s => { if (s !== div) s.classList.add('blink'); });
+        } else if (ph === 'first_selected' && idx !== exampleState.firstUnitIdx) {
+          exampleState.secondUnitIdx = idx; exampleState.phase = 'second_selected';
+          document.querySelectorAll('.step-unit').forEach(s => s.classList.remove('blink'));
+          document.querySelectorAll('.step-unit').forEach(s => {
+            const i = parseInt(s.dataset.index);
+            if (i === exampleState.firstUnitIdx || i === exampleState.secondUnitIdx) s.classList.add('selected-glow');
+            else s.classList.add('dimmed');
+          });
+          const cat = categories[activeCategory];
+          const conv = getConversion(cat.units, cat.edges, exampleState.firstUnitIdx, exampleState.secondUnitIdx);
+          exampleState.conversionPath = conv;
+          document.querySelectorAll('.arrow-group').forEach(g => g.classList.add('dimmed'));
+          if (conv && conv.pathEdges.length) conv.pathEdges.forEach(pe => {
+            const grp = document.querySelector(`.arrow-group[data-edge-idx="${pe.edgeIdx}"]`);
+            if (grp) { grp.classList.remove('dimmed'); grp.classList.add('blink'); }
+          });
+          exampleArea.innerHTML = `<span class="example-value">${exampleState.randomValue.toFixed(2)} ${cat.units[exampleState.firstUnitIdx]}</span><span class="eq-sign blink" id="eqSign1">=</span>`;
+          document.getElementById('eqSign1').onclick = onFirstEq;
+        }
+      }
+
+      function onFirstEq() {
+        if (exampleState.phase !== 'second_selected') return;
+        exampleState.phase = 'operation_shown'; exampleState.firstEqClicked = true;
+        const eq = document.getElementById('eqSign1'); if (eq) { eq.classList.remove('blink'); eq.classList.add('stable'); }
+        document.querySelectorAll('.arrow-group').forEach(g => {
+          g.classList.remove('blink');
+          if (exampleState.conversionPath?.pathEdges.some(pe => g.dataset.edgeIdx == pe.edgeIdx)) {
+            g.classList.add('highlight'); g.querySelector('.arrow-path')?.classList.add('highlight-line');
+          }
+        });
+        const cat = categories[activeCategory]; const val = exampleState.randomValue; const conv = exampleState.conversionPath;
+        const op = conv ? (conv.isMultiplication ? `${val.toFixed(2)} • ${conv.displayFactor}` : `${val.toFixed(2)} : ${conv.displayFactor}`) : '';
+        exampleArea.innerHTML = `<span class="example-value">${val.toFixed(2)} ${cat.units[exampleState.firstUnitIdx]}</span><span class="eq-sign stable">=</span><span class="operation-text">${op}</span><span class="eq-sign blink" id="eqSign2">=</span>`;
+        document.getElementById('eqSign2').onclick = onSecondEq;
+      }
+
+      function onSecondEq() {
+        if (exampleState.phase !== 'operation_shown') return;
+        exampleState.phase = 'result_shown';
+        const eq = document.getElementById('eqSign2'); if (eq) { eq.classList.remove('blink'); eq.classList.add('stable'); }
+        const cat = categories[activeCategory]; const val = exampleState.randomValue; const conv = exampleState.conversionPath;
+        const result = conv ? val * conv.factor : val; const resStr = parseFloat(result.toFixed(10)).toString();
+        exampleArea.innerHTML = `<span class="example-value">${val.toFixed(2)} ${cat.units[exampleState.firstUnitIdx]}</span><span class="eq-sign stable">=</span><span class="operation-text">${exampleArea.querySelector('.operation-text')?.textContent || ''}</span><span class="eq-sign stable">=</span><span class="result-text">${resStr} ${cat.units[exampleState.secondUnitIdx]}</span>`;
+      }
+
+      function resetExample() {
+        exampleState = { active: false, phase: 'idle', firstUnitIdx: null, secondUnitIdx: null, randomValue: null, conversionPath: null, firstEqClicked: false };
+        document.querySelectorAll('.step-unit').forEach(s => s.classList.remove('blink', 'selected-glow', 'dimmed'));
+        document.querySelectorAll('.arrow-group').forEach(g => { g.classList.remove('dimmed', 'blink', 'highlight'); g.querySelector('.arrow-path')?.classList.remove('highlight-line'); });
+        exampleArea.innerHTML = '';
+      }
+
+      btnExample.onclick = () => {
+        if (exampleState.active) resetExample();
+        exampleState.active = true; exampleState.phase = 'selecting_first';
+        document.querySelectorAll('.step-unit').forEach(s => { s.classList.remove('selected-glow', 'dimmed'); s.classList.add('blink'); });
+        document.querySelectorAll('.arrow-group').forEach(g => { g.classList.remove('blink', 'highlight'); g.classList.add('dimmed'); g.querySelector('.arrow-path')?.classList.remove('highlight-line'); });
+        exampleArea.innerHTML = '';
+      };
+
+      function generateQuizPairs() {
+        const u = categories[activeCategory].units; const pairs = [];
+        for (let i = 0; i < u.length; i++) for (let j = 0; j < u.length; j++) if (i !== j) pairs.push({ from: i, to: j });
+        for (let k = pairs.length - 1; k > 0; k--) { const l = Math.floor(Math.random() * (k + 1)); [pairs[k], pairs[l]] = [pairs[l], pairs[k]]; }
+        return pairs;
+      }
+
+      function startQuiz1() {
+        const pairs = generateQuizPairs(); if (!pairs.length) return;
+        quizState = { active: true, type: 1, pairs, currentPairIdx: 0, results: [], selectedOp: null, userValue: '', randomValue: null, fromIdx: null, toIdx: null, expectedResult: null, expectedLabel: null, expectedOp: null };
+        quizOverlay.classList.remove('hidden'); showQuiz1Question();
+      }
+
+      function showQuiz1Question() {
+        if (quizState.currentPairIdx >= quizState.pairs.length) { showQuizResults(); return; }
+        const pair = quizState.pairs[quizState.currentPairIdx];
+        const cat = categories[activeCategory];
+        const conv = getConversion(cat.units, cat.edges, pair.from, pair.to);
+        const factor = conv ? conv.factor : 1;
+        const isMul = factor >= 1;
+        const displayFactor = conv ? conv.displayFactor : 1;
+        const expectedLabel = isMul ? `•${displayFactor}` : `:${displayFactor}`;
+        const expectedOp = isMul ? '•' : ':';
+        const rv = getRandomValue(activeCategory);
+        quizState.fromIdx = pair.from; quizState.toIdx = pair.to; quizState.randomValue = rv;
+        quizState.expectedLabel = expectedLabel; quizState.expectedOp = expectedOp;
+        quizState.expectedResult = rv * factor;
+        quizState.selectedOp = null; quizState.userValue = '';
+        quizPopup.innerHTML = `
+          <div class="quiz-popup-header"><span>Quiz 1: Ετικέτα βέλους (${activeCategory})</span><div><button class="quiz-refresh-btn" id="qr">↻</button><button class="quiz-close-btn" id="qc">✕</button></div></div>
+          <div style="text-align:center;color:var(--text-secondary);">Ερώτηση ${quizState.currentPairIdx+1}/${quizState.pairs.length}</div>
+          <div class="quiz-question">
+            <span class="quiz-value">${rv.toFixed(2)} ${cat.units[pair.from]} = ${rv.toFixed(2)}</span>
+            <button class="quiz-op-btn" data-op="•">•</button>
+            <button class="quiz-op-btn" data-op=":">:</button>
+            <input class="quiz-input" id="qi" inputmode="decimal" placeholder="αριθμός">
+            <span class="quiz-target-unit blink" id="qt">${cat.units[pair.to]}</span>
+          </div>
+          <div style="text-align:center;color:var(--text-secondary);font-size:0.8rem;">Επίλεξε • ή : και γράψε τον αριθμό</div>`;
+        document.querySelectorAll('.quiz-op-btn').forEach(b => b.onclick = () => {
+          document.querySelectorAll('.quiz-op-btn').forEach(x => x.classList.remove('selected-op'));
+          b.classList.add('selected-op');
+          quizState.selectedOp = b.dataset.op;
+        });
+        document.getElementById('qi').oninput = function () { quizState.userValue = this.value; };
+        document.getElementById('qi').onkeydown = e => { if (e.key === 'Enter') submitQuiz1(); };
+        document.getElementById('qt').onclick = submitQuiz1;
+        document.getElementById('qc').onclick = closeQuiz; document.getElementById('qr').onclick = startQuiz1;
+      }
+
+      function submitQuiz1() {
+        if (!quizState.selectedOp) { alert('Επίλεξε • ή :'); return; }
+        const userNum = quizState.userValue.trim().replace(',', '.');
+        if (userNum === '') { alert('Γράψε τον αριθμό.'); return; }
+        const userNumVal = parseFloat(userNum);
+        if (isNaN(userNumVal)) { alert('Μη έγκυρος αριθμός.'); return; }
+        const userLabel = quizState.selectedOp + userNum;
+        const correct = (userLabel === quizState.expectedLabel);
+        const cat = categories[activeCategory];
+        quizState.results.push({
+          fromUnit: cat.units[quizState.fromIdx],
+          toUnit: cat.units[quizState.toIdx],
+          value: quizState.randomValue,
+          expectedLabel: quizState.expectedLabel,
+          userLabel,
+          correct
+        });
+        quizState.currentPairIdx++;
+        showQuiz1Question();
+      }
+
+      function startQuiz2() {
+        const pairs = generateQuizPairs(); if (!pairs.length) return;
+        quizState = { active: true, type: 2, pairs, currentPairIdx: 0, results: [], selectedOp: null, userValue: '', randomValue: null, fromIdx: null, toIdx: null, expectedResult: null, expectedLabel: null, expectedOp: null };
+        quizOverlay.classList.remove('hidden'); showQuiz2Question();
+      }
+
+      function showQuiz2Question() {
+        if (quizState.currentPairIdx >= quizState.pairs.length) { showQuizResults(); return; }
+        const pair = quizState.pairs[quizState.currentPairIdx];
+        const cat = categories[activeCategory];
+        const conv = getConversion(cat.units, cat.edges, pair.from, pair.to);
+        const factor = conv ? conv.factor : 1;
+        const rv = getRandomValue(activeCategory);
+        const expected = rv * factor;
+        quizState.fromIdx = pair.from; quizState.toIdx = pair.to; quizState.randomValue = rv; quizState.expectedResult = expected; quizState.userValue = '';
+        quizPopup.innerHTML = `
+          <div class="quiz-popup-header"><span>Quiz 2: Αριθμός (${activeCategory})</span><div><button class="quiz-refresh-btn" id="qr">↻</button><button class="quiz-close-btn" id="qc">✕</button></div></div>
+          <div style="text-align:center;color:var(--text-secondary);">Ερώτηση ${quizState.currentPairIdx+1}/${quizState.pairs.length}</div>
+          <div class="quiz-question">
+            <span class="quiz-value">${rv.toFixed(2)} ${cat.units[pair.from]} =</span>
+            <input class="quiz-input" id="qi" inputmode="decimal" placeholder=";">
+            <span class="quiz-target-unit blink" id="qt">${cat.units[pair.to]}</span>
+          </div>
+          <div style="text-align:center;color:var(--text-secondary);font-size:0.8rem;">Γράψε το αποτέλεσμα και πάτησε τη μονάδα</div>`;
+        document.getElementById('qi').oninput = function () { quizState.userValue = this.value; };
+        document.getElementById('qi').onkeydown = e => { if (e.key === 'Enter') submitQuiz2(); };
+        document.getElementById('qt').onclick = submitQuiz2;
+        document.getElementById('qc').onclick = closeQuiz; document.getElementById('qr').onclick = startQuiz2;
+      }
+
+      function submitQuiz2() {
+        const v = quizState.userValue.trim().replace(',', '.');
+        if (v === '') { alert('Γράψε τον αριθμό.'); return; }
+        const uv = parseFloat(v);
+        if (isNaN(uv)) { alert('Μη έγκυρος αριθμός.'); return; }
+        const correct = Math.abs(uv - quizState.expectedResult) < 0.001;
+        const cat = categories[activeCategory];
+        quizState.results.push({
+          fromUnit: cat.units[quizState.fromIdx], toUnit: cat.units[quizState.toIdx],
+          value: quizState.randomValue, expectedResult: quizState.expectedResult,
+          userVal: uv, correct
+        });
+        quizState.currentPairIdx++;
+        showQuiz2Question();
+      }
+
+      function showQuizResults() {
+        quizState.active = false;
+        const correctCount = quizState.results.filter(r => r.correct).length;
+        const total = quizState.results.length;
+        let h = `<div class="quiz-popup-header"><span>Αποτελέσματα</span><div><button class="quiz-refresh-btn" id="qr">↻</button><button class="quiz-close-btn" id="qc">✕</button></div></div>
+          <div style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:1rem;">Σκορ: <span style="color:var(--accent);">${correctCount}</span> / ${total}</div>
+          <div class="quiz-results">`;
+
+        quizState.results.forEach(r => {
+          const valStr = r.value.toFixed(2);
+          if (quizState.type === 1) {
+            const correctLine = `${valStr} ${r.fromUnit} = ${valStr} ${r.expectedLabel} ${r.toUnit}`;
+            const userLine = `${valStr} ${r.fromUnit} = ${valStr} ${r.userLabel} ${r.toUnit}`;
+            if (r.correct) {
+              h += `<div class="quiz-result-item correct">✅ ${correctLine}</div>`;
+            } else {
+              h += `<div class="quiz-result-item wrong">❌ ${userLine}</div>`;
+              h += `<div class="quiz-result-item warning">⚠️ ${correctLine}</div>`;
+            }
+          } else {
+            const expectedRes = parseFloat(r.expectedResult.toFixed(6));
+            const correctLine = `${valStr} ${r.fromUnit} = ${expectedRes} ${r.toUnit}`;
+            const userLine = `${valStr} ${r.fromUnit} = ${r.userVal} ${r.toUnit}`;
+            if (r.correct) {
+              h += `<div class="quiz-result-item correct">✅ ${correctLine}</div>`;
+            } else {
+              h += `<div class="quiz-result-item wrong">❌ ${userLine}</div>`;
+              h += `<div class="quiz-result-item warning">⚠️ ${correctLine}</div>`;
+            }
+          }
+        });
+        h += '</div>';
+        quizPopup.innerHTML = h;
+        document.getElementById('qc').onclick = closeQuiz;
+        document.getElementById('qr').onclick = () => { if (quizState.type === 1) startQuiz1(); else startQuiz2(); };
+      }
+
+      function closeQuiz() { quizOverlay.classList.add('hidden'); quizState.active = false; }
+
+      btnQuiz1.onclick = () => { if (exampleState.active) resetExample(); startQuiz1(); };
+      btnQuiz2.onclick = () => { if (exampleState.active) resetExample(); startQuiz2(); };
+      quizOverlay.onclick = e => { if (e.target === quizOverlay) closeQuiz(); };
+
+      renderTabs();
+      switchCategory('Μήκος');
+    })();
+  </script>
+</body>
+</html>
