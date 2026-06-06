@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ΜΑΓΝΗΤΙΚΟ ΠΕΔΙΟ - Χριστόφορος Κατσιλέρος</title>
+    <!-- MathJax (εξαίρεση dependency, για σωστή εμφάνιση μαθηματικών & οριζόντιων κλασμάτων) -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #121212;
+            color: #eaece5;
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2c2c2e;
+        }
+
+        .back-btn {
+            background-color: #2a2a2e;
+            color: #ffd966;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #3a3a3e;
+        }
+
+        .back-btn:hover {
+            background-color: #3a3a40;
+            color: #ffea9e;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: #ffde9c;
+            letter-spacing: -0.3px;
+        }
+
+        .section-title {
+            background: #1e1e24;
+            padding: 12px 18px;
+            border-radius: 28px;
+            margin: 30px 0 20px 0;
+            font-size: 1.6rem;
+            font-weight: 600;
+            border-left: 6px solid #5e9bff;
+            color: #f5e7c8;
+        }
+
+        .question-card {
+            background: #1e1e1e;
+            border-radius: 28px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.7rem;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            border: 1px solid #2c2c2e;
+        }
+
+        .question-text {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 1rem;
+            color: #f2f0e6;
+            word-break: break-word;
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin: 0.8rem 0 1rem 0;
+            align-items: center;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #2a2a2a;
+            padding: 6px 14px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option:hover {
+            background: #3a3a3e;
+        }
+
+        input[type="radio"] {
+            accent-color: #5e9bff;
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        label {
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .check-btn {
+            background: #2e3b2c;
+            border: none;
+            color: #d4e6c3;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 36px;
+            margin-top: 8px;
+            margin-right: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            border: 1px solid #4a6a3a;
+        }
+
+        .check-btn:hover {
+            background: #3e553a;
+            color: #ffffff;
+            border-color: #6f9e4f;
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 12px 16px;
+            border-radius: 20px;
+            background: #262628;
+            font-size: 0.9rem;
+            border-left: 4px solid #6c757d;
+        }
+
+        .correct-feedback {
+            border-left-color: #2ecc71;
+            background: #1e2a1c;
+        }
+
+        .wrong-feedback {
+            border-left-color: #e67e22;
+            background: #2c1e1a;
+        }
+
+        .justification {
+            margin-top: 8px;
+            color: #cbcbc2;
+            line-height: 1.45;
+        }
+
+        .justification strong {
+            color: #ffd966;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #2c2c34;
+            border-radius: 30px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            margin-bottom: 8px;
+            color: #bbbbaa;
+        }
+
+        footer {
+            text-align: right;
+            margin-top: 50px;
+            padding: 15px 20px;
+            font-size: 0.8rem;
+            color: #8e8e93;
+            border-top: 1px solid #2c2c2e;
+        }
+
+        .signature {
+            font-family: monospace;
+            letter-spacing: 1px;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 650px) {
+            body {
+                padding: 12px;
+            }
+            .question-card {
+                padding: 1rem;
+            }
+            .options {
+                gap: 0.5rem;
+            }
+            .option {
+                padding: 4px 12px;
+            }
+            .question-text {
+                font-size: 0.95rem;
+            }
+            .section-title {
+                font-size: 1.3rem;
+            }
+            .check-btn {
+                padding: 6px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="top-bar">
+        <a href="../index.html" class="back-btn">← Επιστροφή</a>
+        <h1>🧲 ΜΑΓΝΗΤΙΚΟ ΠΕΔΙΟ<br><span style="font-size:0.8rem; color:#b9b9b0;">Απαντήσεις με δικαιολόγηση - Χριστόφορος Κατσιλέρος</span></h1>
+    </div>
+
+    <div id="questions-container"></div>
+    <footer>
+        <div class="signature">Κώστας Κούδας</div>
+    </footer>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // Ερωτήσεις Πολλαπλής Επιλογής (1-25) – ακριβές κείμενο από PDF
+    // --------------------------------------------------------------
+    const mcQuestions = [
+        { id: 1, text: "Πηγή του μαγνητικού πεδίου είναι:", options: ["α. Τα ακίνητα ηλεκτρικά φορτία.", "β. Τα κινούμενα ηλεκτρικά φορτία (ηλεκτρικά ρεύματα).", "γ. Τα σταθερά μαγνητικά μονόπολα.", "δ. Μόνο οι μόνιμοι μαγνήτες."], correct: "β", justification: "Το μαγνητικό πεδίο δημιουργείται από φορτία σε κίνηση, είτε αυτά αποτελούν ηλεκτρικό ρεύμα σε αγωγό είτε κινούνται ελεύθερα στο χώρο." },
+        { id: 2, text: "Η μονάδα μέτρησης της έντασης του μαγνητικού πεδίου B στο S.I. είναι το:", options: ["α. Weber (Wb)", "β. Tesla (T)", "γ. Ampere (A)", "δ. Newton (N)"], correct: "β", justification: "Η μονάδα του Β ορίζεται ως \\(1\\, \\text{T} = 1\\, \\text{N}/(\\text{A}\\cdot\\text{m})\\)." },
+        { id: 3, text: "Ένα σωματίδιο με φορτίο q εισέρχεται σε ομογενές μαγνητικό πεδίο B με ταχύτητα v παράλληλη στις δυναμικές γραμμές. Η δύναμη Lorentz που δέχεται είναι:", options: ["α. \\(F = qvB\\)", "β. \\(F = qvB/2\\)", "γ. Μηδέν.", "δ. \\(F = qv^2B\\)"], correct: "γ", justification: "Η δύναμη δίνεται από τον τύπο \\(F = qvB\\text{ημ}\\phi\\). Όταν η κίνηση γίνεται παράλληλα προς τις μαγνητικές γραμμές, \\(\\phi = 0^\\circ\\) ή \\(180^\\circ\\), άρα \\(\\text{ημ}\\phi = 0\\)." },
+        { id: 4, text: "Ένα φορτισμένο σωματίδιο κινείται μέσα σε ομογενές μαγνητικό πεδίο. Η μαγνητική δύναμη F:", options: ["α. Μεταβάλλει το μέτρο της ταχύτητας του σωματιδίου.", "β. Παράγει έργο (W > 0).", "γ. Είναι πάντα κάθετη στην ταχύτητα v.", "δ. Είναι παράλληλη στο μαγνητικό πεδίο Β."], correct: "γ", justification: "Η δύναμη Lorentz είναι πάντα κάθετη στο επίπεδο που ορίζουν η ταχύτητα v και το πεδίο Β, επομένως είναι κάθετη στην ταχύτητα." },
+        { id: 5, text: "Σε έναν φασματογράφο μάζας, ένα ιόν επιταχύνεται από την ηρεμία μέσω διαφοράς δυναμικού V και στη συνέχεια εισέρχεται σε ομογενές μαγνητικό πεδίο Β. Η ακτίνα R της κυκλικής τροχιάς του είναι:", options: ["α. Ανάλογη της τάσης V.", "β. Αντιστρόφως ανάλογη της τάσης V.", "γ. Ανάλογη της τετραγωνικής ρίζας της τάσης \\(\\sqrt{V}\\).", "δ. Ανεξάρτητη της τάσης V."], correct: "γ", justification: "Το σωματίδιο αποκτά ταχύτητα \\(v = \\sqrt{2qV/m}\\). Η ακτίνα είναι \\(R = mv/(qB)\\). Συνδυάζοντας, προκύπτει \\(R = \\frac{1}{B}\\sqrt{\\frac{2mV}{q}}\\), άρα η ακτίνα είναι ανάλογη του \\(\\sqrt{V}\\)." },
+        { id: 6, text: "Ένας ευθύγραμμος αγωγός μήκους ℓ διαρρέεται από ρεύμα Ι και βρίσκεται μέσα σε ομογενές μαγνητικό πεδίο Β, κάθετα στις δυναμικές γραμμές. Η δύναμη Laplace F που δέχεται είναι:", options: ["α. \\(F = BI/\\ell\\)", "β. \\(F = BI\\ell\\)", "γ. \\(F = I\\ell/B\\)", "δ. Μηδέν."], correct: "β", justification: "Από τη σχέση \\(F = B I \\ell \\text{ημ}\\phi\\), για \\(\\phi = 90^\\circ\\) έχουμε \\(F_{\\max} = B I \\ell\\)." },
+        { id: 7, text: "Δύο παράλληλοι αγωγοί που διαρρέονται από αντίρροπα ρεύματα:", options: ["α. Έλκονται.", "β. Απωθούνται.", "γ. Δεν ασκούν καμία δύναμη μεταξύ τους.", "δ. Περιστρέφονται γύρω από το κοινό τους κέντρο."], correct: "β", justification: "Σύμφωνα με τη θεωρία, αγωγοί με ομόρροπα ρεύματα έλκονται, ενώ με αντίρροπα ρεύματα απωθούνται." },
+        { id: 8, text: "Ένα φορτισμένο σωματίδιο εκτελεί ομαλή κυκλική κίνηση μέσα σε ομογενές μαγνητικό πεδίο Β. Αν διπλασιάσουμε την ταχύτητά του v, η περίοδος περιφοράς Τ:", options: ["α. Διπλασιάζεται.", "β. Υποδιπλασιάζεται.", "γ. Παραμένει σταθερή.", "δ. Τετραπλασιάζεται."], correct: "γ", justification: "Η περίοδος δίνεται από τη σχέση \\(T = \\frac{2\\pi m}{qB}\\). Στον τύπο αυτό δεν υπεισέρχεται η ταχύτητα v, άρα η περίοδος είναι ανεξάρτητη της ταχύτητας." },
+        { id: 9, text: "Ο νόμος του Ampère συνδέει:", options: ["α. Το μαγνητικό πεδίο με τις πηγές του (ρεύματα).", "β. Τη μαγνητική δύναμη με την επιτάχυνση.", "γ. Τη μαγνητική ροή με την ηλεκτρική τάση.", "δ. Τη μάζα με την ενέργεια."], correct: "α", justification: "Ο νόμος του Ampère δίνει τη σχέση μεταξύ της έντασης του μαγνητικού πεδίου και του αλγεβρικού αθροίσματος των ρευμάτων που περικλείει μια κλειστή διαδρομή." },
+        { id: 10, text: "Στον επιλογέα ταχυτήτων, ένα σωματίδιο κινείται ευθύγραμμα και ομαλά όταν η ταχύτητά του v ισούται με:", options: ["α. \\(B/E\\)", "β. \\(E \\cdot B\\)", "γ. \\(E/B\\)", "δ. \\(\\sqrt{E/B}\\)"], correct: "γ", justification: "Στην περίπτωση αυτή η ηλεκτρική δύναμη μέτρου \\(|q|E\\) είναι αντίθετη της μαγνητικής μέτρου \\(|q|vB\\), άρα \\(v = E/B\\)." },
+        { id: 11, text: "Η διεύθυνση της δύναμης Lorentz είναι πάντα:", options: ["α. Παράλληλη στην ταχύτητα v.", "β. Παράλληλη στο μαγνητικό πεδίο B.", "γ. Κάθετη τόσο στην ταχύτητα v όσο και στο μαγνητικό πεδίο B.", "δ. Τυχαία."], correct: "γ", justification: "Προκύπτει από τον κανόνα των τριών δακτύλων του δεξιού χεριού." },
+        { id: 12, text: "Αν ένα φορτισμένο σωματίδιο εισέλθει σε ομογενές μαγνητικό πεδίο με ταχύτητα v που σχηματίζει γωνία \\(0 < \\phi < 90^\\circ\\) με το B, η τροχιά του θα είναι:", options: ["α. Κύκλος.", "β. Ευθεία γραμμή.", "γ. Έλικα (ελικοειδής).", "δ. Παραβολή."], correct: "γ", justification: "Η κίνηση αναλύεται σε μια ευθύγραμμη ομαλή (παράλληλα στο Β) και μια ομαλή κυκλική (κάθετα στο Β), οπότε η σύνθεση είναι έλικα." },
+        { id: 13, text: "Το μέτρο της έντασης του μαγνητικού πεδίου στο εσωτερικό σωληνοειδούς πηνίου είναι B. Το μέτρο της έντασης στα άκρα του σωληνοειδούς είναι:", options: ["α. B.", "β. \\(B/4\\).", "γ. \\(B/3\\).", "δ. \\(B/2\\)."], correct: "δ", justification: "Αναφέρεται στη θεωρία και μπορεί να αποδειχτεί θεωρώντας πως ένα σωληνοειδές είναι η σε σειρά συνδεσμολογία δύο ίδιων πηνίων (μισού αριθμού σπειρών και μισού μήκους) με την ίδια πυκνότητα σπειρών, που διαρρέονται από την ίδια ένταση ρεύματος (i). Άρα, η ένταση στο εσωτερικό (μέσο) του αρχικού πηνίου είναι η επαλληλία δύο ίσων εντάσεων στο κοινό άκρο των δύο επιμέρους πηνίων." },
+        { id: 14, text: "Το μαγνητικό πεδίο στο κέντρο ενός κυκλικού ρευματοφόρου αγωγού ακτίνας R είναι:", options: ["α. Ανάλογο του R.", "β. Αντιστρόφως ανάλογο του R.", "γ. Ανάλογο του \\(R^2\\).", "δ. Ανεξάρτητο του R."], correct: "β", justification: "Από τη σχέση \\(B = \\frac{\\mu_0 I}{2R}\\), φαίνεται ότι το Β είναι αντιστρόφως ανάλογο της ακτίνας." },
+        { id: 15, text: "Η σταθερά μ₀ ονομάζεται:", options: ["α. Μαγνητική επιδεκτικότητα του κενού.", "β. Μαγνητική διαπερατότητα του κενού.", "γ. Διηλεκτρική σταθερά.", "δ. Σταθερά του Coulomb."], correct: "β", justification: "Είναι η θεμελιώδης σταθερά του μαγνητισμού στο κενό." },
+        { id: 16, text: "Στον φασματογράφο μάζας, η ακτίνα R της κυκλικής τροχιάς ιόντων με το ίδιο q, v, B, είναι ανάλογη:", options: ["α. Του τετραγώνου του φορτίου τους.", "β. Της μάζας m των ιόντων.", "γ. Της έντασης του μαγνητικού πεδίου.", "δ. Της θερμοκρασίας."], correct: "β", justification: "\\(R = \\frac{mv}{qB}\\). Για ιόντα με το ίδιο q, v, B, η ακτίνα R καθορίζεται από τη μάζα m." },
+        { id: 17, text: "Ένα πρωτόνιο και ένα ηλεκτρόνιο εισέρχονται με την ίδια ταχύτητα v κάθετα σε ομογενές μαγνητικό πεδίο Β. Ποιο σωματίδιο θα διαγράψει τροχιά με μεγαλύτερη ακτίνα;", options: ["α. Το ηλεκτρόνιο.", "β. Το πρωτόνιο.", "γ. Και τα δύο θα έχουν την ίδια ακτίνα.", "δ. Κανένα, θα κινηθούν ευθύγραμμα."], correct: "β", justification: "Επειδή \\(R = \\frac{mv}{qB}\\) και το πρωτόνιο έχει πολύ μεγαλύτερη μάζα από το ηλεκτρόνιο (\\(m_p \\gg m_e\\)), ενώ έχουν το ίδιο κατά μέτρο φορτίο, η ακτίνα του πρωτονίου θα είναι μεγαλύτερη." },
+        { id: 18, text: "Η δύναμη Laplace που ασκείται σε αγωγό είναι μηδέν όταν:", options: ["α. Ο αγωγός έχει ρευματοφόρα τμήματα εκτός του μαγνητικού πεδίου.", "β. Ο αγωγός είναι παράλληλος στις δυναμικές γραμμές του πεδίου.", "γ. Το ρεύμα είναι πολύ μεγάλο.", "δ. Το μαγνητικό πεδίο είναι ομογενές."], correct: "β", justification: "Για \\(\\phi = 0^\\circ\\), ο όρος \\(\\text{ημ}\\phi\\) στον τύπο \\(F = B I \\ell \\text{ημ}\\phi\\) μηδενίζεται." },
+        { id: 19, text: "Ο κανόνας του δεξιού χεριού για τη φορά των δυναμικών γραμμών ευθύγραμμου αγωγού ορίζει ότι:", options: ["α. Ο αντίχειρας δείχνει το Β και τα τέσσερα δάχτυλα το Ι.", "β. Ο αντίχειρας δείχνει τη φορά του ρεύματος Ι και τα τέσσερα δάχτυλα τη φορά του Β.", "γ. Η παλάμη δείχνει τη δύναμη.", "δ. Τα τέσσερα δάχτυλα δείχνουν τη φορά της ταχύτητας."], correct: "β", justification: "Είναι ο βασικός κανόνας προσδιορισμού της φοράς του πεδίου γύρω από αγωγό." },
+        { id: 20, text: "Σε ένα σωληνοειδές πηνίο, το μαγνητικό πεδίο στο εσωτερικό του είναι:", options: ["α. Μηδέν.", "β. Ανομοιογενές.", "γ. Πρακτικά ομογενές και με μαγνητικές γραμμές παράλληλες στον άξονά του.", "δ. Κυκλικό γύρω από τον άξονα."], correct: "γ", justification: "Οι δυναμικές γραμμές στο εσωτερικό είναι παράλληλες ευθείες." },
+        { id: 21, text: "Η δύναμη που ασκείται μεταξύ δύο παράλληλων ρευματοφόρων αγωγών είναι:", options: ["α. Ηλεκτροστατική δύναμη.", "β. Μαγνητική δύναμη (Laplace).", "γ. Δύναμη τριβής.", "δ. Βαρυτική δύναμη."], correct: "β", justification: "Είναι αποτέλεσμα της αλληλεπίδρασης του μαγνητικού πεδίου του ενός αγωγού με το ρεύμα του άλλου." },
+        { id: 22, text: "Η μεταβολή της ορμής που υφίσταται ένα φορτισμένο σωματίδιο λόγω της μαγνητικής δύναμης Lorentz:", options: ["α. Αλλάζει την κινητική του ενέργεια.", "β. Είναι πάντα μηδέν.", "γ. Αφορά μόνο στην κατεύθυνση της ορμής του, όχι στο μέτρο της.", "δ. Είναι παράλληλη στην ταχύτητα."], correct: "γ", justification: "Επειδή \\(\\mathbf{F} \\perp \\mathbf{v}\\), η δύναμη αλλάζει μόνο τη διεύθυνση της κίνησης." },
+        { id: 23, text: "Αν σε έναν φασματογράφο μάζας διπλασιάσουμε την επιταχύνουσα τάση V, τότε η ακτίνα R της κυκλικής τροχιάς του ιόντος θα γίνει:", options: ["α. \\(2R\\)", "β. \\(4R\\)", "γ. \\(\\sqrt{2}R\\)", "δ. \\(R/\\sqrt{2}\\)"], correct: "γ", justification: "Εφόσον η ακτίνα R είναι ανάλογη της τετραγωνικής ρίζας της τάσης \\(\\sqrt{V}\\), ο διπλασιασμός της τάσης οδηγεί σε αύξηση της ακτίνας κατά \\(\\sqrt{2}\\) φορές." },
+        { id: 24, text: "Η πειραματική μέτρηση του λόγου e/m έγινε από τον:", options: ["α. Newton", "β. Ampère", "γ. Thomson", "δ. Faraday"], correct: "γ", justification: "Ο J.J. Thomson χρησιμοποίησε καθοδικό σωλήνα για να προσδιορίσει τον ειδικό λόγο φορτίου προς μάζα του ηλεκτρονίου." },
+        { id: 25, text: "Ένας κυκλικός αγωγός διαρρέεται από ρεύμα. Αν διπλασιάσουμε την ένταση του ρεύματος Ι και την ακτίνα R, το μαγνητικό πεδίο στο κέντρο του:", options: ["α. Διπλασιάζεται.", "β. Υποδιπλασιάζεται.", "γ. Παραμένει το ίδιο.", "δ. Τετραπλασιάζεται."], correct: "γ", justification: "\\(B' = \\frac{\\mu_0 (2I)}{2 \\cdot 2R} = \\frac{\\mu_0 I}{2R} = B\\)." }
+    ];
+
+    // --------------------------------------------------------------
+    // Ερωτήσεις Σωστού-Λάθους (26-50) – αυτούσιες δικαιολογήσεις από PDF
+    // --------------------------------------------------------------
+    const tfQuestions = [
+        { id: 26, text: "Το μαγνητικό πεδίο ασκεί δύναμη σε ακίνητα ηλεκτρικά φορτία.", correct: "Λάθος", justification: "Η δύναμη Lorentz \\(F = qvB\\text{ημ}\\phi\\) απαιτεί ταχύτητα \\(v \\neq 0\\)." },
+        { id: 27, text: "Η μαγνητική δύναμη Lorentz δεν παράγει έργο.", correct: "Σωστό", justification: "Η δύναμη είναι πάντα κάθετη στη μετατόπιση, άρα \\(W = F \\cdot \\Delta s \\cdot \\text{συν}90^\\circ = 0\\)." },
+        { id: 28, text: "Η μονάδα έντασης ρεύματος Ampere (1 Α) ορίζεται μέσω της μαγνητικής δύναμης που ασκείται μεταξύ δύο παράλληλων αγωγών.", correct: "Σωστό", justification: "Το 1 Α ορίζεται ως το ρεύμα που προκαλεί δύναμη \\(2 \\cdot 10^{-7}\\) Ν ανά μέτρο μήκους μεταξύ δύο αγωγών σε απόσταση 1 m." },
+        { id: 29, text: "Ο νόμος των Biot και Savart χρησιμοποιείται για τον υπολογισμό του μαγνητικού πεδίου που δημιουργεί ένα στοιχειώδες τμήμα ρευματοφόρου αγωγού.", correct: "Σωστό", justification: "Αποτελεί τη θεμελιώδη σχέση για τον υπολογισμό του dB." },
+        { id: 30, text: "Δύο παράλληλοι αγωγοί που διαρρέονται από ομόρροπα ρεύματα απωθούνται.", correct: "Λάθος", justification: "Οι αγωγοί με ομόρροπα ρεύματα έλκονται." },
+        { id: 31, text: "Η ακτίνα της κυκλικής τροχιάς φορτισμένου σωματιδίου σε Β πεδίο είναι αντιστρόφως ανάλογη της έντασης του πεδίου.", correct: "Σωστό", justification: "Από τη σχέση \\(R = \\frac{mv}{qB}\\)." },
+        { id: 32, text: "Η μαγνητική δύναμη Lorentz μεταβάλλει την κινητική ενέργεια του σωματιδίου.", correct: "Λάθος", justification: "Εφόσον το έργο της δύναμης είναι μηδέν, η κινητική ενέργεια παραμένει σταθερή." },
+        { id: 33, text: "Ο κανόνας των τριών δακτύλων του δεξιού χεριού χρησιμοποιείται για την εύρεση της φοράς της δύναμης Laplace.", correct: "Σωστό", justification: "Αντίχειρας στο Ι, δείκτης στο Β, μέσος στη δύναμη F." },
+        { id: 34, text: "Η μαγνητική διαπερατότητα μ₀ έχει μονάδα μέτρησης T·m/A.", correct: "Σωστό", justification: "Προκύπτει από τους τύπους του μαγνητικού πεδίου (π.χ. ευθυγράμμου)." },
+        { id: 35, text: "Το μαγνητικό πεδίο ευθύγραμμου αγωγού απείρου μήκους είναι ομογενές.", correct: "Λάθος", justification: "Η ένταση μειώνεται όσο απομακρυνόμαστε από τον αγωγό (\\(B \\propto 1/r\\))." },
+        { id: 36, text: "Αν ένα φορτισμένο σωματίδιο εισέλθει σε μαγνητικό πεδίο και δεν εκτραπεί, τότε σίγουρα δεν υπάρχει μαγνητικό πεδίο στο χώρο.", correct: "Λάθος", justification: "Μπορεί να κινείται παράλληλα ή αντιπαράλληλα στις δυναμικές γραμμές, οπότε η δύναμη είναι μηδέν." },
+        { id: 37, text: "Στον φασματογράφο μάζας χρησιμοποιούνται ιόντα με την ίδια ταχύτητα.", correct: "Σωστό", justification: "Γι’ αυτό το σκοπό προηγείται ο επιλογέας ταχυτήτων, ώστε να διαχωριστούν ιόντα με βάση τη μάζα και όχι την ταχύτητα." },
+        { id: 38, text: "Η δύναμη Laplace είναι μέγιστη όταν ο αγωγός είναι κάθετος στο Β.", correct: "Σωστό", justification: "Διότι τότε \\(\\text{ημ}90^\\circ = 1\\)." },
+        { id: 39, text: "Το μήκος της τροχιάς S που διαγράφει φορτισμένο σωματίδιο σε χρονική διάρκεια Δt εντός ομογενούς μαγνητικού πεδίου μπορεί σε κάθε περίπτωση να υπολογιστεί από τη σχέση S = v·Δt.", correct: "Σωστό", justification: "Το μέτρο της ταχύτητας δε μεταβάλλεται κατά τη διάρκεια της κίνησης του φορτίου εντός του ομογενούς μαγνητικού πεδίου, οπότε ισχύει." },
+        { id: 40, text: "Η ένταση του μαγνητικού πεδίου Β είναι μονόμετρο μέγεθος.", correct: "Λάθος", justification: "Είναι διανυσματικό μέγεθος με μέτρο, διεύθυνση και φορά." },
+        { id: 41, text: "Ο νόμος του Ampère ισχύει μόνο για ευθύγραμμους αγωγούς.", correct: "Λάθος", justification: "Είναι γενικός νόμος που ισχύει για οποιοδήποτε σχήμα αγωγών και οποιαδήποτε κλειστή διαδρομή." },
+        { id: 42, text: "Η ταχύτητα που επιτρέπει ένας επιλογέας ταχυτήτων στα φορτισμένα σωματίδια να έχουν ώστε να περάσουν από το εσωτερικό του εξαρτάται από την απόλυτη τιμή του φορτίου.", correct: "Λάθος", justification: "Ισχύει \\(v = E/B\\), δεν εξαρτάται." },
+        { id: 43, text: "Το μαγνητικό πεδίο στο εσωτερικό ενός σωληνοειδούς είναι ανάλογο του αριθμού των σπειρών ανά μονάδα μήκους.", correct: "Σωστό", justification: "\\(B = \\mu_0 n I\\), όπου \\(n = N/\\ell\\)." },
+        { id: 44, text: "Η περίοδος περιφοράς φορτισμένου σωματιδίου σε μαγνητικό πεδίο εξαρτάται από τη μάζα του.", correct: "Σωστό", justification: "\\(T = \\frac{2\\pi m}{qB}\\), άρα μεγαλύτερη μάζα σημαίνει μεγαλύτερη περίοδο." },
+        { id: 45, text: "Η δύναμη που ασκεί το μαγνητικό πεδίο σε κινούμενο φορτίο είναι πάντα κάθετη στο μαγνητικό πεδίο.", correct: "Σωστό", justification: "Αποτελεί ιδιότητα του εξωτερικού γινομένου \\(\\mathbf{F} = q(\\mathbf{v} \\times \\mathbf{B})\\). Εξωτερικό γινόμενο δε διδασκόμαστε στη Γ’ λυκείου, οπότε πρέπει να θυμόμαστε απέξω την ιδιότητα της καθετότητας." },
+        { id: 46, text: "Οι δυναμικές γραμμές του μαγνητικού πεδίου ευθύγραμμου αγωγού είναι ομόκεντροι κύκλοι.", correct: "Σωστό", justification: "Τα επίπεδα των κύκλων είναι κάθετα στον αγωγό." },
+        { id: 47, text: "Στον επιλογέα ταχυτήτων, η δύναμη από το ηλεκτρικό πεδίο και η δύναμη από το μαγνητικό πεδίο έχουν πάντα την ίδια φορά.", correct: "Λάθος", justification: "Πρέπει να έχουν αντίθετη φορά ώστε να δίνουν \\(\\Sigma F = 0\\)." },
+        { id: 48, text: "To Weber (Wb) είναι ίσο με T·m².", correct: "Σωστό", justification: "Προκύπτει από τον ορισμό της μαγνητικής ροής." },
+        { id: 49, text: "Η κίνηση του πλάσματος στο Σύμπαν επηρεάζεται από τα μαγνητικά πεδία.", correct: "Σωστό", justification: "Λόγω της δύναμης Lorentz που ασκείται στα ιόντα και ηλεκτρόνια του πλάσματος." },
+        { id: 50, text: "Το ειδικό φορτίο q/m ενός σωματιδίου καθορίζει την ακτίνα της τροχιάς του για δεδομένα v και Β.", correct: "Σωστό", justification: "Από τη σχέση \\(R = \\frac{v}{B} \\cdot \\frac{m}{q}\\)." }
+    ];
+
+    // Render όλων των ερωτήσεων
+    function renderQuestions() {
+        const container = document.getElementById('questions-container');
+        if (!container) return;
+        let html = '';
+
+        html += `<div class="section-title">🔹 Ερωτήσεις Πολλαπλής Επιλογής (1-25)</div>`;
+        mcQuestions.forEach(q => {
+            html += buildMCQuestionCard(q);
+        });
+
+        html += `<div class="section-title">🔸 Ερωτήσεις Σωστού - Λάθους (26-50)</div>`;
+        tfQuestions.forEach(q => {
+            html += buildTFQuestionCard(q);
+        });
+
+        container.innerHTML = html;
+    }
+
+    function buildMCQuestionCard(q) {
+        const optionLetters = ['α', 'β', 'γ', 'δ'];
+        let optionsHtml = `<div class="options">`;
+        q.options.forEach((opt, idx) => {
+            const letter = optionLetters[idx];
+            optionsHtml += `
+                <div class="option">
+                    <input type="radio" name="mc_${q.id}" value="${letter}" id="mc_${q.id}_${letter}">
+                    <label for="mc_${q.id}_${letter}">${escapeHtml(opt)}</label>
+                </div>`;
+        });
+        optionsHtml += `</div>`;
+        return `
+            <div class="question-card" data-qid="mc_${q.id}" data-correct="${q.correct}" data-justification="${escapeHtml(q.justification)}" data-type="mc">
+                <div class="badge">Ερώτηση ${q.id}</div>
+                <div class="question-text">${escapeHtml(q.text)}</div>
+                ${optionsHtml}
+                <button class="check-btn" data-qid="mc_${q.id}">✓ Έλεγχος απάντησης</button>
+                <div class="feedback" id="feedback_mc_${q.id}" style="display: none;"></div>
+            </div>
+        `;
+    }
+
+    function buildTFQuestionCard(q) {
+        return `
+            <div class="question-card" data-qid="tf_${q.id}" data-correct="${q.correct}" data-justification="${escapeHtml(q.justification)}" data-type="tf">
+                <div class="badge">Ερώτηση ${q.id}</div>
+                <div class="question-text">${escapeHtml(q.text)}</div>
+                <div class="options">
+                    <div class="option"><input type="radio" name="tf_${q.id}" value="Σωστό" id="tf_${q.id}_true"><label for="tf_${q.id}_true">Σωστό</label></div>
+                    <div class="option"><input type="radio" name="tf_${q.id}" value="Λάθος" id="tf_${q.id}_false"><label for="tf_${q.id}_false">Λάθος</label></div>
+                </div>
+                <button class="check-btn" data-qid="tf_${q.id}">✓ Έλεγχος απάντησης</button>
+                <div class="feedback" id="feedback_tf_${q.id}" style="display: none;"></div>
+            </div>
+        `;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Event delegation για έλεγχο απαντήσεων
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.check-btn');
+        if (!btn) return;
+        const qidAttr = btn.getAttribute('data-qid');
+        if (!qidAttr) return;
+        const card = btn.closest('.question-card');
+        if (!card) return;
+        const correctAnswer = card.getAttribute('data-correct');
+        const justificationRaw = card.getAttribute('data-justification');
+        const type = card.getAttribute('data-type');
+        let selectedValue = null;
+        if (type === 'mc') {
+            const selectedRadio = card.querySelector(`input[name="${qidAttr}"]:checked`);
+            if (selectedRadio) selectedValue = selectedRadio.value;
+        } else if (type === 'tf') {
+            const selectedRadio = card.querySelector(`input[name="${qidAttr}"]:checked`);
+            if (selectedRadio) selectedValue = selectedRadio.value;
+        }
+        const feedbackDiv = card.querySelector(`.feedback`);
+        if (!feedbackDiv) return;
+
+        if (!selectedValue) {
+            feedbackDiv.style.display = 'block';
+            feedbackDiv.innerHTML = `<span style="color:#f4a261;">⚠️ Παρακαλώ επιλέξτε μια απάντηση πρώτα.</span>`;
+            feedbackDiv.classList.remove('correct-feedback', 'wrong-feedback');
+            return;
+        }
+
+        const isCorrect = (selectedValue === correctAnswer);
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.classList.remove('correct-feedback', 'wrong-feedback');
+        if (isCorrect) {
+            feedbackDiv.classList.add('correct-feedback');
+            feedbackDiv.innerHTML = `<strong>✅ Σωστή απάντηση!</strong><div class="justification">📘 Δικαιολόγηση: ${justificationRaw}</div>`;
+        } else {
+            feedbackDiv.classList.add('wrong-feedback');
+            feedbackDiv.innerHTML = `<strong>❌ Λανθασμένη απάντηση.</strong><div class="justification">📘 Σωστή απάντηση: <strong>${correctAnswer}</strong><br>Αιτιολόγηση: ${justificationRaw}</div>`;
+        }
+        if (window.MathJax) {
+            MathJax.typesetPromise([feedbackDiv]).catch(err => console.log(err));
+        }
+    });
+
+    renderQuestions();
+    if (window.MathJax) {
+        MathJax.typesetPromise();
+    }
+</script>
+</body>
+</html>

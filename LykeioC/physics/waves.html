@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ΚΥΜΑΤΑ - Χριστόφορος Κατσιλέρος</title>
+    <!-- MathJax (εξαίρεση dependency, για σωστή εμφάνιση μαθηματικών & οριζόντιων κλασμάτων) -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #121212;
+            color: #eaece5;
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2c2c2e;
+        }
+
+        .back-btn {
+            background-color: #2a2a2e;
+            color: #ffd966;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #3a3a3e;
+        }
+
+        .back-btn:hover {
+            background-color: #3a3a40;
+            color: #ffea9e;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: #ffde9c;
+            letter-spacing: -0.3px;
+        }
+
+        .section-title {
+            background: #1e1e24;
+            padding: 12px 18px;
+            border-radius: 28px;
+            margin: 30px 0 20px 0;
+            font-size: 1.6rem;
+            font-weight: 600;
+            border-left: 6px solid #5db0e2;
+            color: #f5e7c8;
+        }
+
+        .question-card {
+            background: #1e1e1e;
+            border-radius: 28px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.7rem;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            border: 1px solid #2c2c2e;
+        }
+
+        .question-text {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 1rem;
+            color: #f2f0e6;
+            word-break: break-word;
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin: 0.8rem 0 1rem 0;
+            align-items: center;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #2a2a2a;
+            padding: 6px 14px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option:hover {
+            background: #3a3a3e;
+        }
+
+        input[type="radio"] {
+            accent-color: #5db0e2;
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        label {
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .check-btn {
+            background: #2e3b2c;
+            border: none;
+            color: #d4e6c3;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 36px;
+            margin-top: 8px;
+            margin-right: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            border: 1px solid #4a6a3a;
+        }
+
+        .check-btn:hover {
+            background: #3e553a;
+            color: #ffffff;
+            border-color: #6f9e4f;
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 12px 16px;
+            border-radius: 20px;
+            background: #262628;
+            font-size: 0.9rem;
+            border-left: 4px solid #6c757d;
+        }
+
+        .correct-feedback {
+            border-left-color: #2ecc71;
+            background: #1e2a1c;
+        }
+
+        .wrong-feedback {
+            border-left-color: #e67e22;
+            background: #2c1e1a;
+        }
+
+        .justification {
+            margin-top: 8px;
+            color: #cbcbc2;
+            line-height: 1.45;
+        }
+
+        .justification strong {
+            color: #ffd966;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #2c2c34;
+            border-radius: 30px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            margin-bottom: 8px;
+            color: #bbbbaa;
+        }
+
+        footer {
+            text-align: right;
+            margin-top: 50px;
+            padding: 15px 20px;
+            font-size: 0.8rem;
+            color: #8e8e93;
+            border-top: 1px solid #2c2c2e;
+        }
+
+        .signature {
+            font-family: monospace;
+            letter-spacing: 1px;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 650px) {
+            body {
+                padding: 12px;
+            }
+            .question-card {
+                padding: 1rem;
+            }
+            .options {
+                gap: 0.5rem;
+            }
+            .option {
+                padding: 4px 12px;
+            }
+            .question-text {
+                font-size: 0.95rem;
+            }
+            .section-title {
+                font-size: 1.3rem;
+            }
+            .check-btn {
+                padding: 6px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="top-bar">
+        <a href="../index.html" class="back-btn">← Επιστροφή</a>
+        <h1>🌊 ΚΥΜΑΤΑ<br><span style="font-size:0.8rem; color:#b9b9b0;">Απαντήσεις με δικαιολόγηση - Χριστόφορος Κατσιλέρος</span></h1>
+    </div>
+
+    <div id="questions-container"></div>
+    <footer>
+        <div class="signature">Κώστας Κούδας</div>
+    </footer>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // Ερωτήσεις Πολλαπλής Επιλογής (1-25) – ακριβές κείμενο από PDF
+    // --------------------------------------------------------------
+    const mcQuestions = [
+        { id: 1, text: "Η ταχύτητα διάδοσης ενός μηχανικού κύματος σε ένα ομογενές ελαστικό μέσο εξαρτάται από:", options: ["α. Τη συχνότητα της πηγής.", "β. Το πλάτος της ταλάντωσης των μορίων του.", "γ. Τις ιδιότητες του μέσου διάδοσης.", "δ. Το μήκος κύματος."], correct: "γ", justification: "Η ταχύτητα διάδοσης είναι ιδιότητα του μέσου και καθορίζεται από την ελαστικότητα και την πυκνότητά του." },
+        { id: 2, text: "Σε ένα εγκάρσιο μηχανικό κύμα, τα μόρια του μέσου ταλαντώνονται:", options: ["α. Παράλληλα στη διεύθυνση διάδοσης του κύματος.", "β. Κάθετα στη διεύθυνση διάδοσης του κύματος.", "γ. Σε τυχαίες διευθύνσεις.", "δ. Δεν ταλαντώνονται, απλώς μεταφέρονται."], correct: "β", justification: "Αυτός είναι ο ορισμός του εγκάρσιου κύματος: η ταλάντωση των σωματιδίων γίνεται σε διεύθυνση κάθετη στη διεύθυνση διάδοσης." },
+        { id: 3, text: "Κατά τη διάδοση ενός κύματος μεταφέρεται:", options: ["α. Ύλη και ενέργεια.", "β. Μόνο ύλη.", "γ. Ενέργεια και ορμή, αλλά όχι ύλη.", "δ. Μόνο ορμή."], correct: "γ", justification: "Το κύμα είναι μια διαταραχή που διαδίδεται μεταφέροντας ενέργεια και ορμή από σημείο σε σημείο, χωρίς τη μεταφορά των ίδιων των μορίων του μέσου." },
+        { id: 4, text: "Αν διπλασιάσουμε τη συχνότητα f μιας πηγής που δημιουργεί κύμα στο ίδιο μέσο, το μήκος κύματος λ:", options: ["α. Διπλασιάζεται.", "β. Παραμένει σταθερό.", "γ. Υποδιπλασιάζεται.", "δ. Τετραπλασιάζεται."], correct: "γ", justification: "Από τη θεμελιώδη εξίσωση της κυματικής \\(v = \\lambda \\cdot f\\), εφόσον η ταχύτητα \\(v\\) είναι σταθερή για το ίδιο μέσο, το \\(\\lambda\\) και η \\(f\\) είναι ποσά αντιστρόφως ανάλογα." },
+        { id: 5, text: "Η αρχή της επαλληλίας (υπέρθεσης) των κυμάτων ισχύει:", options: ["α. Μόνο για τα μηχανικά κύματα.", "β. Μόνο για τα ηλεκτρομαγνητικά κύματα.", "γ. Τόσο για τα μηχανικά όσο και για τα ηλεκτρομαγνητικά κύματα.", "δ. Μόνο όταν τα κύματα έχουν το ίδιο πλάτος."], correct: "γ", justification: "Τα ηλεκτρομαγνητικά κύματα, όπως και τα μηχανικά, υπακούουν στην αρχή της επαλληλίας." },
+        { id: 6, text: "Στη συμβολή δύο σύγχρονων πηγών στην επιφάνεια υγρού, ένα σημείο M παραμένει διαρκώς ακίνητο (απόσβεση) όταν η διαφορά των αποστάσεών του από τις πηγές \\((r_1 - r_2)\\) είναι:", options: ["α. Ακέραιο πολλαπλάσιο του λ.", "β. Περιττό πολλαπλάσιο του \\(\\frac{\\lambda}{2}\\).", "γ. Ίση με μηδέν.", "δ. Ίση με \\(\\frac{\\lambda}{4}\\)."], correct: "β", justification: "Η συνθήκη για πλήρη ακύρωση (απόσβεση) είναι η διαφορά των αποστάσεων να είναι \\((2k+1)\\frac{\\lambda}{2}\\), \\(k\\) ακέραιος." },
+        { id: 7, text: "Σε ένα στάσιμο κύμα, η απόσταση μεταξύ δύο διαδοχικών δεσμών είναι ίση με:", options: ["α. λ", "β. \\(\\frac{\\lambda}{2}\\)", "γ. \\(\\frac{\\lambda}{4}\\)", "δ. 2λ"], correct: "β", justification: "Στο στάσιμο κύμα, η απόσταση μεταξύ δύο διαδοχικών δεσμών (ή δύο διαδοχικών κοιλιών) είναι πάντα \\(\\frac{\\lambda}{2}\\)." },
+        { id: 8, text: "Τα σημεία ενός στάσιμου κύματος που βρίσκονται μεταξύ δύο διαδοχικών δεσμών:", options: ["α. Έχουν όλα το ίδιο πλάτος ταλάντωσης.", "β. Έχουν όλα την ίδια φάση.", "γ. Έχουν διαφορά φάσης π rad.", "δ. Είναι όλα ακίνητα."], correct: "β", justification: "Όλα τα σημεία μεταξύ δύο διαδοχικών δεσμών ανήκουν στην ίδια 'άτρακτο', κινούνται ομόρροπα με την κοιλία στο μέσο της απόστασης των δύο δεσμών και διέρχονται ταυτόχρονα από τη θέση ισορροπίας με την ίδια φορά, άρα έχουν την ίδια φάση." },
+        { id: 9, text: "Τα ηλεκτρομαγνητικά κύματα παράγονται από:", options: ["α. Ακίνητα ηλεκτρικά φορτία.", "β. Φορτία που κινούνται με σταθερή ταχύτητα.", "γ. Επιταχυνόμενα ηλεκτρικά φορτία.", "δ. Σταθερά μαγνητικά πεδία."], correct: "γ", justification: "Μόνο τα ηλεκτρικά φορτία που επιταχύνονται (ή επιβραδύνονται) δημιουργούν ηλεκτρομαγνητικά κύματα." },
+        { id: 10, text: "Το ηλεκτρομαγνητικό κύμα είναι:", options: ["α. Πάντα διαμήκες.", "β. Πάντα εγκάρσιο.", "γ. Διαμήκες στα στερεά και εγκάρσιο στα υγρά.", "δ. Μηχανικό κύμα."], correct: "β", justification: "Τα διανύσματα της έντασης του ηλεκτρικού (Ε) και του μαγνητικού (Β) πεδίου είναι κάθετα μεταξύ τους και κάθετα στη διεύθυνση διάδοσης." },
+        { id: 11, text: "Στο κενό, όλα τα ηλεκτρομαγνητικά κύματα έχουν:", options: ["α. Την ίδια συχνότητα.", "β. Το ίδιο μήκος κύματος.", "γ. Την ίδια ταχύτητα διάδοσης c.", "δ. Την ίδια ενέργεια."], correct: "γ", justification: "Όλα τα ηλεκτρομαγνητικά κύματα διαδίδονται στο κενό με την ταχύτητα του φωτός c (≈ 3 · 10⁸ m/s)." },
+        { id: 12, text: "Ποια από τις παρακάτω ακτινοβολίες έχει τη μεγαλύτερη συχνότητα στο ηλεκτρομαγνητικό φάσμα;", options: ["α. Ραδιοκύματα.", "β. Υπέρυθρες ακτίνες.", "γ. Ορατό φως.", "δ. Ακτίνες γ."], correct: "δ", justification: "Οι ακτίνες γ βρίσκονται στο άκρο του φάσματος με τα μικρότερα μήκη κύματος και τις υψηλότερες συχνότητες." },
+        { id: 13, text: "Σε μεγάλη απόσταση από μια κεραία εκπομπής (πομπός = ταλαντούμενο ηλεκτρικό δίπολο), το ηλεκτρικό και το μαγνητικό πεδίο ενός Η/Μ κύματος:", options: ["α. Έχουν διαφορά φάσης 90°.", "β. Έχουν διαφορά φάσης 180°.", "γ. Είναι σε φάση (συμφωνία φάσης).", "δ. Είναι σταθερά."], correct: "γ", justification: "Ενώ κοντά στην κεραία έχουν διαφορά φάσης, σε μεγάλη απόσταση τα δύο πεδία μεταβάλλονται ταυτόχρονα (μηδενίζονται και μεγιστοποιούνται μαζί), άρα είναι σε φάση." },
+        { id: 14, text: "Όταν ένα αρμονικό κύμα διαδίδεται σε μια χορδή, η μέγιστη ταχύτητα ταλάντωσης ενός μορίου της χορδής \\(v_{max}\\) είναι:", options: ["α. Ίση με την ταχύτητα διάδοσης υ του κύματος.", "β. Ανάλογη του πλάτους A και της κυκλικής συχνότητας ω.", "γ. Πάντα σταθερή για όλα τα μόρια ανεξάρτητα από το πλάτος.", "δ. Μηδέν."], correct: "β", justification: "Η μέγιστη ταχύτητα ταλάντωσης ενός σωματιδίου δίνεται από τη σχέση \\(v_{max}= \\omega A\\), ενώ η ταχύτητα διάδοσης υ είναι σταθερή και εξαρτάται από το μέσο." },
+        { id: 15, text: "Η απόσταση μεταξύ ενός δεσμού και μιας διαδοχικής κοιλίας σε ένα στάσιμο κύμα είναι:", options: ["α. \\(\\frac{\\lambda}{2}\\)", "β. \\(\\frac{\\lambda}{4}\\)", "γ. λ", "δ. \\(\\frac{3\\lambda}{4}\\)"], correct: "β", justification: "Η απόσταση από δεσμό σε διαδοχικό δεσμό είναι \\(\\lambda/2\\), άρα η κοιλία που βρίσκεται ακριβώς στη μέση της απόστασης των δύο διαδοχικών δεσμών απέχει κατά \\(\\lambda/4\\) από καθέναν από αυτούς." },
+        { id: 16, text: "Τα ραδιοκύματα δημιουργούνται κυρίως από:", options: ["α. Αποδιέγερση πυρήνων.", "β. Ταλαντούμενα ηλεκτρονικά κυκλώματα LC.", "γ. Θερμά σώματα.", "δ. Φθορίζουσες οθόνες."], correct: "β", justification: "Τα ραδιοκύματα παράγονται από ταλαντούμενα κυκλώματα LC και χρησιμοποιούνται στις τηλεπικοινωνίες." },
+        { id: 17, text: "Αν σε ένα στάσιμο κύμα διπλασιάσουμε τη συχνότητα f των κυμάτων που συμβάλλουν, η απόσταση μεταξύ των δεσμών:", options: ["α. Διπλασιάζεται.", "β. Υποδιπλασιάζεται.", "γ. Παραμένει σταθερή.", "δ. Τετραπλασιάζεται."], correct: "β", justification: "Καθώς \\(v = \\lambda f = \\text{σταθερή}\\) (ίδιο μέσο), αν η f διπλασιαστεί, το λ υποδιπλασιάζεται. Επειδή η απόσταση των δεσμών είναι \\(\\lambda/2\\), θα υποδιπλασιαστεί και αυτή." },
+        { id: 18, text: "Στο στιγμιότυπο ενός κύματος, τα σημεία που βρίσκονται στην ίδια φάση απέχουν μεταξύ τους απόσταση που είναι:", options: ["α. Περιττό πολλαπλάσιο του \\(\\frac{\\lambda}{2}\\).", "β. Ίση με \\(\\frac{\\lambda}{4}\\).", "γ. Ακέραιο πολλαπλάσιο του μήκους κύματος λ.", "δ. Πάντα σταθερή και ίση με 2λ."], correct: "γ", justification: "Από τον ορισμό του μήκους κύματος, δύο σημεία είναι σε φάση όταν η απόστασή τους είναι \\(k\\lambda\\)." },
+        { id: 19, text: "Ποιο από τα παρακάτω Η/Μ κύματα έχει το μεγαλύτερο μήκος κύματος στο κενό;", options: ["α. Ακτίνες Χ.", "β. Υπεριώδης ακτινοβολία.", "γ. Μικροκύματα.", "δ. Πράσινο φως."], correct: "γ", justification: "Στο φάσμα, τα μικροκύματα έχουν μεγαλύτερο μήκος κύματος από το ορατό, το υπεριώδες και τις ακτίνες Χ." },
+        { id: 20, text: "Κατά τη συμβολή δύο κυμάτων, η αρχή της επαλληλίας ορίζει ότι η συνισταμένη (συνολική) απομάκρυνση είναι:", options: ["α. Το γινόμενο των επιμέρους απομακρύνσεων.", "β. Το αλγεβρικό άθροισμα των επιμέρους απομακρύνσεων.", "γ. Η διαφορά των τετραγώνων των απομακρύνσεων.", "δ. Πάντα μηδέν."], correct: "β", justification: "Αυτή είναι η διατύπωση της αρχής της επαλληλίας." },
+        { id: 21, text: "Ένα στάσιμο κύμα:", options: ["α. Μεταφέρει ενέργεια από το ένα άκρο στο άλλο.", "β. Δεν μεταφέρει ενέργεια (η ενέργεια εγκλωβίζεται μεταξύ των δεσμών).", "γ. Είναι ένα τρέχον κύμα με μεταβλητό πλάτος.", "δ. Διαδίδεται μόνο στο κενό."], correct: "β", justification: "Στο στάσιμο κύμα δεν υπάρχει μεταφορά ενέργειας κατά τη διεύθυνση διάδοσης των αρχικών κυμάτων· η ενέργεια ταλαντώνεται στις περιοχές των κοιλιών." },
+        { id: 22, text: "Ποια από τις παρακάτω προτάσεις σχετικά με τα ηλεκτρομαγνητικά κύματα (διάδοση στο κενό) είναι σωστή;", options: ["α. Το ηλεκτρικό και το μαγνητικό πεδίο είναι παράλληλα στη διεύθυνση διάδοσης του κύματος.", "β. Το πηλίκο των μέτρων των εντάσεων του ηλεκτρικού και του μαγνητικού πεδίου (Ε/Β) κάθε στιγμή είναι ίσο με την ταχύτητα του φωτός c.", "γ. Τα ηλεκτρομαγνητικά κύματα είναι διαμήκη κύματα.", "δ. Παράγονται από ηλεκτρικά φορτία που κινούνται με σταθερή ταχύτητα."], correct: "β", justification: "Από τη μελέτη των ηλεκτρομαγνητικών κυμάτων έχει διαπιστωθεί ότι κάθε στιγμή ισχύει η σχέση \\(E/B = c\\). Τα κύματα αυτά είναι εγκάρσια, τα πεδία τους είναι κάθετα στη διεύθυνση διάδοσης και παράγονται από επιταχυνόμενα φορτία." },
+        { id: 23, text: "Οι 'δεσμοί' σε ένα στάσιμο κύμα είναι σημεία που:", options: ["α. Ταλαντώνονται με μέγιστο πλάτος.", "β. Παραμένουν διαρκώς ακίνητα.", "γ. Έχουν μέγιστη ταχύτητα.", "δ. Αλλάζουν πλάτος με το χρόνο."], correct: "β", justification: "Ορισμός των δεσμών είναι τα σημεία μηδενικού πλάτους." },
+        { id: 24, text: "Η σχέση μεταξύ των μέτρων E και B ενός αρμονικού Η/Μ κύματος στο κενό είναι:", options: ["α. \\(E = B/c\\)", "β. \\(E = c \\cdot B\\)", "γ. \\(E = B\\)", "δ. \\(E = B^2\\)"], correct: "β", justification: "Σε κάθε στιγμή ισχύει η σχέση \\(E = c \\cdot B\\) για τα μέτρα των εντάσεων." },
+        { id: 25, text: "Ποια ακτινοβολία χρησιμοποιείται για τη μελέτη της δομής των ατόμων και των κρυστάλλων;", options: ["α. Ραδιοκύματα.", "β. Ακτίνες Χ.", "γ. Υπέρυθρες.", "δ. Μικροκύματα."], correct: "β", justification: "Λόγω του πολύ μικρού μήκους κύματος (συγκρίσιμο με τις ατομικές αποστάσεις), οι ακτίνες Χ είναι κατάλληλες για κρυσταλλογραφία." }
+    ];
+
+    // --------------------------------------------------------------
+    // Ερωτήσεις Σωστού-Λάθους (26-54) – ακριβείς δικαιολογήσεις από PDF
+    // --------------------------------------------------------------
+    const tfQuestions = [
+        { id: 26, text: "Τα διαμήκη κύματα διαδίδονται και στα υγρά.", correct: "Σωστό", justification: "Τα διαμήκη κύματα (π.χ. ήχος) διαδίδονται σε όλα τα μέσα (στερεά, υγρά, αέρια)." },
+        { id: 27, text: "Το μήκος κύματος λ αλλάζει όταν το κύμα περνάει από ένα μέσο σε ένα άλλο.", correct: "Σωστό", justification: "Επειδή η συχνότητα f παραμένει σταθερή και η ταχύτητα v αλλάζει, το μήκος κύματος \\(\\lambda = v/f\\) αναγκαστικά μεταβάλλεται." },
+        { id: 28, text: "Στη συμβολή δύο κυμάτων, αν η διαφορά αποστάσεων \\(r_1 - r_2\\) είναι ίση με \\(1,5\\lambda\\), το σημείο εκτελεί ταλάντωση με μέγιστο πλάτος.", correct: "Λάθος", justification: "Το \\(1,5\\lambda\\) είναι περιττό πολλαπλάσιο του \\(\\lambda/2\\) (είναι \\(3\\cdot\\frac{\\lambda}{2}\\)), άρα έχουμε απόσβεση (ακύρωση) και όχι ενίσχυση." },
+        { id: 29, text: "Τα στάσιμα κύματα δημιουργούνται από τη συμβολή δύο κυμάτων που διαδίδονται στο ίδιο μέσο με αντίθετες κατευθύνσεις, ίσα πλάτη και ίσες συχνότητες.", correct: "Σωστό", justification: "Αυτή είναι η απαραίτητη συνθήκη για τη δημιουργία στάσιμου κύματος." },
+        { id: 30, text: "Το πλάτος της ταλάντωσης σε μια κοιλία στάσιμου κύματος είναι 2A (όπου A το πλάτος των κυμάτων που συμβάλλουν).", correct: "Σωστό", justification: "Στις κοιλίες τα δύο κύματα συμβάλλουν ενισχυτικά, άρα τα πλάτη προστίθενται \\(A + A = 2A\\)." },
+        { id: 31, text: "Ένα σταθερό ηλεκτρικό φορτίο εκπέμπει ηλεκτρομαγνητική ακτινοβολία.", correct: "Λάθος", justification: "Μόνο τα φορτία που επιταχύνονται παράγουν Η/Μ κύματα. Τα ακίνητα φορτία δημιουργούν μόνο στατικό ηλεκτρικό πεδίο." },
+        { id: 32, text: "Τα ηλεκτρομαγνητικά κύματα είναι εγκάρσια διότι η ένταση του ηλεκτρικού πεδίου Ε και η ένταση του μαγνητικού πεδίου είναι διανύσματα κάθετα μεταξύ τους.", correct: "Λάθος", justification: "Είναι εγκάρσια διότι και τα δύο πεδία ταλαντώνονται κάθετα προς τη διεύθυνση διάδοσής τους." },
+        { id: 33, text: "Οι ακτίνες γ έχουν τη μικρότερη ενέργεια στο ηλεκτρομαγνητικό φάσμα.", correct: "Λάθος", justification: "Έχουν τη μεγαλύτερη συχνότητα, άρα και τη μεγαλύτερη ενέργεια." },
+        { id: 34, text: "Η απόσταση μεταξύ δύο διαδοχικών κοιλιών σε ένα στάσιμο κύμα είναι λ.", correct: "Λάθος", justification: "Η απόσταση είναι \\(\\lambda/2\\)." },
+        { id: 35, text: "Σε ένα μηχανικό κύμα, η ταχύτητα διάδοσης v είναι ανάλογη του πλάτους A.", correct: "Λάθος", justification: "Η ταχύτητα διάδοσης εξαρτάται μόνο από το μέσο και όχι από το πόσο ισχυρή είναι η διαταραχή (πλάτος)." },
+        { id: 36, text: "Τα ηλεκτρομαγνητικά κύματα διαδίδονται και στο κενό.", correct: "Σωστό", justification: "Σε αντίθεση με τα μηχανικά, τα Η/Μ κύματα δεν χρειάζονται υλικό μέσο για να διαδοθούν." },
+        { id: 37, text: "Στο στάσιμο κύμα, όλα τα σημεία του μέσου έχουν το ίδιο πλάτος ταλάντωσης.", correct: "Λάθος", justification: "Το πλάτος εξαρτάται από τη θέση x του σημείου (μεταβάλλεται από 0 στους δεσμούς έως 2A στις κοιλίες)." },
+        { id: 38, text: "Η υπεριώδης ακτινοβολία είναι ορατή από το ανθρώπινο μάτι.", correct: "Λάθος", justification: "Το ανθρώπινο μάτι βλέπει μόνο στο εύρος 400‑700 nm (κενό‑αέρας). Η υπεριώδης έχει μικρότερο μήκος κύματος και είναι αόρατη." },
+        { id: 39, text: "Στα στάσιμα κύματα μεταφέρεται ενέργεια από το ένα σημείο του μέσου στο άλλο κατά τη διεύθυνση διάδοσης των αρχικών κυμάτων.", correct: "Λάθος", justification: "Σε αντίθεση με τα τρέχοντα κύματα, στο στάσιμο κύμα δεν μεταφέρεται ενέργεια από το ένα σημείο του μέσου στο άλλο. Η ενέργεια των δύο κυμάτων που συμβάλλουν για να δημιουργήσουν το στάσιμο παραμένει «εγκλωβισμένη» ανάμεσα στους δεσμούς." },
+        { id: 40, text: "Σε ένα Η/Μ κύμα, το ηλεκτρικό και το μαγνητικό πεδίο είναι παράλληλα μεταξύ τους.", correct: "Λάθος", justification: "Είναι πάντα κάθετα μεταξύ τους (\\(\\vec{E} \\perp \\vec{B}\\))." },
+        { id: 41, text: "Τα κύματα μεταφέρουν ορμή.", correct: "Σωστό", justification: "Τα κύματα μεταφέρουν και ενέργεια και ορμή." },
+        { id: 42, text: "Κατά τη συμβολή, αν δύο κύματα συναντηθούν σε ένα σημείο με διαφορά φάσης 3π, έχουμε ενίσχυση.", correct: "Λάθος", justification: "Διαφορά φάσης \\(3\\pi = (2\\cdot1+1)\\pi\\) αντιστοιχεί σε αντίθεση φάσης, άρα έχουμε απόσβεση." },
+        { id: 43, text: "Το μήκος κύματος λ είναι η απόσταση που διανύει το κύμα σε χρόνο μιας περιόδου T.", correct: "Σωστό", justification: "Ένας από τους ορισμούς του \\(\\lambda\\)." },
+        { id: 44, text: "Οι ακτίνες Χ έχουν μεγαλύτερο μήκος κύματος από τα ραδιοκύματα.", correct: "Λάθος", justification: "Οι ακτίνες Χ έχουν πολύ μικρό μήκος κύματος, ενώ τα ραδιοκύματα έχουν από εκατοστά έως χιλιόμετρα." },
+        { id: 45, text: "Σε ένα ταλαντούμενο ηλεκτρικό δίπολο, τη στιγμή που σε σημείο κοντά του το μέτρο της έντασης Ε του ηλεκτρικού πεδίου είναι μέγιστο, είναι μέγιστο και το μέτρο του μαγνητικού πεδίου Β.", correct: "Λάθος", justification: "Είναι σε διαφορά φάσης π/2. Όταν το ένα είναι μέγιστο, το άλλο είναι μηδενικό." },
+        { id: 46, text: "Τα ραδιοκύματα χρησιμοποιούνται στην Ιατρική.", correct: "Λάθος", justification: "Τα ραδιοκύματα χρησιμοποιούνται στη ραδιοφωνία και στην τηλεόραση." },
+        { id: 47, text: "Σε ένα στάσιμο κύμα, δύο σημεία που βρίσκονται εκατέρωθεν ενός δεσμού και έχουν μόνο ένα δεσμό ανάμεσά τους, έχουν διαφορά φάσης π rad.", correct: "Σωστό", justification: "Όταν τα σημεία από τη μια μεριά του δεσμού κινούνται προς τα πάνω, τα σημεία από την άλλη κινούνται προς τα κάτω." },
+        { id: 48, text: "Η ταχύτητα διάδοσης υ ενός κύματος εξαρτάται από τη συχνότητα f.", correct: "Λάθος", justification: "Η ταχύτητα καθορίζεται από το μέσο. Αν αλλάξει η συχνότητα, θα αλλάξει το μήκος κύματος ώστε το γινόμενο \\(\\lambda f\\) να παραμείνει ίσο με το σταθερό υ." },
+        { id: 49, text: "Το σήμα κινητής τηλεφωνίας μεταδίδεται μέσω ηλεκτρομαγνητικών κυμάτων.", correct: "Σωστό", justification: "Η κινητή τηλεφωνία χρησιμοποιεί ραδιοκύματα (Η/Μ κύματα) για τη μετάδοση σημάτων." },
+        { id: 50, text: "Το στιγμιότυπο ενός κύματος είναι η 'φωτογραφία' του κύματος μια συγκεκριμένη χρονική στιγμή.", correct: "Σωστό", justification: "Δείχνει την απομάκρυνση όλων των μορίων του μέσου σε συνάρτηση με τη θέση τους x τη στιγμή t." },
+        { id: 51, text: "Η φάση ενός τρέχοντος κύματος αυξάνεται κατά τη φορά διάδοσης του κύματος.", correct: "Λάθος", justification: "Μειώνεται. \\(\\phi(x) = 2\\pi\\left(\\frac{t}{T} - \\frac{x}{\\lambda}\\right)\\) για κύμα που διαδίδεται προς τη θετική κατεύθυνση και \\(\\phi(x) = 2\\pi\\left(\\frac{t}{T} + \\frac{x}{\\lambda}\\right)\\) για κύμα που διαδίδεται προς την αρνητική κατεύθυνση." },
+        { id: 52, text: "Σε σημείο πάνω στην επιφάνεια νερού όπου φτάνουν δύο μόνο κύματα ίδιου πλάτους Α με χρονική διαφορά κάθε στιγμή ίση με \\(\\Delta t = \\frac{5T}{2}\\) (Τ = περίοδος των κυμάτων), το σημείο έχει μέγιστο πλάτος 2Α.", correct: "Λάθος", justification: "\\(\\Delta t = \\frac{5T}{2} \\Rightarrow \\Delta r = \\frac{5\\lambda}{2}\\) = περιττό πολλαπλάσιο του \\(\\lambda/2\\), άρα απόσβεση." },
+        { id: 53, text: "Η μαθηματική σχέση \\(\\Delta\\phi = 2\\pi \\frac{\\Delta x}{\\lambda}\\) υπολογίζει τη διαφορά φάσης τόσο μεταξύ δύο σημείων την ίδια στιγμή στο τρέχον κύμα, όσο και μεταξύ δύο σημείων την ίδια στιγμή στο στάσιμο.", correct: "Λάθος", justification: "Προσοχή, μόνο στο τρέχον κύμα." },
+        { id: 54, text: "Η μαθηματική σχέση \\(\\Delta\\phi = 2\\pi \\frac{\\Delta r}{\\lambda}\\) όσο και η σχέση \\(\\Delta\\phi = 2\\pi \\frac{\\Delta t}{T} = \\omega\\Delta t\\) υπολογίζει τη διαφορά φάσης με την οποία δύο κύματα φτάνουν σε σημείο πάνω στην επιφάνεια νερού από δύο πηγές και συμβάλλουν (\\(\\Delta r\\) = διαφορά αποστάσεων του σημείου από τις πηγές, \\(\\Delta t\\) = διαφορά χρόνων αφίξεως των δύο κυμάτων).", correct: "Σωστό", justification: "\\(\\Delta\\phi = \\phi_1 - \\phi_2 \\rightarrow \\Delta\\phi = 2\\pi\\left(\\frac{t}{T} - \\frac{r_1}{\\lambda}\\right) - 2\\pi\\left(\\frac{t}{T} - \\frac{r_2}{\\lambda}\\right) \\rightarrow \\Delta\\phi = 2\\pi \\frac{\\Delta r}{\\lambda}\\). Περαιτέρω, \\(\\Delta\\phi = 2\\pi \\frac{\\Delta r}{\\lambda} = 2\\pi \\frac{\\Delta t}{T} \\rightarrow \\Delta\\phi = 2\\pi \\frac{\\Delta t}{T} = \\omega\\Delta t\\)." }
+    ];
+
+    // Render όλων των ερωτήσεων
+    function renderQuestions() {
+        const container = document.getElementById('questions-container');
+        if (!container) return;
+        let html = '';
+
+        html += `<div class="section-title">🔹 Ερωτήσεις Πολλαπλής Επιλογής (1-25)</div>`;
+        mcQuestions.forEach(q => {
+            html += buildMCQuestionCard(q);
+        });
+
+        html += `<div class="section-title">🔸 Ερωτήσεις Σωστού - Λάθους (26-54)</div>`;
+        tfQuestions.forEach(q => {
+            html += buildTFQuestionCard(q);
+        });
+
+        container.innerHTML = html;
+    }
+
+    function buildMCQuestionCard(q) {
+        const optionLetters = ['α', 'β', 'γ', 'δ'];
+        let optionsHtml = `<div class="options">`;
+        q.options.forEach((opt, idx) => {
+            const letter = optionLetters[idx];
+            optionsHtml += `
+                <div class="option">
+                    <input type="radio" name="mc_${q.id}" value="${letter}" id="mc_${q.id}_${letter}">
+                    <label for="mc_${q.id}_${letter}">${escapeHtml(opt)}</label>
+                </div>`;
+        });
+        optionsHtml += `</div>`;
+        return `
+            <div class="question-card" data-qid="mc_${q.id}" data-correct="${q.correct}" data-justification="${escapeHtml(q.justification)}" data-type="mc">
+                <div class="badge">Ερώτηση ${q.id}</div>
+                <div class="question-text">${escapeHtml(q.text)}</div>
+                ${optionsHtml}
+                <button class="check-btn" data-qid="mc_${q.id}">✓ Έλεγχος απάντησης</button>
+                <div class="feedback" id="feedback_mc_${q.id}" style="display: none;"></div>
+            </div>
+        `;
+    }
+
+    function buildTFQuestionCard(q) {
+        return `
+            <div class="question-card" data-qid="tf_${q.id}" data-correct="${q.correct}" data-justification="${escapeHtml(q.justification)}" data-type="tf">
+                <div class="badge">Ερώτηση ${q.id}</div>
+                <div class="question-text">${escapeHtml(q.text)}</div>
+                <div class="options">
+                    <div class="option"><input type="radio" name="tf_${q.id}" value="Σωστό" id="tf_${q.id}_true"><label for="tf_${q.id}_true">Σωστό</label></div>
+                    <div class="option"><input type="radio" name="tf_${q.id}" value="Λάθος" id="tf_${q.id}_false"><label for="tf_${q.id}_false">Λάθος</label></div>
+                </div>
+                <button class="check-btn" data-qid="tf_${q.id}">✓ Έλεγχος απάντησης</button>
+                <div class="feedback" id="feedback_tf_${q.id}" style="display: none;"></div>
+            </div>
+        `;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Event delegation για έλεγχο απαντήσεων
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.check-btn');
+        if (!btn) return;
+        const qidAttr = btn.getAttribute('data-qid');
+        if (!qidAttr) return;
+        const card = btn.closest('.question-card');
+        if (!card) return;
+        const correctAnswer = card.getAttribute('data-correct');
+        const justificationRaw = card.getAttribute('data-justification');
+        const type = card.getAttribute('data-type');
+        let selectedValue = null;
+        if (type === 'mc') {
+            const selectedRadio = card.querySelector(`input[name="${qidAttr}"]:checked`);
+            if (selectedRadio) selectedValue = selectedRadio.value;
+        } else if (type === 'tf') {
+            const selectedRadio = card.querySelector(`input[name="${qidAttr}"]:checked`);
+            if (selectedRadio) selectedValue = selectedRadio.value;
+        }
+        const feedbackDiv = card.querySelector(`.feedback`);
+        if (!feedbackDiv) return;
+
+        if (!selectedValue) {
+            feedbackDiv.style.display = 'block';
+            feedbackDiv.innerHTML = `<span style="color:#f4a261;">⚠️ Παρακαλώ επιλέξτε μια απάντηση πρώτα.</span>`;
+            feedbackDiv.classList.remove('correct-feedback', 'wrong-feedback');
+            return;
+        }
+
+        const isCorrect = (selectedValue === correctAnswer);
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.classList.remove('correct-feedback', 'wrong-feedback');
+        if (isCorrect) {
+            feedbackDiv.classList.add('correct-feedback');
+            feedbackDiv.innerHTML = `<strong>✅ Σωστή απάντηση!</strong><div class="justification">📘 Δικαιολόγηση: ${justificationRaw}</div>`;
+        } else {
+            feedbackDiv.classList.add('wrong-feedback');
+            feedbackDiv.innerHTML = `<strong>❌ Λανθασμένη απάντηση.</strong><div class="justification">📘 Σωστή απάντηση: <strong>${correctAnswer}</strong><br>Αιτιολόγηση: ${justificationRaw}</div>`;
+        }
+        if (window.MathJax) {
+            MathJax.typesetPromise([feedbackDiv]).catch(err => console.log(err));
+        }
+    });
+
+    renderQuestions();
+    if (window.MathJax) {
+        MathJax.typesetPromise();
+    }
+</script>
+</body>
+</html>

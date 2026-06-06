@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ΚΡΟΥΣΕΙΣ - Χριστόφορος Κατσιλέρος</title>
+    <!-- MathJax (εξαίρεση dependency, για σωστή εμφάνιση μαθηματικών & οριζόντιων κλασμάτων) -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #121212;
+            color: #eaece5;
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2c2c2e;
+        }
+
+        .back-btn {
+            background-color: #2a2a2e;
+            color: #ffd966;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #3a3a3e;
+        }
+
+        .back-btn:hover {
+            background-color: #3a3a40;
+            color: #ffea9e;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: #ffde9c;
+            letter-spacing: -0.3px;
+        }
+
+        .section-title {
+            background: #1e1e24;
+            padding: 12px 18px;
+            border-radius: 28px;
+            margin: 30px 0 20px 0;
+            font-size: 1.6rem;
+            font-weight: 600;
+            border-left: 6px solid #ff6b6b;
+            color: #f5e7c8;
+        }
+
+        .question-card {
+            background: #1e1e1e;
+            border-radius: 28px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.7rem;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            border: 1px solid #2c2c2e;
+        }
+
+        .question-text {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 1rem;
+            color: #f2f0e6;
+            word-break: break-word;
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin: 0.8rem 0 1rem 0;
+            align-items: center;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #2a2a2a;
+            padding: 6px 14px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option:hover {
+            background: #3a3a3e;
+        }
+
+        input[type="radio"] {
+            accent-color: #ff6b6b;
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        label {
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .check-btn {
+            background: #2e3b2c;
+            border: none;
+            color: #d4e6c3;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 36px;
+            margin-top: 8px;
+            margin-right: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            border: 1px solid #4a6a3a;
+        }
+
+        .check-btn:hover {
+            background: #3e553a;
+            color: #ffffff;
+            border-color: #6f9e4f;
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 12px 16px;
+            border-radius: 20px;
+            background: #262628;
+            font-size: 0.9rem;
+            border-left: 4px solid #6c757d;
+        }
+
+        .correct-feedback {
+            border-left-color: #2ecc71;
+            background: #1e2a1c;
+        }
+
+        .wrong-feedback {
+            border-left-color: #e67e22;
+            background: #2c1e1a;
+        }
+
+        .justification {
+            margin-top: 8px;
+            color: #cbcbc2;
+            line-height: 1.45;
+        }
+
+        .justification strong {
+            color: #ffd966;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #2c2c34;
+            border-radius: 30px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            margin-bottom: 8px;
+            color: #bbbbaa;
+        }
+
+        footer {
+            text-align: right;
+            margin-top: 50px;
+            padding: 15px 20px;
+            font-size: 0.8rem;
+            color: #8e8e93;
+            border-top: 1px solid #2c2c2e;
+        }
+
+        .signature {
+            font-family: monospace;
+            letter-spacing: 1px;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 650px) {
+            body {
+                padding: 12px;
+            }
+            .question-card {
+                padding: 1rem;
+            }
+            .options {
+                gap: 0.5rem;
+            }
+            .option {
+                padding: 4px 12px;
+            }
+            .question-text {
+                font-size: 0.95rem;
+            }
+            .section-title {
+                font-size: 1.3rem;
+            }
+            .check-btn {
+                padding: 6px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="top-bar">
+        <a href="../index.html" class="back-btn">← Επιστροφή</a>
+        <h1>💥 ΚΡΟΥΣΕΙΣ<br><span style="font-size:0.8rem; color:#b9b9b0;">Απαντήσεις με δικαιολόγηση - Χριστόφορος Κατσιλέρος</span></h1>
+    </div>
+
+    <div id="questions-container"></div>
+    <footer>
+        <div class="signature">Κώστας Κούδας</div>
+    </footer>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // Ερωτήσεις Πολλαπλής Επιλογής (1-25) – ακριβές κείμενο από PDF
+    // --------------------------------------------------------------
+    const mcQuestions = [
+        { id: 1, text: "Σε ένα μονωμένο σύστημα δύο σωμάτων που συγκρούονται, η συνολική ορμή:", options: ["α. Διατηρείται μόνο στις ελαστικές κρούσεις.", "β. Διατηρείται σε κάθε είδους κρούση.", "γ. Μειώνεται λόγω των εσωτερικών δυνάμεων.", "δ. Αυξάνεται αν η κρούση είναι έκκεντρη."], correct: "β", justification: "Εφόσον το σύστημα είναι μονωμένο (ΣF εξωτ = 0), η ορμή διατηρείται πάντα (pαρχ = pτελ), καθώς οι δυνάμεις κρούσης είναι εσωτερικές." },
+        { id: 2, text: "Κατά την πλαστική κρούση δύο σωμάτων, η απώλεια κινητικής ενέργειας:", options: ["α. Είναι μηδενική.", "β. Είναι η μέγιστη δυνατή.", "γ. Εξαρτάται από τη θερμοκρασία.", "δ. Μετατρέπεται σε δυναμική ενέργεια."], correct: "β", justification: "Στην πλαστική κρούση τα σώματα ενώνονται (συσσωμάτωμα), μετατρέποντας το μέγιστο δυνατό μέρος της κινητικής ενέργειας σε θερμότητα και ενέργεια παραμόρφωσης." },
+        { id: 3, text: "Δύο σφαίρες με ίσες μάζες m1 = m2 συγκρούονται κεντρικά και ελαστικά. Αν η μία είναι αρχικά ακίνητη, μετά την κρούση:", options: ["α. Και οι δύο κινούνται με την ίδια ταχύτητα.", "β. Ανταλλάσσουν ταχύτητες (η πρώτη σταματά).", "γ. Η πρώτη συνεχίζει με τη μισή ταχύτητα.", "δ. Κινούνται σε αντίθετες κατευθύνσεις με ίσες ταχύτητες."], correct: "β", justification: "Στην κεντρική ελαστική κρούση ίσων μαζών, τα σώματα ανταλλάσσουν ταχύτητες (v1’ = v2 και v2’ = v1)." },
+        { id: 4, text: "Μια μικρή σφαίρα προσκρούει ελαστικά και κάθετα σε ακίνητο τοίχο με ταχύτητα v. Η μεταβολή της ορμής της (Δp) κατά μέτρο είναι:", options: ["α. mv", "β. 0", "γ. 2mv", "δ. -mv"], correct: "γ", justification: "Δp = pτελ – pαρχ = (−mv) − (mv) = −2mv. Το μέτρο της μεταβολής είναι 2mv." },
+        { id: 5, text: "Η κρούση ονομάζεται 'κεντρική' όταν:", options: ["α. Τα σώματα έχουν το ίδιο μέγεθος.", "β. Οι ταχύτητες των κέντρων μάζας βρίσκονται στην ίδια ευθεία.", "γ. Τα σώματα συγκρούονται στην αρχή του άξονα x΄x.", "δ. Η κινητική ενέργεια διατηρείται."], correct: "β", justification: "Αυτός είναι ο ορισμός της κεντρικής (ή μετωπικής) κρούσης." },
+        { id: 6, text: "Σε μια έκρηξη ενός βλήματος σε δύο θραύσματα, η συνολική κινητική ενέργεια:", options: ["α. Διατηρείται σταθερή.", "β. Αυξάνεται.", "γ. Μειώνεται.", "δ. Είναι πάντα μηδέν."], correct: "β", justification: "Στην έκρηξη, η χημική ενέργεια της γόμωσης μετατρέπεται σε κινητική ενέργεια των θραυσμάτων, άρα η Kτελ > Kαρχ." },
+        { id: 7, text: "Ένα σώμα μάζας m συγκρούεται κεντρικά και ελαστικά με ακίνητο σώμα πολύ μεγαλύτερης μάζας M (M ≫ m). Η ταχύτητα του σώματος m μετά την κρούση:", options: ["α. Μηδενίζεται.", "β. Είναι σχεδόν ίση με την αρχική και αντίθετης φοράς.", "γ. Είναι ίση με το μισό της αρχικής.", "δ. Δεν αλλάζει."], correct: "β", justification: "Από τις σχέσεις της ελαστικής κρούσης, όταν M ≫ m, τότε v′ ≈ −v." },
+        { id: 8, text: "Η ορμή ενός συστήματος σωμάτων διατηρείται όταν:", options: ["α. Η συνισταμένη των εξωτερικών δυνάμεων είναι μηδέν.", "β. Οι δυνάμεις τριβής είναι πολύ μεγάλες.", "γ. Η κίνηση είναι μόνο στροφική.", "δ. Τα σώματα είναι φορτισμένα."], correct: "α", justification: "Πρόκειται για τη θεμελιώδη αρχή διατήρησης της ορμής." },
+        { id: 9, text: "Κατά την πλαστική κρούση δύο σωμάτων που κινούνται αντίρροπα με ίσες κατά μέτρο ορμές, η ταχύτητα του συσσωματώματος θα είναι:", options: ["α. v/2", "β. Μηδέν.", "γ. Ίση με την ταχύτητα του βαρύτερου σώματος.", "δ. Διπλάσια της αρχικής."], correct: "β", justification: "Η ολική ορμή είναι pολ = p1 + (−p1) = 0. Εφόσον pαρχ = 0, τότε και pτελ = 0, άρα V = 0." },
+        { id: 10, text: "Η μονάδα μέτρησης της ορμής στο S.I. είναι:", options: ["α. Joule", "β. Newton", "γ. kg·m/s", "δ. Watt"], correct: "γ", justification: "p = m · v, άρα μονάδα μάζας επί μονάδα ταχύτητας." },
+        { id: 11, text: "Σε μια ανελαστική κρούση (όχι πλαστική) σε μονωμένο σύστημα:", options: ["α. Η ορμή δεν διατηρείται.", "β. Η κινητική ενέργεια διατηρείται.", "γ. Η ορμή διατηρείται, αλλά η κινητική ενέργεια όχι.", "δ. Τα σώματα ανταλλάσσουν ορμές."], correct: "γ", justification: "Σε κάθε κρούση μονωμένου συστήματος η ορμή διατηρείται, αλλά στην ανελαστική έχουμε απώλειες κινητικής ενέργειας." },
+        { id: 12, text: "Αν ένα σωματίδιο α συγκρουστεί κεντρικά και ελαστικά με έναν ακίνητο πυρήνα που έχει την ίδια μάζα με αυτό, τότε το σωματίδιο α:", options: ["α. Θα ανακλαστεί με την ίδια ταχύτητα.", "β. Θα παραμείνει ακίνητο στη θέση του πυρήνα.", "γ. Θα συνεχίσει με τη μισή ταχύτητα.", "δ. Θα διαπεράσει τον πυρήνα."], correct: "β", justification: "Λόγω της ανταλλαγής ταχυτήτων σε ελαστική κρούση ίσων μαζών, το σωματίδιο α σταματά και ο πυρήνας αποκτά την ταχύτητα του α." },
+        { id: 13, text: "Η δύναμη που ασκεί το ένα σώμα στο άλλο κατά την κρούση είναι:", options: ["α. Εξωτερική δύναμη.", "β. Εσωτερική δύναμη του συστήματος.", "γ. Πάντα σταθερή.", "δ. Μηδενική."], correct: "β", justification: "Οι δυνάμεις αλληλεπίδρασης μεταξύ των μελών του συστήματος είναι εσωτερικές." },
+        { id: 14, text: "Στην πλάγια ελαστική κρούση δύο ίσων σφαιρών, όταν η μία είναι αρχικά ακίνητη, οι ταχύτητές τους μετά την κρούση:", options: ["α. Είναι παράλληλες.", "β. Είναι κάθετες μεταξύ τους.", "γ. Είναι αντίρροπες.", "δ. Έχουν το ίδιο μέτρο."], correct: "β", justification: "Είναι κλασικό αποτέλεσμα της διατήρησης ορμής και ενέργειας για ίσες μάζες σε δύο διαστάσεις." },
+        { id: 15, text: "Ως «σκέδαση» στη σύγχρονη φυσική ορίζουμε το φαινόμενο στο οποίο:", options: ["α. Δύο σώματα συγκρούονται υποχρεωτικά με φυσική επαφή.", "β. Δύο σωματίδια του μικρόκοσμου αλληλεπιδρούν με ισχυρές δυνάμεις για πολύ μικρό χρονικό διάστημα, χωρίς απαραίτητα να έρθουν σε επαφή.", "γ. Η συνολική ορμή του συστήματος δεν διατηρείται.", "δ. Τα σώματα ενώνονται πάντα σε ένα συσσωμάτωμα."], correct: "β", justification: "Η έννοια της κρούσης στον μικρόκοσμο ονομάζεται και σκέδαση και περιλαμβάνει φαινόμενα όπου τα σωματίδια αλληλεπιδρούν έντονα για ελάχιστο χρόνο χωρίς να έρχονται σε επαφή." },
+        { id: 16, text: "Σε μια κεντρική (μετωπική) κρούση δύο σφαιρών:", options: ["α. Τα διανύσματα των ταχυτήτων των κέντρων μάζας τους πριν τη σύγκρουση βρίσκονται στην ίδια ευθεία.", "β. Οι ταχύτητες των σωμάτων μετά την κρούση είναι οπωσδήποτε κάθετες μεταξύ τους.", "γ. Η κινητική ενέργεια κάθε σώματος ξεχωριστά παραμένει σταθερή.", "δ. Τα σώματα πρέπει υποχρεωτικά να έχουν ίσες μάζες."], correct: "α", justification: "Αυτός είναι ο ορισμός της κεντρικής κρούσης, όπου οι ταχύτητες των κέντρων μάζας βρίσκονται πάνω στην ίδια ευθεία." },
+        { id: 17, text: "Κατά την πλαστική κρούση ενός βλήματος με ακίνητο στόχο που μπορεί να κινηθεί, το βλήμα χάνει:", options: ["α. Όλη την ορμή του.", "β. Μέρος της ορμής του (το συσσωμάτωμα κινείται).", "γ. Όλη τη μάζα του.", "δ. Μόνο τη δυναμική του ενέργεια."], correct: "β", justification: "Εφόσον το συσσωμάτωμα αποκτά ταχύτητα V > 0, το σύστημα διατηρεί την αρχική ορμή του βλήματος. Το βλήμα 'δίνει' μέρος της ορμής του στο στόχο." },
+        { id: 18, text: "Η κρούση στην οποία οι ταχύτητες των σωμάτων πριν τη σύγκρουση είναι παράλληλες αλλά δεν βρίσκονται στην ίδια ευθεία ονομάζεται:", options: ["α. Κεντρική.", "β. Έκκεντρη.", "γ. Πλάγια.", "δ. Ελαστική."], correct: "β", justification: "Αυτός είναι ο ορισμός της έκκεντρης κρούσης." },
+        { id: 19, text: "Κατά την κρούση δύο σωμάτων, η συνολική ενέργεια (κάθε μορφής):", options: ["α. Διατηρείται πάντα.", "β. Διατηρείται μόνο στις ελαστικές.", "γ. Μειώνεται πάντα.", "δ. Γίνεται μηδέν."], correct: "α", justification: "Σύμφωνα με την αρχή διατήρησης της ενέργειας, η ενέργεια δεν χάνεται, απλώς αλλάζει μορφές (π.χ. κινητική σε θερμότητα)." },
+        { id: 20, text: "Σε ένα διάγραμμα δύναμης - χρόνου (F – t), το εμβαδόν μεταξύ της καμπύλης και του άξονα των χρόνων παριστάνει:", options: ["α. Την ταχύτητα.", "β. Την κινητική ενέργεια.", "γ. Τη μεταβολή της ορμής.", "δ. Τη μάζα."], correct: "γ", justification: "F = Δp/Δt ⇒ Δp = F · Δt." },
+        { id: 21, text: "Αν ένα σώμα m συγκρουστεί ελαστικά με ακίνητο σώμα M, το σώμα m θα συνεχίσει να κινείται προς την ίδια κατεύθυνση αν:", options: ["α. m = M", "β. m > M", "γ. m < M", "δ. Ποτέ δεν συνεχίζει στην ίδια κατεύθυνση."], correct: "β", justification: "Από τον τύπο v1′ = (m − M)·v1/(m + M). Για να είναι v1′ ομόρροπο του v1, πρέπει m − M > 0." },
+        { id: 22, text: "Στην ελαστική κρούση, η συνολική κινητική ενέργεια πριν είναι Κ1 και μετά Κ2. Ισχύει:", options: ["α. \\(K_1 > K_2\\)", "β. \\(K_1 < K_2\\)", "γ. \\(K_1 = K_2\\)", "δ. \\(K_2 = 0\\)"], correct: "γ", justification: "Αυτός είναι ο ορισμός της ελαστικής κρούσης." },
+        { id: 23, text: "Ένα σώμα προσκρούει πλάγια και ελαστικά σε λείο τοίχο. Η γωνία ανάκλασης είναι:", options: ["α. Πάντα 90°.", "β. Ίση με τη γωνία πρόσπτωσης.", "γ. Διπλάσια της γωνίας πρόσπτωσης.", "δ. Μηδέν."], correct: "β", justification: "Στην ελαστική κρούση με τοίχο, η συνιστώσα της ταχύτητας παράλληλα στον τοίχο μένει σταθερή και η κάθετη αλλάζει φορά, άρα οι γωνίες είναι ίσες." },
+        { id: 24, text: "Κατά την κρούση, ο χρόνος επαφής των σωμάτων είναι:", options: ["α. Πολύ μεγάλος.", "β. Πολύ μικρός (αμελητέος).", "γ. Διαφορετικός για κάθε σώμα.", "δ. Μικρός μόνο για τις έκκεντρες κρούσεις."], correct: "β", justification: "Οι κρούσεις είναι φαινόμενα πολύ μικρής διάρκειας." },
+        { id: 25, text: "Η ορμή p και η κινητική ενέργεια K ενός σώματος μάζας m συνδέονται με τη σχέση:", options: ["α. \\(K = p^2/(2m)\\)", "β. \\(K = p \\cdot m\\)", "γ. \\(K = 2mp^2\\)", "δ. \\(p = K/v\\)"], correct: "α", justification: "\\(K = \\frac{1}{2}mv^2 = \\frac{1}{2}m(p/m)^2 = p^2/(2m)\\)." }
+    ];
+
+    // --------------------------------------------------------------
+    // Ερωτήσεις Σωστού-Λάθους (26-50) – αυτούσιες δικαιολογήσεις από PDF
+    // --------------------------------------------------------------
+    const tfQuestions = [
+        { id: 26, text: "Σε κάθε κρούση (ελαστική ή μη), η συνολική ορμή του συστήματος παραμένει σταθερή αν δεν υπάρχουν εξωτερικές δυνάμεις.", correct: "Σωστό", justification: "Βασική αρχή της μηχανικής για μονωμένα συστήματα." },
+        { id: 27, text: "Στην πλαστική κρούση σε μονωμένο σύστημα, η ορμή του συστήματος δεν διατηρείται.", correct: "Λάθος", justification: "Η ορμή διατηρείται σε ΟΛΕΣ τις κρούσεις μονωμένων συστημάτων." },
+        { id: 28, text: "Μετά από μια πλαστική κρούση, η κινητική ενέργεια του συστήματος είναι πάντα μηδέν.", correct: "Λάθος", justification: "Το συσσωμάτωμα μπορεί να κινείται με ταχύτητα V, άρα να έχει κινητική ενέργεια. Μόνο αν η αρχική συνολική ορμή ήταν μηδέν, το συσσωμάτωμα ακινητοποιείται." },
+        { id: 29, text: "Στην κεντρική ελαστική κρούση δύο σωμάτων με m1 = m2, αν το ένα είναι ακίνητο, μετά την κρούση οι σφαίρες κινούνται με την ίδια ταχύτητα.", correct: "Λάθος", justification: "Ανταλλάσσουν ταχύτητες, άρα η πρώτη σταματά και η δεύτερη ξεκινά." },
+        { id: 30, text: "Κατά τη διάρκεια μιας κρούσης, η δύναμη που ασκείται σε ένα σώμα από το άλλο προκαλεί τη μεταβολή της ορμής του.", correct: "Σωστό", justification: "Από τον δεύτερο νόμο του Νεύτωνα, η δύναμη σχετίζεται με τον ρυθμό μεταβολής της ορμής." },
+        { id: 31, text: "Κατά την έκρηξη ενός σώματος, η ορμή του συστήματος δεν διατηρείται επειδή οι δυνάμεις είναι πολύ ισχυρές.", correct: "Λάθος", justification: "Οι δυνάμεις της έκρηξης είναι εσωτερικές, άρα η ορμή διατηρείται αν το σύστημα είναι μονωμένο." },
+        { id: 32, text: "Στην ελαστική κρούση, ένα μέρος της ενέργειας μετατρέπεται σε θερμότητα.", correct: "Λάθος", justification: "Στην ελαστική κρούση δεν έχουμε καμία απώλεια ενέργειας σε θερμότητα." },
+        { id: 33, text: "Η ορμή είναι διανυσματικό μέγεθος.", correct: "Σωστό", justification: "Έχει μέτρο και κατεύθυνση (ίδια με την ταχύτητα)." },
+        { id: 34, text: "Αν δύο σώματα έχουν ίσες κινητικές ενέργειες, έχουν οπωσδήποτε και ίσες ορμές.", correct: "Λάθος", justification: "Η ορμή εξαρτάται από τη μάζα και την ταχύτητα γραμμικά (mv), ενώ η ενέργεια από το τετράγωνο (1/2mv²). Επίσης η ορμή είναι διάνυσμα, η ενέργεια μονόμετρο." },
+        { id: 35, text: "Η κάθετη ελαστική κρούση μιας σφαίρας με τοίχο αλλάζει τη φορά της ορμής της.", correct: "Σωστό", justification: "Η ταχύτητα αναστρέφεται, άρα και η ορμή (p → -p)." },
+        { id: 36, text: "Στην πλαστική κρούση, η μάζα του συσσωματώματος είναι ίση με το άθροισμα των μαζών των δύο σωμάτων.", correct: "Σωστό", justification: "Τα σώματα ενώνονται σε ένα." },
+        { id: 37, text: "Κατά την κρούση δύο σωμάτων, η δύναμη που δέχεται το πρώτο από το δεύτερο είναι ίσου μέτρου και αντίθετης φοράς από τη δύναμη που δέχεται το δεύτερο από το πρώτο.", correct: "Σωστό", justification: "Σύμφωνα με τον 3ο νόμο του Νεύτωνα (Δράση-Αντίδραση)." },
+        { id: 38, text: "Η κινητική ενέργεια ενός συστήματος σωμάτων μπορεί να είναι μηδέν, ενώ η ορμή του να μην είναι.", correct: "Λάθος", justification: "Αν K = 0 τότε v = 0 για όλα τα σώματα, άρα και p = 0. Το αντίστροφο όμως μπορεί να συμβεί (π.χ. pολ = 0 αλλά Kολ > 0)." },
+        { id: 39, text: "Στην κεντρική ελαστική κρούση, αν m1 ≫ m2 και το m2 είναι ακίνητο, η ταχύτητα του m1 μετά την κρούση παραμένει σχεδόν ίδια.", correct: "Σωστό", justification: "Το μεγαλύτερης μάζας σώμα διατηρεί τη φορά κίνησής του από τη σχέση v1′ = (m1−m2)·v1/(m1+m2) και v1′ ≈ v1." },
+        { id: 40, text: "Σε κάθε κρούση, η ορμή κάθε σώματος ξεχωριστά παραμένει σταθερή.", correct: "Λάθος", justification: "Η ορμή ΚΑΘΕ σώματος αλλάζει, λόγω της δύναμης που δέχεται· μόνο η ΣΥΝΟΛΙΚΗ ορμή του συστήματος διατηρείται." },
+        { id: 41, text: "Η κρούση λέγεται πλάγια αν οι ταχύτητες των σωμάτων έχουν τυχαίες διευθύνσεις.", correct: "Σωστό", justification: "Ορισμός της πλάγιας κρούσης." },
+        { id: 42, text: "Η αρχή διατήρησης της ορμής ισχύει και στις εκρήξεις.", correct: "Σωστό", justification: "Οι δυνάμεις είναι εσωτερικές, άρα pαρχ = pτελ." },
+        { id: 43, text: "Η απώλεια κινητικής ενέργειας σε μια κρούση υπολογίζεται από τη διαφορά Kαρχ – Kτελ.", correct: "Σωστό", justification: "Η διαφορά αυτή δείχνει πόση ενέργεια 'χάθηκε' ως θερμότητα." },
+        { id: 44, text: "Σε μια πλαστική κρούση, αν το ένα σώμα είναι αρχικά ακίνητο, το συσσωμάτωμα θα κινείται πάντα προς την κατεύθυνση του κινούμενου σώματος.", correct: "Σωστό", justification: "Λόγω διατήρησης της ορμής, η ορμή του συσσωματώματος πρέπει να έχει την ίδια κατεύθυνση με την αρχική ολική ορμή." },
+        { id: 45, text: "Η μεταβολή του μέτρου της ορμής είναι μονόμετρο μέγεθος.", correct: "Σωστό", justification: "Είναι διαφορά μονόμετρων μεγεθών συνεπώς, μονόμετρο." },
+        { id: 46, text: "Στην κεντρική ελαστική κρούση ίσων μαζών, αν και τα δύο σώματα κινούνται, απλώς ανταλλάσσουν τις ταχύτητές τους.", correct: "Σωστό", justification: "Πρόκειται για γενική ιδιότητα της ελαστικής κρούσης ίσων μαζών." },
+        { id: 47, text: "Αν ένα σώμα συγκρουστεί πλαστικά με έναν τοίχο, η ορμή του συστήματος 'σώμα-τοίχος' δεν διατηρείται.", correct: "Λάθος", justification: "Η ορμή διατηρείται πάντα, αλλά επειδή ο τοίχος είναι συνδεδεμένος με τη Γη (τεράστια μάζα), η μεταβολή της ταχύτητάς του είναι μη ανιχνεύσιμη." },
+        { id: 48, text: "Το έργο των εσωτερικών δυνάμεων σε μια κρούση μπορεί να είναι διάφορο του μηδενός.", correct: "Σωστό", justification: "Στις ανελαστικές κρούσεις, οι εσωτερικές δυνάμεις παράγουν έργο που μετατρέπεται σε θερμότητα." },
+        { id: 49, text: "Η ορμή ενός σώματος εξαρτάται από το σύστημα αναφοράς του παρατηρητή.", correct: "Σωστό", justification: "Επειδή η ταχύτητα είναι σχετική, και η ορμή p = mv εξαρτάται από το σύστημα ως προς το οποίο τη μετράμε." },
+        { id: 50, text: "Στις κρούσεις, θεωρούμε ότι οι εξωτερικές δυνάμεις (π.χ. βάρος) δεν προλαβαίνουν να αλλάξουν σημαντικά την ορμή λόγω της μικρής διάρκειας του φαινομένου.", correct: "Σωστό", justification: "Αυτή είναι η βασική παραδοχή για την εφαρμογή της διατήρησης της ορμής κατά τη διάρκεια της κρούσης." }
+    ];
+
+    // Render όλων των ερωτήσεων
+    function renderQuestions() {
+        const container = document.getElementById('questions-container');
+        if (!container) return;
+        let html = '';
+
+        html += `<div class="section-title">🔹 Ερωτήσεις Πολλαπλής Επιλογής (1-25)</div>`;
+        mcQuestions.forEach(q => {
+            html += buildMCQuestionCard(q);
+        });
+
+        html += `<div class="section-title">🔸 Ερωτήσεις Σωστού - Λάθους (26-50)</div>`;
+        tfQuestions.forEach(q => {
+            html += buildTFQuestionCard(q);
+        });
+
+        container.innerHTML = html;
+    }
+
+    function buildMCQuestionCard(q) {
+        const optionLetters = ['α', 'β', 'γ', 'δ'];
+        let optionsHtml = `<div class="options">`;
+        q.options.forEach((opt, idx) => {
+            const letter = optionLetters[idx];
+            optionsHtml += `
+                <div class="option">
+                    <input type="radio" name="mc_${q.id}" value="${letter}" id="mc_${q.id}_${letter}">
+                    <label for="mc_${q.id}_${letter}">${escapeHtml(opt)}</label>
+                </div>`;
+        });
+        optionsHtml += `</div>`;
+        return `
+            <div class="question-card" data-qid="mc_${q.id}" data-correct="${q.correct}" data-justification="${escapeHtml(q.justification)}" data-type="mc">
+                <div class="badge">Ερώτηση ${q.id}</div>
+                <div class="question-text">${escapeHtml(q.text)}</div>
+                ${optionsHtml}
+                <button class="check-btn" data-qid="mc_${q.id}">✓ Έλεγχος απάντησης</button>
+                <div class="feedback" id="feedback_mc_${q.id}" style="display: none;"></div>
+            </div>
+        `;
+    }
+
+    function buildTFQuestionCard(q) {
+        return `
+            <div class="question-card" data-qid="tf_${q.id}" data-correct="${q.correct}" data-justification="${escapeHtml(q.justification)}" data-type="tf">
+                <div class="badge">Ερώτηση ${q.id}</div>
+                <div class="question-text">${escapeHtml(q.text)}</div>
+                <div class="options">
+                    <div class="option"><input type="radio" name="tf_${q.id}" value="Σωστό" id="tf_${q.id}_true"><label for="tf_${q.id}_true">Σωστό</label></div>
+                    <div class="option"><input type="radio" name="tf_${q.id}" value="Λάθος" id="tf_${q.id}_false"><label for="tf_${q.id}_false">Λάθος</label></div>
+                </div>
+                <button class="check-btn" data-qid="tf_${q.id}">✓ Έλεγχος απάντησης</button>
+                <div class="feedback" id="feedback_tf_${q.id}" style="display: none;"></div>
+            </div>
+        `;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Event delegation για έλεγχο απαντήσεων
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.check-btn');
+        if (!btn) return;
+        const qidAttr = btn.getAttribute('data-qid');
+        if (!qidAttr) return;
+        const card = btn.closest('.question-card');
+        if (!card) return;
+        const correctAnswer = card.getAttribute('data-correct');
+        const justificationRaw = card.getAttribute('data-justification');
+        const type = card.getAttribute('data-type');
+        let selectedValue = null;
+        if (type === 'mc') {
+            const selectedRadio = card.querySelector(`input[name="${qidAttr}"]:checked`);
+            if (selectedRadio) selectedValue = selectedRadio.value;
+        } else if (type === 'tf') {
+            const selectedRadio = card.querySelector(`input[name="${qidAttr}"]:checked`);
+            if (selectedRadio) selectedValue = selectedRadio.value;
+        }
+        const feedbackDiv = card.querySelector(`.feedback`);
+        if (!feedbackDiv) return;
+
+        if (!selectedValue) {
+            feedbackDiv.style.display = 'block';
+            feedbackDiv.innerHTML = `<span style="color:#f4a261;">⚠️ Παρακαλώ επιλέξτε μια απάντηση πρώτα.</span>`;
+            feedbackDiv.classList.remove('correct-feedback', 'wrong-feedback');
+            return;
+        }
+
+        const isCorrect = (selectedValue === correctAnswer);
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.classList.remove('correct-feedback', 'wrong-feedback');
+        if (isCorrect) {
+            feedbackDiv.classList.add('correct-feedback');
+            feedbackDiv.innerHTML = `<strong>✅ Σωστή απάντηση!</strong><div class="justification">📘 Δικαιολόγηση: ${justificationRaw}</div>`;
+        } else {
+            feedbackDiv.classList.add('wrong-feedback');
+            feedbackDiv.innerHTML = `<strong>❌ Λανθασμένη απάντηση.</strong><div class="justification">📘 Σωστή απάντηση: <strong>${correctAnswer}</strong><br>Αιτιολόγηση: ${justificationRaw}</div>`;
+        }
+        if (window.MathJax) {
+            MathJax.typesetPromise([feedbackDiv]).catch(err => console.log(err));
+        }
+    });
+
+    renderQuestions();
+    if (window.MathJax) {
+        MathJax.typesetPromise();
+    }
+</script>
+</body>
+</html>

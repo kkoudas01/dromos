@@ -170,7 +170,7 @@
 
 # Γ Λυκείου <folder>LykeioC</folder>
 
-## Κατεύθυνση
+## Μαθηματικά Προσανατολισμού
 
 ### Εισαγωγή στις συναρτήσεις
 
@@ -238,10 +238,28 @@
 
 [Κεφ. 3.7](LykeioC/flashcards/flashcards3.7.html)
 
-## Χημεία
+## Χημεία Προσανατολισμού
 
 [Γενικό Quiz Α Θέμα](LykeioC/Chem/quizTheory.html)
 
-## Φυσική
+## Φυσική Προσανατολισμού
+
+### Επαναληπτικά
 
 [Γενικό Quiz Α Θέμα](LykeioC/physics/themaA.html)
+
+### Ερωτήσεις θεωρίας (Χριστόφορος Κατσιλέρος)
+
+[Ταλαντώσεις](LykeioC/physics/oscil.html)
+
+[Κύματα](LykeioC/physics/waves.html)
+
+[Μαγνητικό πεδίο](LykeioC/physics/magnField.html)
+
+[Στερεό](LykeioC/physics/stereo.html)
+
+[Κρούσεις](LykeioC/physics/kroyseis.html)
+
+[Ηλεκτρομαγνητική επαγωγή](LykeioC/physics/epagogi.html)
+
+[Κβαντομηχανική](LykeioC/physics/quantoMechanics.html)
