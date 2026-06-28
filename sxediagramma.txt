@@ -37,12 +37,6 @@
 
 [Javalab](https://javalab.org/en/)
 
-# Τα παιδία παίζει
-
-## Γεωμετρία
-
-[Έλλειψη VS Υπερβολή](fun/conics2.html)
-
 --hline--
 
 # Α Γυμνασίου <folder>GymnasioA</folder>
