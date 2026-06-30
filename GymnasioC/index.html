@@ -283,7 +283,7 @@ body::after{
 <div id="menu_1" class="popup-overlay" onclick="closePopup(event,'menu_1')">
   <div class="popup-box">
     <button class="popup-close" onclick="closePopupDirect('menu_1')">✕</button>
-    <p>🔬 H σελίδα αυτή περιέχει υλικό σχετικό με την εκπαίδευση των μαθηματικών και γενικότερα των θετικών επιστημών.</p><p>🧙‍♂️ Εγώ ονομάζομαι Κώστας Κούδας. Είμαι μαθηματικός, εργάζομαι στην Κέρκυρα.</p><p>🌐 Επιπλέον ιστοσελίδες μου μπορείτε να βρείτε <a href="porfolio.html" target="_blank" onclick="return openLink(event,'porfolio.html')">εδώ</a></p>
+    <p>🔬 H σελίδα αυτή περιέχει υλικό σχετικό με την εκπαίδευση των μαθηματικών και γενικότερα των θετικών επιστημών.</p><p>🧙‍♂️ Εγώ ονομάζομαι Κώστας Κούδας. Είμαι μαθηματικός, εργάζομαι στην Κέρκυρα.</p><p>🌐 Επιπλέον ιστοσελίδες μου μπορείτε να βρείτε <a href="https://kostas-koudas.pages.dev/" target="_blank" onclick="return openLink(event,'https://kostas-koudas.pages.dev/')">εδώ</a></p>
   </div>
 </div>
 <li class="h1-item">
@@ -292,79 +292,98 @@ body::after{
   </button>
   <ul id="menu_2" class="submenu"><li class="h2-item">
   <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_3')">
-    <span class="arrow">▸</span>Αναζητήσεις
+    <span class="arrow">▸</span>Σχολείο
   </button>
-  <ul id="menu_3" class="submenu"><li class="menu-link"><a href="https://www.wolframalpha.com/" target="_blank" onclick="return openLink(event,'https://www.wolframalpha.com/')">Wolfram Alpha</a></li></ul>
+  <ul id="menu_3" class="submenu"><li class="h3-item">
+  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_4')">
+    <span class="arrow">▸</span>Επίσημα
+  </button>
+  <ul id="menu_4" class="submenu"><li class="menu-link"><a href="https://trapeza.iep.edu.gr/" target="_blank" onclick="return openLink(event,'https://trapeza.iep.edu.gr/')">Τράπεζα Θεμάτων</a></li>
+<li class="menu-link"><a href="https://www.study4exams.gr/" target="_blank" onclick="return openLink(event,'https://www.study4exams.gr/')">study4exams</a></li>
+<li class="menu-link"><a href="https://ebooksdl.cti.gr/didaktika_paketa" target="_blank" onclick="return openLink(event,'https://ebooksdl.cti.gr/didaktika_paketa')">Νέα σχολικά βιβλία</a></li></ul>
 </li>
-<li class="h2-item">
-  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_4')">
-    <span class="arrow">▸</span>Προγραμματισμός
+<li class="h3-item">
+  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_5')">
+    <span class="arrow">▸</span>Μαθηματικές ιστοσελίδες
   </button>
-  <ul id="menu_4" class="submenu"><li class="menu-link"><a href="https://www.wolframcloud.com/" target="_blank" onclick="return openLink(event,'https://www.wolframcloud.com/')">Wolfram Cloud</a></li></ul>
-</li>
-<li class="h2-item">
-  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_5')">
-    <span class="arrow">▸</span>Άλγεβρα
-  </button>
-  <ul id="menu_5" class="submenu"><li class="menu-link"><a href="https://www.desmos.com/calculator?lang=el" target="_blank" onclick="return openLink(event,'https://www.desmos.com/calculator?lang=el')">Desmos</a></li>
-<li class="menu-link"><a href="https://www.geogebra.org/graphing" target="_blank" onclick="return openLink(event,'https://www.geogebra.org/graphing')">Geogebra-γραφικές παραστάσεις</a></li></ul>
+  <ul id="menu_5" class="submenu"><li class="menu-link"><a href="https://www.askisopolis.gr/" target="_blank" onclick="return openLink(event,'https://www.askisopolis.gr/')">Ασκησόπολις</a></li></ul>
+</li></ul>
 </li>
 <li class="h2-item">
   <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_6')">
+    <span class="arrow">▸</span>Αναζητήσεις
+  </button>
+  <ul id="menu_6" class="submenu"><li class="menu-link"><a href="https://www.wolframalpha.com/" target="_blank" onclick="return openLink(event,'https://www.wolframalpha.com/')">Wolfram Alpha</a></li></ul>
+</li>
+<li class="h2-item">
+  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_7')">
+    <span class="arrow">▸</span>Προγραμματισμός
+  </button>
+  <ul id="menu_7" class="submenu"><li class="menu-link"><a href="https://www.wolframcloud.com/" target="_blank" onclick="return openLink(event,'https://www.wolframcloud.com/')">Wolfram Cloud</a></li></ul>
+</li>
+<li class="h2-item">
+  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_8')">
+    <span class="arrow">▸</span>Άλγεβρα
+  </button>
+  <ul id="menu_8" class="submenu"><li class="menu-link"><a href="https://www.desmos.com/calculator?lang=el" target="_blank" onclick="return openLink(event,'https://www.desmos.com/calculator?lang=el')">Desmos</a></li>
+<li class="menu-link"><a href="https://www.geogebra.org/graphing" target="_blank" onclick="return openLink(event,'https://www.geogebra.org/graphing')">Geogebra-γραφικές παραστάσεις</a></li></ul>
+</li>
+<li class="h2-item">
+  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_9')">
     <span class="arrow">▸</span>Γεωμετρία
   </button>
-  <ul id="menu_6" class="submenu"><li class="menu-link"><a href="https://www.geogebra.org/geometry" target="_blank" onclick="return openLink(event,'https://www.geogebra.org/geometry')">Geogebra-γεωμετρία επιπέδου</a></li>
+  <ul id="menu_9" class="submenu"><li class="menu-link"><a href="https://www.geogebra.org/geometry" target="_blank" onclick="return openLink(event,'https://www.geogebra.org/geometry')">Geogebra-γεωμετρία επιπέδου</a></li>
 <li class="menu-link"><a href="https://www.geogebra.org/3d" target="_blank" onclick="return openLink(event,'https://www.geogebra.org/3d')">Geogebra-γεωμετρία χώρου</a></li>
 <li class="menu-link"><a href="https://www.c82.net/euclid/el/" target="_blank" onclick="return openLink(event,'https://www.c82.net/euclid/el/')">Ο Ευκλείδης του Byrne</a></li></ul>
 </li>
 <li class="h2-item">
-  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_7')">
+  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_10')">
     <span class="arrow">▸</span>Φυσική
   </button>
-  <ul id="menu_7" class="submenu"><li class="menu-link"><a href="https://phet.colorado.edu/" target="_blank" onclick="return openLink(event,'https://phet.colorado.edu/')">Phet</a></li>
+  <ul id="menu_10" class="submenu"><li class="menu-link"><a href="https://phet.colorado.edu/" target="_blank" onclick="return openLink(event,'https://phet.colorado.edu/')">Phet</a></li>
 <li class="menu-link"><a href="https://javalab.org/en/" target="_blank" onclick="return openLink(event,'https://javalab.org/en/')">Javalab</a></li></ul>
 </li></ul>
 </li>
 <li class="h1-item">
-  <button class="toggle-btn h1-btn" onclick="toggleMenu('menu_8')">
+  <button class="toggle-btn h1-btn" onclick="toggleMenu('menu_11')">
     <span class="arrow">▸</span>Γ Γυμνασίου
   </button>
-  <ul id="menu_8" class="submenu"><li class="h2-item">
-  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_9')">
+  <ul id="menu_11" class="submenu"><li class="h2-item">
+  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_12')">
     <span class="arrow">▸</span>Άλγεβρα
   </button>
-  <ul id="menu_9" class="submenu"><li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_10')">
+  <ul id="menu_12" class="submenu"><li class="h3-item">
+  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_13')">
     <span class="arrow">▸</span>Εξισώσεις
   </button>
-  <ul id="menu_10" class="submenu"><li class="h4-item">
-  <button class="toggle-btn h4-btn" onclick="toggleMenu('menu_11')">
+  <ul id="menu_13" class="submenu"><li class="h4-item">
+  <button class="toggle-btn h4-btn" onclick="toggleMenu('menu_14')">
     <span class="arrow">▸</span>Εξισώσεις 2ου βαθμού
   </button>
-  <ul id="menu_11" class="submenu"><li class="menu-link"><a href="quadratic_flowchart.html" target="_blank" onclick="return openLink(event,'quadratic_flowchart.html')">Διακρίνουσα</a></li></ul>
+  <ul id="menu_14" class="submenu"><li class="menu-link"><a href="quadratic_flowchart.html" target="_blank" onclick="return openLink(event,'quadratic_flowchart.html')">Διακρίνουσα</a></li></ul>
 </li></ul>
 </li>
 <li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_12')">
+  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_15')">
     <span class="arrow">▸</span>Συναρτήσεις
   </button>
-  <ul id="menu_12" class="submenu"><li class="h4-item">
-  <button class="toggle-btn h4-btn" onclick="toggleMenu('menu_13')">
+  <ul id="menu_15" class="submenu"><li class="h4-item">
+  <button class="toggle-btn h4-btn" onclick="toggleMenu('menu_16')">
     <span class="arrow">▸</span>Γραμμικές συναρτήσεις
   </button>
-  <ul id="menu_13" class="submenu"><li class="menu-link"><a href="linearReg.html" target="_blank" onclick="return openLink(event,'linearReg.html')">Βρες την ευθεία</a></li></ul>
+  <ul id="menu_16" class="submenu"><li class="menu-link"><a href="linearReg.html" target="_blank" onclick="return openLink(event,'linearReg.html')">Βρες την ευθεία</a></li></ul>
 </li></ul>
 </li></ul>
 </li>
 <li class="h2-item">
-  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_14')">
+  <button class="toggle-btn h2-btn" onclick="toggleMenu('menu_17')">
     <span class="arrow">▸</span>Γεωμετρία
   </button>
-  <ul id="menu_14" class="submenu"><li class="h3-item">
-  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_15')">
+  <ul id="menu_17" class="submenu"><li class="h3-item">
+  <button class="toggle-btn h3-btn" onclick="toggleMenu('menu_18')">
     <span class="arrow">▸</span>Τριγωνομετρία
   </button>
-  <ul id="menu_15" class="submenu"><li class="menu-link"><a href="polarCoord.html" target="_blank" onclick="return openLink(event,'polarCoord.html')">Πολικές και καρτεσιανές συντεταγμένες</a></li>
+  <ul id="menu_18" class="submenu"><li class="menu-link"><a href="polarCoord.html" target="_blank" onclick="return openLink(event,'polarCoord.html')">Πολικές και καρτεσιανές συντεταγμένες</a></li>
 <li class="menu-link"><a href="trigonArithGgymnSel.html" target="_blank" onclick="return openLink(event,'trigonArithGgymnSel.html')">Quiz: Τριγωνομετρικοί αριθμοί κυρτών γωνιών</a></li></ul>
 </li></ul>
 </li></ul>

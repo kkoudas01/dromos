@@ -4,10 +4,24 @@
 
 🧙‍♂️ Εγώ ονομάζομαι Κώστας Κούδας. Είμαι μαθηματικός, εργάζομαι στην Κέρκυρα.
 
-🌐 Επιπλέον ιστοσελίδες μου μπορείτε να βρείτε [εδώ](porfolio.html)}
+🌐 Επιπλέον ιστοσελίδες μου μπορείτε να βρείτε [εδώ](https://kostas-koudas.pages.dev/)}
 </popup>
 
 # Χρήσιμοι σύνδεσμοι <folder-all></folder>
+
+## Σχολείο
+
+### Επίσημα
+
+[Τράπεζα Θεμάτων](https://trapeza.iep.edu.gr/)
+
+[study4exams](https://www.study4exams.gr/)
+
+[Νέα σχολικά βιβλία](https://ebooksdl.cti.gr/didaktika_paketa)
+
+### Μαθηματικές ιστοσελίδες
+
+[Ασκησόπολις](https://www.askisopolis.gr/)
 
 ## Αναζητήσεις
 
@@ -38,6 +52,10 @@
 [Javalab](https://javalab.org/en/)
 
 --hline--
+
+# ΣΤ Δημοτικού <folder>DimotikoST</folder>
+
+[Προπαίδεια](DimotikoST/propaideia.html)
 
 # Α Γυμνασίου <folder>GymnasioA</folder>
 

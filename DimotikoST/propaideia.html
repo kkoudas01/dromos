@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Προπαίδεια · Παιχνιδιάρικο</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface2: #1c2333;
+            --text: #f0f0f0;
+            --text2: #c9d1d9;
+            --accent: #58a6ff;
+            --accent2: #f0a050;
+            --success: #3fb950;
+            --error: #f85149;
+            --warning: #d2991d;
+            --border: #30363d;
+            --radius: 20px;
+            --radius-sm: 14px;
+            --font: 'Segoe UI', 'Comic Sans MS', 'Chalkboard SE', system-ui, sans-serif;
+            --shadow: 0 6px 28px rgba(0, 0, 0, 0.5);
+            --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font);
+            background: radial-gradient(circle at 20% 20%, #1a2332, #0d1117);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            background-attachment: fixed;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: rgba(22, 27, 34, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .header-left { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: all 0.2s var(--bounce);
+            white-space: nowrap;
+            min-height: 46px;
+            font-family: var(--font);
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            letter-spacing: 0.02em;
+        }
+        .btn:hover { background: #2a3545; border-color: #8ab4f8; transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 20px rgba(88,166,255,0.2); }
+        .btn:active { transform: scale(0.94); transition: 0.08s; }
+        .btn-accent { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 800; }
+        .btn-accent:hover { background: #79b8ff; border-color: #c2d9ff; box-shadow: 0 0 22px rgba(88,166,255,0.5); }
+        .btn-warn { background: var(--accent2); color: #000; border-color: var(--accent2); font-weight: 800; }
+        .btn-warn:hover { background: #f5b860; border-color: #ffd580; }
+        .btn-sm { padding: 8px 15px; font-size: 0.9rem; min-height: 40px; }
+        .btn-lg { padding: 14px 28px; font-size: 1.2rem; border-radius: var(--radius); }
+
+        .main { flex: 1; padding: 20px 16px; max-width: 1100px; width: 100%; margin: 0 auto; }
+
+        .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; justify-content: center; }
+        .tab-btn {
+            padding: 12px 22px; border-radius: 40px; border: 2px solid var(--border);
+            background: rgba(22,27,34,0.7); backdrop-filter: blur(6px); color: var(--text2);
+            cursor: pointer; font-size: 1rem; font-weight: 700; transition: all 0.25s var(--bounce);
+            font-family: var(--font); min-height: 46px; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 24px rgba(88,166,255,0.6); transform: scale(1.04); }
+        .tab-btn:hover:not(.active) { border-color: #5a6a80; background: #1e2530; transform: translateY(-1px); }
+
+        .panel { display: none; animation: fadeSlide 0.3s ease; }
+        .panel.active { display: block; }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        .grid-buttons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 20px; }
+
+        .multiplication-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 16px 0; }
+        .multiplication-item {
+            background: rgba(22,27,34,0.8); backdrop-filter: blur(8px); border: 2px solid var(--border);
+            border-radius: var(--radius-sm); padding: 12px 18px; font-size: 1.2rem; font-weight: 700;
+            text-align: center; min-width: 100px; transition: 0.25s; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .multiplication-item.highlight { border-color: #f0a050; background: #1f1a10; box-shadow: 0 0 18px rgba(240,160,80,0.4); }
+
+        .table-wrapper { overflow-x: auto; margin: 20px 0; border-radius: var(--radius); border: 2px solid var(--border); background: rgba(22,27,34,0.7); backdrop-filter: blur(6px); padding: 10px; }
+        .mult-table { border-collapse: collapse; width: 100%; min-width: 600px; font-size: 0.9rem; text-align: center; }
+        .mult-table th, .mult-table td { border: 1px solid var(--border); padding: 10px 6px; font-weight: 700; }
+        .mult-table th { background: #1e2a3a; color: var(--accent2); }
+        .mult-table td { background: #111920; }
+        .mult-table .diag { background: #1f3a1f; color: #8fe08f; font-weight: 800; }
+
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+            z-index: 200; display: flex; align-items: center; justify-content: center;
+            padding: 16px; animation: fadeIn 0.2s;
+        }
+        .modal {
+            background: var(--surface); border: 2px solid var(--border); border-radius: 28px;
+            padding: 24px 20px 20px; max-width: 700px; width: 100%; max-height: 85vh;
+            overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.7); position: relative;
+            animation: popIn 0.3s var(--bounce);
+        }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-close {
+            position: absolute; top: 12px; right: 14px; background: #f85149; border: none;
+            color: white; font-size: 1.8rem; font-weight: bold; cursor: pointer; width: 42px;
+            height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            transition: 0.25s; z-index: 10; box-shadow: 0 4px 12px rgba(248,81,73,0.4);
+            line-height: 1; font-family: var(--font);
+        }
+        .modal-close:hover { background: #ff6b63; transform: rotate(90deg) scale(1.1); box-shadow: 0 0 20px rgba(255,107,99,0.7); }
+
+        .quiz-question { font-size: 1.6rem; text-align: center; margin: 16px 0; font-weight: 800; color: #f0d080; text-shadow: 0 2px 6px black; }
+        .quiz-input {
+            display: block; width: 130px; margin: 0 auto 16px; padding: 14px; font-size: 1.5rem;
+            text-align: center; border-radius: 50px; border: 3px solid var(--border);
+            background: #0b0f16; color: #fff; font-weight: 700; font-family: var(--font);
+            transition: 0.2s; outline: none; box-shadow: inset 0 2px 8px black;
+        }
+        .quiz-input:focus { border-color: var(--accent); box-shadow: 0 0 20px var(--accent); }
+        .quiz-input.error { border-color: var(--error); animation: shake 0.4s ease; }
+        .quiz-input.correct { border-color: var(--success); background: #0a1f0a; box-shadow: 0 0 24px #3fb950; }
+        @keyframes shake { 0%,100%{ transform: translateX(0); } 25%{ transform: translateX(-8px); } 75%{ transform: translateX(8px); } }
+
+        .quiz-feedback { text-align: center; font-weight: 800; font-size: 1.2rem; margin: 10px 0; min-height: 32px; }
+        .quiz-feedback.correct { color: #9eff80; } .quiz-feedback.error { color: #ff8a80; }
+        .quiz-progress { text-align: center; font-size: 0.95rem; color: var(--text2); }
+        .quiz-summary { text-align: center; margin: 12px 0; font-weight: 800; font-size: 1.2rem; }
+        .quiz-summary.perfect { color: #f0d060; }
+
+        .pairs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
+        @media (max-width: 500px) { .pairs-grid { grid-template-columns: 1fr; } }
+        .pair-row {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center;
+            background: #1b2230; padding: 14px; border-radius: 18px; border: 2px solid var(--border);
+        }
+        .pair-row input {
+            width: 55px; padding: 10px; font-size: 1rem; text-align: center; border-radius: 12px;
+            border: 2px solid var(--border); background: #0b0f16; color: #fff; font-weight: 700; transition: 0.2s;
+        }
+        .pair-row input:focus { border-color: var(--accent); outline: none; }
+
+        .footer {
+            text-align: right; padding: 8px 20px; font-size: 0.8rem; color: #5a5f66;
+            font-style: italic; background: rgba(22,27,34,0.7); backdrop-filter: blur(4px);
+            border-top: 1px solid var(--border); position: sticky; bottom: 0; z-index: 50;
+        }
+
+        .confetti-piece {
+            position: fixed; width: 10px; height: 10px; background: #f0a050; top: -20px;
+            z-index: 9999; animation: confettiFall 2.5s linear forwards; border-radius: 2px;
+        }
+        @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity:1; } 100% { transform: translateY(105vh) rotate(720deg); opacity:0; } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="index.html" class="btn btn-sm" title="Αρχική σελίδα">🏠 Αρχική</a>
+            <button class="btn btn-sm" id="btnTable" title="Πίνακας Πολλαπλασιασμού">📊 Πίνακας</button>
+        </div>
+    </header>
+
+    <main class="main" id="mainContent">
+        <div id="symbolScreen" style="text-align:center;padding:50px 16px;">
+            <h2 style="font-size:2rem;color:var(--accent2);margin-bottom:24px;">🔢 Διάλεξε σύμβολο</h2>
+            <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">
+                <button class="btn btn-lg btn-accent" data-symbol="•" id="btnSymbolDot" style="font-size:2.5rem;width:110px;">•</button>
+                <button class="btn btn-lg btn-warn" data-symbol="×" id="btnSymbolX" style="font-size:2.5rem;width:110px;">×</button>
+            </div>
+            <p style="margin-top:20px;color:var(--text2);">Πάτησε το αγαπημένο σου σύμβολο!</p>
+        </div>
+
+        <div id="appContent" style="display:none;">
+            <nav class="tabs" id="tabNav">
+                <button class="tab-btn active" data-tab="tab-number">🔢 Ανά νούμερο</button>
+                <button class="tab-btn" data-tab="tab-pairs">🔗 Ζευγάρια</button>
+                <button class="tab-btn" data-tab="tab-doubles">🟰 Διπλά</button>
+                <button class="tab-btn" data-tab="tab-all">🌐 Όλα μαζί</button>
+            </nav>
+
+            <div class="panel active" id="tab-number">
+                <div class="grid-buttons" id="numberButtons"></div>
+                <div id="numberDisplay"></div>
+                <div id="numberQuizBtn" style="text-align:center;margin-top:14px;"></div>
+            </div>
+            <div class="panel" id="tab-pairs">
+                <div class="grid-buttons" id="pairsButtons"></div>
+                <div id="pairsDisplay"></div>
+                <div id="pairsQuizBtn" style="text-align:center;margin-top:14px;"></div>
+            </div>
+            <div class="panel" id="tab-doubles">
+                <div id="doublesDisplay"></div>
+                <div id="doublesQuizBtn" style="text-align:center;margin-top:14px;"></div>
+            </div>
+            <div class="panel" id="tab-all">
+                <div id="allTableDisplay"></div>
+                <div id="allQuizBtn" style="text-align:center;margin-top:14px;"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer"><span>Κώστας Κούδας</span></footer>
+    <div id="modalContainer"></div>
+
+    <script>
+        (function() {
+            let multSymbol = '×';
+            let currentTab = 'tab-number';
+            let selectedNumber = null;
+            let selectedPair = null;
+            let modalStack = [];   // navigation stack
+
+            const symbolScreen = document.getElementById('symbolScreen');
+            const appContent = document.getElementById('appContent');
+            const modalContainer = document.getElementById('modalContainer');
+            const tabNav = document.getElementById('tabNav');
+            const panels = {
+                'tab-number': document.getElementById('tab-number'),
+                'tab-pairs': document.getElementById('tab-pairs'),
+                'tab-doubles': document.getElementById('tab-doubles'),
+                'tab-all': document.getElementById('tab-all'),
+            };
+
+            // ========== MODAL STACK ==========
+            function pushModal(renderFn) {
+                modalStack.push(renderFn);
+                renderFn();
+            }
+            function popModal() {
+                if (modalStack.length === 0) return;
+                modalStack.pop();
+                if (modalStack.length === 0) {
+                    closeAllModals();
+                } else {
+                    const prev = modalStack[modalStack.length-1];
+                    prev();
+                }
+            }
+            function closeAllModals() {
+                modalStack = [];
+                modalContainer.innerHTML = '';
+            }
+
+            // ========== SYMBOL SELECTION ==========
+            document.getElementById('btnSymbolDot').addEventListener('click', () => selectSymbol('•'));
+            document.getElementById('btnSymbolX').addEventListener('click', () => selectSymbol('×'));
+
+            function selectSymbol(sym) {
+                multSymbol = sym;
+                symbolScreen.style.display = 'none';
+                appContent.style.display = 'block';
+                initAll();
+            }
+
+            function initAll() {
+                buildNumberButtons();
+                buildPairsButtons();
+                buildDoublesDisplay();
+                buildAllTable();
+                setupTabs();
+                showPanel('tab-number');
+                const firstTab = document.querySelector('.tab-btn[data-tab="tab-number"]');
+                if (firstTab) firstTab.classList.add('active');
+            }
+
+            function setupTabs() {
+                tabNav.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        tabNav.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        showPanel(btn.dataset.tab);
+                    });
+                });
+            }
+
+            function showPanel(tabId) {
+                currentTab = tabId;
+                Object.values(panels).forEach(p => p.classList.remove('active'));
+                if (panels[tabId]) panels[tabId].classList.add('active');
+                if (tabId !== 'tab-number') {
+                    selectedNumber = null;
+                    document.getElementById('numberDisplay').innerHTML = '';
+                    document.getElementById('numberQuizBtn').innerHTML = '';
+                }
+                if (tabId !== 'tab-pairs') {
+                    selectedPair = null;
+                    document.getElementById('pairsDisplay').innerHTML = '';
+                    document.getElementById('pairsQuizBtn').innerHTML = '';
+                }
+            }
+
+            // ========== TABLE POPUP ==========
+            document.getElementById('btnTable').addEventListener('click', () => {
+                pushModal(renderTableModal);
+            });
+
+            function renderTableModal() {
+                let html = '<div class="modal-overlay" id="tableOverlay"><div class="modal">';
+                html += '<button class="modal-close" id="closeTableModal">✕</button>';
+                html += '<h3 style="color:var(--accent2);">📊 Πίνακας Πολλαπλασιασμού</h3>';
+                html += '<div class="table-wrapper"><table class="mult-table"><thead><tr><th>'+multSymbol+'</th>';
+                for (let i=0; i<=10; i++) html += '<th>'+i+'</th>';
+                html += '</tr></thead><tbody>';
+                for (let r=0; r<=10; r++) {
+                    html += '<tr><th>'+r+'</th>';
+                    for (let c=0; c<=10; c++) {
+                        html += '<td class="'+(r===c?'diag':'')+'">'+(r*c)+'</td>';
+                    }
+                    html += '</tr>';
+                }
+                html += '</tbody></table></div></div></div>';
+                modalContainer.innerHTML = html;
+                document.getElementById('closeTableModal').addEventListener('click', popModal);
+                document.getElementById('tableOverlay').addEventListener('click', function(e) {
+                    if (e.target === e.currentTarget) closeAllModals();
+                });
+            }
+
+            // ========== NUMBER TAB ==========
+            function buildNumberButtons() {
+                const container = document.getElementById('numberButtons');
+                container.innerHTML = '';
+                for (let a=2; a<=10; a++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn';
+                    btn.textContent = 'Προπαίδεια του ' + a;
+                    btn.addEventListener('click', () => selectNumber(a));
+                    container.appendChild(btn);
+                }
+            }
+
+            function selectNumber(a) {
+                selectedNumber = a;
+                const sym = multSymbol;
+                let items = '';
+                for (let i=0; i<=10; i++) {
+                    items += '<span class="multiplication-item">'+i+' '+sym+' '+a+' = '+(i*a)+'</span>';
+                }
+                document.getElementById('numberDisplay').innerHTML =
+                    '<h3 style="color:var(--accent2);">Προπαίδεια του '+a+'</h3><div class="multiplication-list">'+items+'</div>';
+                document.getElementById('numberQuizBtn').innerHTML =
+                    '<button class="btn btn-accent btn-lg" id="btnNumberQuiz">🎯 Quiz</button>';
+                document.getElementById('btnNumberQuiz').addEventListener('click', () => showNumberQuizModal(a));
+            }
+
+            function showNumberQuizModal(a) {
+                function render() {
+                    let html = '<div class="modal-overlay" id="quizOverlay"><div class="modal">';
+                    html += '<button class="modal-close" id="closeQuizModal">✕</button><h3>🎯 Quiz '+a+'</h3>';
+                    html += '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px;">';
+                    html += '<button class="btn btn-accent" id="quizNumberOrder">📋 Με τη σειρά</button>';
+                    html += '<button class="btn btn-accent" id="quizNumberShuffle">🔀 Ανάκατα</button>';
+                    html += '<button class="btn btn-accent" id="quizNumberResult">🎯 Με αποτέλεσμα</button>';
+                    html += '</div></div></div>';
+                    modalContainer.innerHTML = html;
+                    document.getElementById('closeQuizModal').addEventListener('click', popModal);
+                    document.getElementById('quizOverlay').addEventListener('click', function(e) {
+                        if (e.target === e.currentTarget) closeAllModals();
+                    });
+                    document.getElementById('quizNumberOrder').addEventListener('click', () => {
+                        startNumberQuiz(a, 'order');
+                    });
+                    document.getElementById('quizNumberShuffle').addEventListener('click', () => {
+                        startNumberQuiz(a, 'shuffle');
+                    });
+                    document.getElementById('quizNumberResult').addEventListener('click', () => {
+                        startNumberQuiz(a, 'result');
+                    });
+                }
+                pushModal(render);
+            }
+
+            function startNumberQuiz(a, mode) {
+                const sym = multSymbol;
+                let questions = [];
+                if (mode === 'result') {
+                    for (let i=0; i<=10; i++) questions.push({ factor:i, product:i*a, a:a });
+                    shuffleArray(questions);
+                    runQuizResultMode(questions, a, 'Προπαίδεια του '+a);
+                } else {
+                    for (let i=0; i<=10; i++) questions.push({ factor:i, product:i*a, questionStr: i+' '+sym+' '+a+' = ?' });
+                    if (mode === 'shuffle') shuffleArray(questions);
+                    runQuizStandard(questions, 'Προπαίδεια του '+a);
+                }
+            }
+
+            // ========== STANDARD QUIZ (fill product) ==========
+            function runQuizStandard(questions, title) {
+                let wrongList = [];
+                let idx = 0;
+
+                function renderQuestion() {
+                    if (idx >= questions.length) {
+                        finishQuiz(title, questions.length, wrongList, () => {
+                            questions = [...wrongList];
+                            wrongList = [];
+                            idx = 0;
+                            renderQuestion();
+                        });
+                        return;
+                    }
+                    const q = questions[idx];
+                    let html = '<div class="modal-overlay" id="quizRunOverlay"><div class="modal">';
+                    html += '<button class="modal-close" id="closeRunQuiz">✕</button><h3>'+title+'</h3>';
+                    html += '<p class="quiz-progress">Ερώτηση '+(idx+1)+'/'+questions.length+'</p>';
+                    html += '<p class="quiz-question">'+q.questionStr+'</p>';
+                    html += '<input type="number" class="quiz-input" id="quizAnswerInput" placeholder=";">';
+                    html += '<div class="quiz-feedback" id="quizFeedback"></div>';
+                    html += '<button class="btn btn-accent" id="btnQuizSubmit">✅ Έλεγχος</button></div></div>';
+                    modalContainer.innerHTML = html;
+                    document.getElementById('closeRunQuiz').addEventListener('click', popModal);
+                    const input = document.getElementById('quizAnswerInput');
+                    const fb = document.getElementById('quizFeedback');
+                    document.getElementById('btnQuizSubmit').addEventListener('click', function check() {
+                        const val = parseInt(input.value);
+                        if (isNaN(val)) { fb.textContent='Δώσε αριθμό!'; fb.className='quiz-feedback error'; return; }
+                        if (val === q.product) {
+                            fb.textContent='✅ Τέλεια!'; fb.className='quiz-feedback correct';
+                            input.classList.add('correct'); input.disabled = true;
+                            document.getElementById('btnQuizSubmit').disabled = true;
+                            setTimeout(() => { idx++; renderQuestion(); }, 700);
+                        } else {
+                            fb.textContent='❌ ΛΑΘΟΣ. Σωστό: '+q.product; fb.className='quiz-feedback error';
+                            input.classList.add('error'); wrongList.push(q); input.disabled = true;
+                            document.getElementById('btnQuizSubmit').disabled = true;
+                            setTimeout(() => { idx++; renderQuestion(); }, 1100);
+                        }
+                    });
+                    input.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btnQuizSubmit').click(); });
+                    setTimeout(() => input.focus(), 150);
+                }
+
+                pushModal(renderQuestion);
+            }
+
+            // ========== RESULT MODE QUIZ (given product, find factors) ==========
+            function runQuizResultMode(questions, fixedA, title) {
+                let wrongList = [];
+                let idx = 0;
+                const sym = multSymbol;
+
+                function renderQuestion() {
+                    if (idx >= questions.length) {
+                        finishQuiz(title, questions.length, wrongList, () => {
+                            questions = [...wrongList];
+                            wrongList = [];
+                            idx = 0;
+                            renderQuestion();
+                        });
+                        return;
+                    }
+                    const q = questions[idx];
+                    let html = '<div class="modal-overlay" id="quizRunOverlay"><div class="modal">';
+                    html += '<button class="modal-close" id="closeRunQuiz">✕</button><h3>'+title+' (αποτέλεσμα)</h3>';
+                    html += '<p class="quiz-progress">'+(idx+1)+'/'+questions.length+'</p>';
+                    html += '<p class="quiz-question">Αποτέλεσμα: <strong>'+q.product+'</strong></p>';
+                    html += '<div style="text-align:center; display:flex; justify-content:center; align-items:center; gap:8px;">';
+                    html += '<input class="quiz-input" id="q1" placeholder=";" style="display:inline-block; width:80px; margin:0;">';
+                    html += '<span style="font-size:1.5rem; font-weight:bold;">'+sym+'</span>';
+                    html += '<input class="quiz-input" id="q2" placeholder=";" style="display:inline-block; width:80px; margin:0;">';
+                    html += '<span style="font-size:1.5rem; margin-left:4px;">= '+q.product+'</span>';
+                    html += '</div>';
+                    html += '<div class="quiz-feedback" id="quizFeedback"></div>';
+                    html += '<button class="btn btn-accent" id="btnQuizSubmit">✅ Έλεγχος</button></div></div>';
+                    modalContainer.innerHTML = html;
+                    document.getElementById('closeRunQuiz').addEventListener('click', popModal);
+                    const i1 = document.getElementById('q1');
+                    const i2 = document.getElementById('q2');
+                    const fb = document.getElementById('quizFeedback');
+                    document.getElementById('btnQuizSubmit').addEventListener('click', function check() {
+                        const v1 = parseInt(i1.value);
+                        const v2 = parseInt(i2.value);
+                        if (isNaN(v1) || isNaN(v2)) { fb.textContent='Συμπλήρωσε και τα δύο!'; return; }
+                        if ((v1===fixedA && v2===q.factor) || (v1===q.factor && v2===fixedA)) {
+                            fb.textContent='✅ Μπράβο!'; fb.className='quiz-feedback correct';
+                            i1.classList.add('correct'); i2.classList.add('correct');
+                            i1.disabled = i2.disabled = true;
+                            document.getElementById('btnQuizSubmit').disabled = true;
+                            setTimeout(() => { idx++; renderQuestion(); }, 700);
+                        } else {
+                            fb.textContent='❌ ΛΑΘΟΣ. Σωστό: '+fixedA+' '+sym+' '+q.factor;
+                            fb.className='quiz-feedback error';
+                            i1.classList.add('error'); i2.classList.add('error'); wrongList.push(q);
+                            i1.disabled = i2.disabled = true;
+                            document.getElementById('btnQuizSubmit').disabled = true;
+                            setTimeout(() => { idx++; renderQuestion(); }, 1200);
+                        }
+                    });
+                    i1.addEventListener('keydown', e => { if (e.key === 'Enter') i2.focus(); });
+                    i2.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btnQuizSubmit').click(); });
+                    setTimeout(() => i1.focus(), 150);
+                }
+
+                pushModal(renderQuestion);
+            }
+
+            function finishQuiz(title, total, wrongList, retryFn) {
+                function renderSummary() {
+                    let html = '<div class="modal-overlay" id="summaryOverlay"><div class="modal">';
+                    html += '<button class="modal-close" id="closeSummary">✕</button><h3>📊 Αποτελέσματα</h3>';
+                    if (wrongList.length === 0) {
+                        html += '<p class="quiz-summary perfect">🎉 Μπράβο! Κανένα λάθος! 🌟</p>';
+                        html += '<button class="btn btn-accent" id="btnCloseOk">Κλείσιμο</button>';
+                        setTimeout(() => spawnConfetti(), 200);
+                    } else {
+                        html += '<p class="quiz-summary" style="color:#f0a050;">⚠️ Λάθη: '+wrongList.length+' / '+total+'</p>';
+                        html += '<button class="btn btn-warn" id="btnRetryWrong">🔄 Επανάληψη λαθών</button>';
+                        html += '<button class="btn" id="btnCloseOk" style="margin-left:8px;">Κλείσιμο</button>';
+                    }
+                    html += '</div></div>';
+                    modalContainer.innerHTML = html;
+                    document.getElementById('closeSummary').addEventListener('click', popModal);
+                    document.getElementById('btnCloseOk').addEventListener('click', popModal);
+                    document.getElementById('summaryOverlay').addEventListener('click', function(e) {
+                        if (e.target === e.currentTarget) closeAllModals();
+                    });
+                    if (wrongList.length && retryFn) {
+                        document.getElementById('btnRetryWrong').addEventListener('click', () => {
+                            popModal();  // back to previous (quiz type)
+                            retryFn();
+                        });
+                    }
+                }
+                // Replace the quiz run modal with summary (pop quiz run from stack)
+                if (modalStack.length > 0) modalStack.pop();
+                pushModal(renderSummary);
+            }
+
+            function spawnConfetti() {
+                for (let i=0; i<40; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    piece.style.left = Math.random()*100+'%';
+                    piece.style.background = ['#f0a050','#58a6ff','#3fb950','#f85149','#d2991d'][Math.floor(Math.random()*5)];
+                    piece.style.animationDuration = (2+Math.random()*2)+'s';
+                    document.body.appendChild(piece);
+                    setTimeout(() => piece.remove(), 3000);
+                }
+            }
+
+            // ========== PAIRS ==========
+            const pairsList = [[4,6],[6,8],[6,9],[4,10]];
+            function buildPairsButtons() {
+                const container = document.getElementById('pairsButtons');
+                container.innerHTML = '';
+                pairsList.forEach(pair => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn';
+                    btn.textContent = 'Προπαίδειες των {'+pair[0]+', '+pair[1]+'}';
+                    btn.addEventListener('click', () => selectPair(pair));
+                    container.appendChild(btn);
+                });
+            }
+            function selectPair(pair) {
+                selectedPair = pair;
+                const [z1,z2] = pair;
+                const sym = multSymbol;
+                let items1 = '', items2 = '';
+                for (let i=0; i<=10; i++) {
+                    items1 += '<span class="multiplication-item">'+i+' '+sym+' '+z1+' = '+(i*z1)+'</span>';
+                    items2 += '<span class="multiplication-item">'+i+' '+sym+' '+z2+' = '+(i*z2)+'</span>';
+                }
+                document.getElementById('pairsDisplay').innerHTML =
+                    '<h3 style="color:var(--accent2);">'+z1+'</h3><div class="multiplication-list">'+items1+'</div>'+
+                    '<h3 style="color:var(--accent2);">'+z2+'</h3><div class="multiplication-list">'+items2+'</div>';
+                document.getElementById('pairsQuizBtn').innerHTML =
+                    '<button class="btn btn-accent btn-lg" id="btnPairsQuiz">🎯 Quiz</button>';
+                document.getElementById('btnPairsQuiz').addEventListener('click', () => showPairsQuizModal(pair));
+            }
+            function showPairsQuizModal(pair) {
+                function render() {
+                    let html = '<div class="modal-overlay" id="quizOverlay"><div class="modal"><button class="modal-close" id="closeQuizModal">✕</button><h3>🎯 Quiz {'+pair[0]+','+pair[1]+'}</h3><div style="display:flex;gap:12px;justify-content:center;">';
+                    html += '<button class="btn btn-accent" id="quizPairsShuffle">🔀 Ανάκατα</button><button class="btn btn-accent" id="quizPairsCommon">🔗 Κοινά πολλαπλάσια</button></div></div></div>';
+                    modalContainer.innerHTML = html;
+                    document.getElementById('closeQuizModal').addEventListener('click', popModal);
+                    document.getElementById('quizOverlay').addEventListener('click', e => { if(e.target===e.currentTarget) closeAllModals(); });
+                    document.getElementById('quizPairsShuffle').addEventListener('click', () => { popModal(); startPairsShuffle(pair); });
+                    document.getElementById('quizPairsCommon').addEventListener('click', () => { popModal(); startCommonMultiples(pair); });
+                }
+                pushModal(render);
+            }
+            function startPairsShuffle(pair) {
+                const [z1,z2] = pair;
+                const sym = multSymbol;
+                let questions = [];
+                for (let i=0; i<=10; i++) {
+                    questions.push({ factor:i, product:i*z1, questionStr: i+' '+sym+' '+z1+' = ?' });
+                    questions.push({ factor:i, product:i*z2, questionStr: i+' '+sym+' '+z2+' = ?' });
+                }
+                shuffleArray(questions);
+                runQuizStandard(questions, 'Ζευγάρι {'+z1+','+z2+'}');
+            }
+            function startCommonMultiples(pair) {
+                const [z1,z2] = pair;
+                const sym = multSymbol;
+                const maxVal = Math.max(z1,z2);
+                const minLimit = Math.min(10*z1,10*z2);
+                const commons = [];
+                const seen = new Set();
+                for (let i=0; i<=10; i++) {
+                    const p = i*z1;
+                    if (p >= maxVal && p <= minLimit && !seen.has(p)) {
+                        for (let j=0; j<=10; j++) {
+                            if (j*z2 === p) { commons.push({mult1:i, mult2:j, product:p}); seen.add(p); break; }
+                        }
+                    }
+                }
+                for (let j=0; j<=10; j++) {
+                    const p = j*z2;
+                    if (p >= maxVal && p <= minLimit && !seen.has(p)) {
+                        for (let i=0; i<=10; i++) {
+                            if (i*z1 === p) { commons.push({mult1:i, mult2:j, product:p}); seen.add(p); break; }
+                        }
+                    }
+                }
+                commons.sort((a,b) => a.product - b.product);
+
+                function render() {
+                    let html = '<div class="modal-overlay" id="quizRunOverlay"><div class="modal"><button class="modal-close" id="closeCommonQuiz">✕</button><h3>🔗 Κοινά πολλαπλάσια</h3><p>Βρες από '+maxVal+' έως '+minLimit+'</p><div id="commonPairsContainer">';
+                    commons.forEach((c, idx) => {
+                        html += '<div class="pair-row" data-product="'+c.product+'">';
+                        html += '<input class="common-input" data-field="mult1" placeholder=";"> '+sym+' '+z1+' = <input class="common-input" data-field="prod" placeholder=";"> | ';
+                        html += '<input class="common-input" data-field="mult2" placeholder=";"> '+sym+' '+z2+' = <input class="common-input" data-field="prod2" placeholder=";">';
+                        html += '</div>';
+                    });
+                    html += '</div><div class="quiz-feedback" id="quizFeedback"></div><button class="btn btn-accent" id="btnCheckCommon">✅ Έλεγχος</button></div></div>';
+                    modalContainer.innerHTML = html;
+                    document.getElementById('closeCommonQuiz').addEventListener('click', popModal);
+                    document.getElementById('btnCheckCommon').addEventListener('click', () => {
+                        const feedback = document.getElementById('quizFeedback');
+                        const rows = document.querySelectorAll('.pair-row');
+                        let allOk = true;
+                        let errorCount = 0;
+                        const usedProducts = new Set();
+
+                        document.querySelectorAll('.common-input').forEach(inp => inp.classList.remove('error','correct'));
+
+                        rows.forEach(row => {
+                            const mult1El = row.querySelector('[data-field="mult1"]');
+                            const prodEl = row.querySelector('[data-field="prod"]');
+                            const mult2El = row.querySelector('[data-field="mult2"]');
+                            const prod2El = row.querySelector('[data-field="prod2"]');
+                            const vMult1 = parseInt(mult1El.value);
+                            const vProd = parseInt(prodEl.value);
+                            const vMult2 = parseInt(mult2El.value);
+                            const vProd2 = parseInt(prod2El.value);
+
+                            if (isNaN(vMult1) || isNaN(vProd) || isNaN(vMult2) || isNaN(vProd2)) {
+                                allOk = false; errorCount++;
+                                if (isNaN(vMult1)) mult1El.classList.add('error');
+                                if (isNaN(vProd)) prodEl.classList.add('error');
+                                if (isNaN(vMult2)) mult2El.classList.add('error');
+                                if (isNaN(vProd2)) prod2El.classList.add('error');
+                                return;
+                            }
+                            if (vProd !== vProd2) {
+                                allOk = false; errorCount++;
+                                prodEl.classList.add('error'); prod2El.classList.add('error');
+                                return;
+                            }
+                            const expected = commons.find(c => c.product === vProd);
+                            if (!expected) {
+                                allOk = false; errorCount++;
+                                prodEl.classList.add('error'); prod2El.classList.add('error');
+                                return;
+                            }
+                            if (vMult1 === expected.mult1 && vMult2 === expected.mult2) {
+                                mult1El.classList.add('correct'); prodEl.classList.add('correct');
+                                mult2El.classList.add('correct'); prod2El.classList.add('correct');
+                                usedProducts.add(vProd);
+                            } else {
+                                allOk = false; errorCount++;
+                                mult1El.classList.add('error'); prodEl.classList.add('error');
+                                mult2El.classList.add('error'); prod2El.classList.add('error');
+                            }
+                        });
+
+                        if (usedProducts.size !== commons.length) {
+                            allOk = false;
+                            feedback.textContent = '❌ Κάποια πολλαπλάσια λείπουν ή είναι λάθος.';
+                            feedback.className = 'quiz-feedback error';
+                            return;
+                        }
+
+                        if (allOk) {
+                            feedback.textContent = '🎉 Μπράβο! Όλα σωστά!';
+                            feedback.className = 'quiz-feedback correct';
+                            document.getElementById('btnCheckCommon').disabled = true;
+                            setTimeout(popModal, 2000);
+                        } else {
+                            feedback.textContent = '❌ Υπάρχουν ' + errorCount + ' λάθη. Διόρθωσέ τα.';
+                            feedback.className = 'quiz-feedback error';
+                        }
+                    });
+                }
+                pushModal(render);
+            }
+
+            // ========== DOUBLES ==========
+            function buildDoublesDisplay() {
+                const sym = multSymbol;
+                let items = '';
+                for (let i=0; i<=10; i++) {
+                    items += '<span class="multiplication-item highlight">'+i+' '+sym+' '+i+' = '+(i*i)+'</span>';
+                }
+                document.getElementById('doublesDisplay').innerHTML =
+                    '<h3 style="color:var(--accent2);">Διπλά</h3><div class="multiplication-list">'+items+'</div>';
+                document.getElementById('doublesQuizBtn').innerHTML =
+                    '<button class="btn btn-accent btn-lg" id="btnDoublesQuiz">🎯 Quiz</button>';
+                document.getElementById('btnDoublesQuiz').addEventListener('click', () => {
+                    function render() {
+                        let html = '<div class="modal-overlay" id="quizOverlay"><div class="modal"><button class="modal-close" id="closeQuizModal">✕</button><h3>🎯 Διπλά</h3><div style="display:flex;gap:12px;justify-content:center;">';
+                        html += '<button class="btn btn-accent" id="dOrder">📋 Με τη σειρά</button>';
+                        html += '<button class="btn btn-accent" id="dShuffle">🔀 Ανάκατα</button>';
+                        html += '<button class="btn btn-accent" id="dResult">🎯 Με αποτέλεσμα</button>';
+                        html += '</div></div></div>';
+                        modalContainer.innerHTML = html;
+                        document.getElementById('closeQuizModal').addEventListener('click', popModal);
+                        document.getElementById('quizOverlay').addEventListener('click', e => { if(e.target===e.currentTarget) closeAllModals(); });
+                        document.getElementById('dOrder').addEventListener('click', () => { popModal(); startDoubles('order'); });
+                        document.getElementById('dShuffle').addEventListener('click', () => { popModal(); startDoubles('shuffle'); });
+                        document.getElementById('dResult').addEventListener('click', () => { popModal(); startDoubles('result'); });
+                    }
+                    pushModal(render);
+                });
+            }
+            function startDoubles(mode) {
+                const sym = multSymbol;
+                let questions = [];
+                for (let i=0; i<=10; i++) {
+                    questions.push({ factor:i, product:i*i, questionStr: i+' '+sym+' '+i+' = ?', base:i });
+                }
+                if (mode === 'shuffle') shuffleArray(questions);
+                if (mode === 'result') {
+                    shuffleArray(questions);
+                    runDoublesResultQuiz(questions);
+                } else {
+                    runQuizStandard(questions, 'Διπλά');
+                }
+            }
+            function runDoublesResultQuiz(questions) {
+                let wrongList = [];
+                let idx = 0;
+                const sym = multSymbol;
+                function renderQuestion() {
+                    if (idx >= questions.length) {
+                        finishQuiz('Διπλά', questions.length, wrongList, () => {
+                            questions = [...wrongList];
+                            wrongList = [];
+                            idx = 0;
+                            renderQuestion();
+                        });
+                        return;
+                    }
+                    const q = questions[idx];
+                    let html = '<div class="modal-overlay" id="quizRunOverlay"><div class="modal"><button class="modal-close" id="closeRunQuiz">✕</button><h3>Διπλά (αποτέλεσμα)</h3>';
+                    html += '<p class="quiz-progress">'+(idx+1)+'/'+questions.length+'</p>';
+                    html += '<p class="quiz-question">Αποτέλεσμα: '+q.product+'</p>';
+                    html += '<div style="text-align:center; display:flex; justify-content:center; align-items:center; gap:8px;">';
+                    html += '<input class="quiz-input" id="q1" placeholder=";" style="display:inline-block; width:80px; margin:0;">';
+                    html += '<span style="font-size:1.5rem; font-weight:bold;">'+sym+'</span>';
+                    html += '<input class="quiz-input" id="q2" placeholder=";" style="display:inline-block; width:80px; margin:0;">';
+                    html += '<span style="font-size:1.5rem; margin-left:4px;">= '+q.product+'</span>';
+                    html += '</div>';
+                    html += '<div class="quiz-feedback" id="quizFeedback"></div>';
+                    html += '<button class="btn btn-accent" id="btnQuizSubmit">✅ Έλεγχος</button></div></div>';
+                    modalContainer.innerHTML = html;
+                    document.getElementById('closeRunQuiz').addEventListener('click', popModal);
+                    const i1 = document.getElementById('q1');
+                    const i2 = document.getElementById('q2');
+                    const fb = document.getElementById('quizFeedback');
+                    document.getElementById('btnQuizSubmit').addEventListener('click', () => {
+                        const v1 = parseInt(i1.value), v2 = parseInt(i2.value);
+                        if (isNaN(v1)||isNaN(v2)) { fb.textContent='Συμπλήρωσε και τα δύο!'; return; }
+                        if (v1===q.base && v2===q.base) {
+                            fb.textContent='✅ Σωστό!'; fb.className='quiz-feedback correct';
+                            i1.classList.add('correct'); i2.classList.add('correct');
+                            i1.disabled = i2.disabled = true;
+                            document.getElementById('btnQuizSubmit').disabled = true;
+                            setTimeout(() => { idx++; renderQuestion(); }, 700);
+                        } else {
+                            fb.textContent='❌ ΛΑΘΟΣ. Σωστό: '+q.base+' '+sym+' '+q.base;
+                            fb.className='quiz-feedback error';
+                            wrongList.push(q);
+                            i1.disabled = i2.disabled = true;
+                            document.getElementById('btnQuizSubmit').disabled = true;
+                            setTimeout(() => { idx++; renderQuestion(); }, 1200);
+                        }
+                    });
+                    i1.addEventListener('keydown', e => { if (e.key === 'Enter') i2.focus(); });
+                    i2.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btnQuizSubmit').click(); });
+                    setTimeout(() => i1.focus(), 150);
+                }
+                pushModal(renderQuestion);
+            }
+
+            // ========== ALL TOGETHER ==========
+            function buildAllTable() {
+                const sym = multSymbol;
+                let html = '<h3 style="color:var(--accent2);">Πίνακας 0–10</h3><div class="table-wrapper"><table class="mult-table"><thead><tr><th>'+sym+'</th>';
+                for (let i=0;i<=10;i++) html += '<th>'+i+'</th>';
+                html += '</tr></thead><tbody>';
+                for (let r=0;r<=10;r++) {
+                    html += '<tr><th>'+r+'</th>';
+                    for (let c=0;c<=10;c++) html += '<td class="'+(r===c?'diag':'')+'">'+(r*c)+'</td>';
+                    html += '</tr>';
+                }
+                html += '</tbody></table></div>';
+                document.getElementById('allTableDisplay').innerHTML = html;
+                document.getElementById('allQuizBtn').innerHTML = '<button class="btn btn-accent btn-lg" id="btnAllQuiz">🎯 Quiz (121)</button>';
+                document.getElementById('btnAllQuiz').addEventListener('click', () => {
+                    let questions = [];
+                    for (let r=0; r<=10; r++) {
+                        for (let c=0; c<=10; c++) {
+                            questions.push({ factor:c, product:r*c, questionStr: r+' '+multSymbol+' '+c+' = ?' });
+                        }
+                    }
+                    shuffleArray(questions);
+                    runQuizStandard(questions, 'Όλα μαζί');
+                });
+            }
+
+            function shuffleArray(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+            }
+
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllModals(); });
+        })();
+    </script>
+</body>
+</html>
